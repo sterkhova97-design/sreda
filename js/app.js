@@ -173,10 +173,144 @@ function searchNow(){
 }
 
 function imageSearch(e){
- const f=e.target.files?.[0];if(!f)return;
- let u=URL.createObjectURL(f);
- document.getElementById('imagePreview').innerHTML=`<div class="section-line"><h3>Поиск по изображению</h3></div><img src="${u}" style="width:100%;max-height:220px;object-fit:cover;border-radius:18px"><p class="copy">Демо-режим: показываем визуально близкую подборку.</p>`;
- document.getElementById('searchResults').innerHTML=shuffled(PRODUCTS).map(feedCard).join('');
+ const f=e.target.files?.[0];
+ if(!f)return;
+ const u=URL.createObjectURL(f);
+ window.__lensImageURL=u;
+ document.getElementById('imagePreview').innerHTML=`
+   <div class="lens-wrap">
+     <h3 class="lens-title">Поиск по изображению</h3>
+     <div class="lens-stage" id="lensStage">
+       <img id="lensImage" src="${u}" alt="">
+       <div class="lens-box" id="lensBox">
+         <span class="lens-handle nw" data-handle="nw"></span>
+         <span class="lens-handle ne" data-handle="ne"></span>
+         <span class="lens-handle sw" data-handle="sw"></span>
+         <span class="lens-handle se" data-handle="se"></span>
+       </div>
+     </div>
+     <div class="lens-help"><span>Перемещайте рамку и меняйте её размер</span><b>Выделите предмет</b></div>
+     <div id="lensResultHead"></div>
+   </div>`;
+ const img=document.getElementById('lensImage');
+ img.onload=()=>initLens();
+}
+
+
+let lensState={x:.10,y:.37,w:.80,h:.46,drag:null,start:null,timer:null};
+
+function initLens(){
+ const stage=document.getElementById('lensStage');
+ const box=document.getElementById('lensBox');
+ if(!stage||!box)return;
+ lensState={x:.10,y:.37,w:.80,h:.46,drag:null,start:null,timer:null};
+ updateLensBox();
+ box.addEventListener('pointerdown',lensPointerDown);
+ window.addEventListener('pointermove',lensPointerMove);
+ window.addEventListener('pointerup',lensPointerUp);
+ window.addEventListener('pointercancel',lensPointerUp);
+ setTimeout(updateLensResults,80);
+}
+
+function lensPointerDown(e){
+ e.preventDefault();
+ const stage=document.getElementById('lensStage');
+ if(!stage)return;
+ const r=stage.getBoundingClientRect();
+ lensState.drag=e.target.dataset.handle||'move';
+ lensState.start={
+   px:e.clientX,py:e.clientY,
+   x:lensState.x,y:lensState.y,w:lensState.w,h:lensState.h,
+   sw:r.width,sh:r.height
+ };
+ try{e.currentTarget.setPointerCapture(e.pointerId)}catch(_){}
+}
+
+function lensPointerMove(e){
+ if(!lensState.drag||!lensState.start)return;
+ e.preventDefault();
+ const s=lensState.start;
+ const dx=(e.clientX-s.px)/s.sw,dy=(e.clientY-s.py)/s.sh;
+ let x=s.x,y=s.y,w=s.w,h=s.h;
+ const minW=.18,minH=.16;
+
+ if(lensState.drag==='move'){
+   x=Math.max(0,Math.min(1-w,s.x+dx));
+   y=Math.max(0,Math.min(1-h,s.y+dy));
+ }else{
+   if(lensState.drag.includes('w')){x=Math.max(0,Math.min(s.x+s.w-minW,s.x+dx));w=s.w+(s.x-x)}
+   if(lensState.drag.includes('e')){w=Math.max(minW,Math.min(1-s.x,s.w+dx))}
+   if(lensState.drag.includes('n')){y=Math.max(0,Math.min(s.y+s.h-minH,s.y+dy));h=s.h+(s.y-y)}
+   if(lensState.drag.includes('s')){h=Math.max(minH,Math.min(1-s.y,s.h+dy))}
+ }
+
+ lensState.x=x;lensState.y=y;lensState.w=w;lensState.h=h;
+ updateLensBox();
+ clearTimeout(lensState.timer);
+ lensState.timer=setTimeout(updateLensResults,180);
+}
+
+function lensPointerUp(){
+ if(!lensState.drag)return;
+ lensState.drag=null;lensState.start=null;
+ clearTimeout(lensState.timer);
+ lensState.timer=setTimeout(updateLensResults,80);
+}
+
+function updateLensBox(){
+ const box=document.getElementById('lensBox');
+ if(!box)return;
+ box.style.left=(lensState.x*100)+'%';
+ box.style.top=(lensState.y*100)+'%';
+ box.style.width=(lensState.w*100)+'%';
+ box.style.height=(lensState.h*100)+'%';
+}
+
+function lensCropDataURL(){
+ const img=document.getElementById('lensImage');
+ if(!img||!img.naturalWidth)return null;
+ const c=document.createElement('canvas');
+ const sx=Math.round(lensState.x*img.naturalWidth);
+ const sy=Math.round(lensState.y*img.naturalHeight);
+ const sw=Math.max(1,Math.round(lensState.w*img.naturalWidth));
+ const sh=Math.max(1,Math.round(lensState.h*img.naturalHeight));
+ c.width=Math.min(420,sw);
+ c.height=Math.max(1,Math.round(c.width*sh/sw));
+ c.getContext('2d').drawImage(img,sx,sy,sw,sh,0,0,c.width,c.height);
+ return c.toDataURL('image/jpeg',.84);
+}
+
+function lensDemoRanking(){
+ // Browser-only demo heuristic. For a broad furniture crop we rank beds first.
+ // Shad is intentionally first for the demo image supplied for this prototype.
+ const aspect=lensState.w/Math.max(.001,lensState.h);
+ const area=lensState.w*lensState.h;
+ let preferred;
+ if(aspect>1.15 && area>.12){
+   preferred=['shad','lora','crona','nube','form','sora','core'];
+ }else if(aspect<.72){
+   preferred=['dominique','terra','fima5819','fima5801','aurora'];
+ }else{
+   preferred=['shad','core','nube','lora','crona','form','sora'];
+ }
+ const rank=new Map(preferred.map((id,i)=>[id,i]));
+ return [...PRODUCTS].sort((a,b)=>(rank.has(a.id)?rank.get(a.id):99)-(rank.has(b.id)?rank.get(b.id):99));
+}
+
+function updateLensResults(){
+ const crop=lensCropDataURL();
+ const ranked=lensDemoRanking();
+ const result=document.getElementById('searchResults');
+ const head=document.getElementById('lensResultHead');
+
+ if(head){
+   head.innerHTML=`<div class="lens-result-head">
+     ${crop?`<img class="lens-crop-preview" src="${crop}" alt="">`:''}
+     <div class="lens-result-copy"><b>Ищем по выделенному фрагменту</b>Результаты обновляются автоматически при движении рамки.</div>
+   </div>
+   <div class="lens-results-title">Похожие товары</div>`;
+ }
+ if(result)result.innerHTML=ranked.map(feedCard).join('');
 }
 
 function filterSection(title,key,opts){
