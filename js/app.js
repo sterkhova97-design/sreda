@@ -1,6 +1,13 @@
 
 const PRODUCTS = window.SREDA_PRODUCTS;
 const VISUALS = window.SREDA_VISUALS;
+const STORIES = [
+  {title:'Топ 10 диванов', image:'assets/stories/top10-divany.webp'},
+  {title:'Новинки Gessi', image:'assets/stories/novinki-gessi.jpeg'},
+  {title:'Isaloni', image:'assets/stories/isaloni.jpg'},
+  {title:'Выставка интерьера Москва', image:'assets/stories/vystavka-moskva.jpg'}
+];
+
 const CATEGORIES = ['Все','Мягкая мебель','Стулья','Столы','Освещение','Напольные покрытия','Настенные покрытия','Декор','Радиаторы','Корпусная мебель','Сантехника','Ткани'];
 
 let route='home', selectedCategory='Все', currentProduct=null, currentChat='Nube';
@@ -88,11 +95,12 @@ function renderHome(){
  let goods=PRODUCTS.filter(categoryMatch);
  let mix=selectedCategory==='Все'?shuffled([...goods,...VISUALS]):shuffled(goods);
  return `<div class="feed-tabs">${CATEGORIES.map(c=>`<button class="feed-tab ${c===selectedCategory?'active':''}" onclick="selectedCategory='${c}';render()">${c}</button>`).join('')}</div>
- <div class="ad-card">
-   <img src="${PRODUCTS.find(p=>p.id==='sora').image}" alt="">
-   <div class="ad-copy"><b>Новая коллекция Forma Dom</b><span>Смотреть подборку →</span></div>
- </div>
+ <div class="stories">${STORIES.map(s=>`<button class="story" onclick="storyDemo('${s.title}')"><span class="story-ring"><img src="${s.image}" alt=""></span><span class="story-title">${s.title}</span></button>`).join('')}</div>
  <div class="masonry">${mix.map(feedCard).join('')}</div>`;
+}
+
+function storyDemo(title){
+  alert(title + '\n\nДемо-раздел. Позже сюда можно открыть отдельную подборку.');
 }
 
 function openProduct(id){currentProduct=PRODUCTS.find(p=>p.id===id);route='product';setNav();render();scrollTo(0,0)}
