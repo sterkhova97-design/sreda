@@ -14,6 +14,13 @@ let route='home', selectedCategory='Все', currentProduct=null, currentChat='N
 let profileRole='designer', profileTab='projects', currentProject=null, selectMode=false;
 let favorites=new Set(JSON.parse(localStorage.getItem('sreda:favorites')||'[]'));
 let messages=JSON.parse(localStorage.getItem('sreda:messages')||'[]');
+let attachmentPanelOpen=false;
+let sharedTab='photo';
+let mediaRecorder=null;
+let mediaChunks=[];
+let voiceRecording=false;
+let voiceStartedAt=0;
+let voiceTimer=null;
 let filters={availability:'Все',category:'Все',material:'Все',color:'Все',sort:'Сначала новые',minPrice:0,maxPrice:2000000};
 
 let specData={
@@ -280,65 +287,96 @@ function lensCropDataURL(){
  return c.toDataURL('image/jpeg',.84);
 }
 
-function lensDemoRanking(){
- // Browser-only demo heuristic:
- // 1) analyze average color/brightness of the selected crop
- // 2) use shape/aspect as a secondary hint
- // This lets the brown LO-RA room rank LO-RA first, while the red/white Shad room ranks Shad first.
+
+function lensCropCanvas(){
  const img=document.getElementById('lensImage');
- const aspect=lensState.w/Math.max(.001,lensState.h);
- const area=lensState.w*lensState.h;
- let preferred=['shad','lora','crona','nube','form','sora','core'];
-
- if(img && img.naturalWidth){
-   const c=document.createElement('canvas');
-   c.width=48;c.height=48;
-   const ctx=c.getContext('2d',{willReadFrequently:true});
-   const sx=Math.round(lensState.x*img.naturalWidth);
-   const sy=Math.round(lensState.y*img.naturalHeight);
-   const sw=Math.max(1,Math.round(lensState.w*img.naturalWidth));
-   const sh=Math.max(1,Math.round(lensState.h*img.naturalHeight));
-   ctx.drawImage(img,sx,sy,sw,sh,0,0,48,48);
-
-   const data=ctx.getImageData(0,0,48,48).data;
-   let r=0,g=0,b=0,n=0,dark=0,reddish=0,brownish=0;
-   for(let i=0;i<data.length;i+=4){
-     const R=data[i],G=data[i+1],B=data[i+2],A=data[i+3];
-     if(A<20)continue;
-     r+=R;g+=G;b+=B;n++;
-     const lum=.2126*R+.7152*G+.0722*B;
-     if(lum<105)dark++;
-     if(R>G*1.20 && R>B*1.20 && R>105)reddish++;
-     if(R>G*1.12 && G>B*1.05 && lum<155)brownish++;
-   }
-   if(n){
-     r/=n;g/=n;b/=n;
-     const darkShare=dark/n, redShare=reddish/n, brownShare=brownish/n;
-
-     // LO-RA demo photo: predominantly dark warm brown.
-     if(brownShare>.28 && darkShare>.26 && r>g && g>b){
-       preferred=['lora','crona','shad','sora','nube','form','core'];
+ if(!img||!img.naturalWidth)return null;
+ const c=document.createElement('canvas');
+ c.width=64;c.height=64;
+ const sx=Math.round(lensState.x*img.naturalWidth);
+ const sy=Math.round(lensState.y*img.naturalHeight);
+ const sw=Math.max(1,Math.round(lensState.w*img.naturalWidth));
+ const sh=Math.max(1,Math.round(lensState.h*img.naturalHeight));
+ c.getContext('2d').drawImage(img,sx,sy,sw,sh,0,0,64,64);
+ return c;
+}
+function imageSignature(canvas){
+ const ctx=canvas.getContext('2d',{willReadFrequently:true});
+ const d=ctx.getImageData(0,0,canvas.width,canvas.height).data;
+ let cells=[], gx=4, gy=4;
+ for(let cy=0;cy<gy;cy++){
+   for(let cx=0;cx<gx;cx++){
+     let r=0,g=0,b=0,l=0,n=0;
+     const x0=Math.floor(cx*canvas.width/gx),x1=Math.floor((cx+1)*canvas.width/gx);
+     const y0=Math.floor(cy*canvas.height/gy),y1=Math.floor((cy+1)*canvas.height/gy);
+     for(let y=y0;y<y1;y+=2){
+       for(let x=x0;x<x1;x+=2){
+         const i=(y*canvas.width+x)*4;
+         const R=d[i],G=d[i+1],B=d[i+2];
+         r+=R;g+=G;b+=B;l+=.2126*R+.7152*G+.0722*B;n++;
+       }
      }
-     // Shad demo photo: large red screen + pale bedding.
-     else if(redShare>.16 && r>g*1.10){
-       preferred=['shad','lora','crona','nube','form','sora','core'];
-     }
-     // Tall/slender selections usually mean lighting/plumbing.
-     else if(aspect<.72){
-       preferred=['dominique','terra','fima5819','fima5801','aurora'];
-     }
-     else if(aspect>1.15 && area>.12){
-       preferred=['shad','lora','crona','nube','form','sora','core'];
-     }
+     cells.push([r/n,g/n,b/n,l/n]);
    }
  }
+ return cells;
+}
+function signatureDistance(a,b){
+ let s=0;
+ for(let i=0;i<Math.min(a.length,b.length);i++){
+   const dr=(a[i][0]-b[i][0])/255;
+   const dg=(a[i][1]-b[i][1])/255;
+   const db=(a[i][2]-b[i][2])/255;
+   const dl=(a[i][3]-b[i][3])/255;
+   s+=dr*dr+dg*dg+db*db+.5*dl*dl;
+ }
+ return s/Math.min(a.length,b.length);
+}
+function loadImage(src){
+ return new Promise((resolve,reject)=>{
+   const i=new Image();
+   i.onload=()=>resolve(i);
+   i.onerror=reject;
+   i.src=src;
+ });
+}
+
+async function lensDemoRanking(){
+ const crop=lensCropCanvas();
+ if(!crop)return [...PRODUCTS];
+
+ const refs=[
+   {id:'shad',src:'assets/search-references/shad.webp'},
+   {id:'lora',src:'assets/search-references/lora.webp'}
+ ];
+
+ const cropSig=imageSignature(crop);
+ const scored=[];
+
+ for(const ref of refs){
+   try{
+     const img=await loadImage(ref.src);
+     const c=document.createElement('canvas');
+     c.width=64;c.height=64;
+     c.getContext('2d').drawImage(img,0,0,64,64);
+     const sig=imageSignature(c);
+     scored.push({id:ref.id,score:signatureDistance(cropSig,sig)});
+   }catch(e){}
+ }
+
+ scored.sort((a,b)=>a.score-b.score);
+ const winner=scored[0]?.id||'shad';
+
+ let preferred = winner==='lora'
+   ? ['lora','crona','shad','sora','nube','form','core']
+   : ['shad','lora','crona','nube','form','sora','core'];
 
  const rank=new Map(preferred.map((id,i)=>[id,i]));
  return [...PRODUCTS].sort((a,b)=>(rank.has(a.id)?rank.get(a.id):99)-(rank.has(b.id)?rank.get(b.id):99));
 }
-function updateLensResults(){
+async function updateLensResults(){
  const crop=lensCropDataURL();
- const ranked=lensDemoRanking();
+ const ranked=await lensDemoRanking();
  const result=document.getElementById('searchResults');
  const head=document.getElementById('lensResultHead');
 
@@ -384,12 +422,188 @@ function renderChats(){
  let rows=[['Nube','Прошу уточнить детали','12:40'],['Shad','Нужна дополнительная информация','11:15'],['Квартира на Патриках','Анна: Отлично, спасибо!','Вчера'],['Дом в Подмосковье','Вы: Отправил(а) файл','Пн']];
  return `<div class="chat-tabs"><button class="chat-tab active">Все</button><button class="chat-tab">По товарам</button><button class="chat-tab">По проектам</button></div><div>${rows.map(r=>`<div class="chat-row" onclick="openChat('${r[0]}')"><div class="avatar">${r[0][0]}</div><div><b>${r[0]}</b><small>${r[1]}</small></div><div class="time">${r[2]}</div></div>`).join('')}</div>`;
 }
-function openChat(t){currentChat=t;currentProduct=PRODUCTS.find(p=>p.name===t)||null;route='chat';render();scrollTo(0,0)}
-function renderChat(){
- let rel=messages.filter(m=>!m.product||!currentProduct||m.product===currentProduct.id);
- return `<div class="message-view"><div class="section-line"><h3>‹ ${currentChat}</h3><span>•••</span></div><div class="messages">${rel.map(m=>`<div class="bubble ${m.from==='me'?'me':''}">${m.product&&currentProduct?`<div class="bubble-product"><img src="${currentProduct.image}"><div><b>${currentProduct.name}</b><br><small>${currentProduct.priceLabel}</small></div></div><br>`:''}${m.text}</div>`).join('')}${rel.length?'':'<div class="bubble">Здравствуйте! Чем можем помочь?</div>'}</div><div class="composer"><input id="msg" placeholder="Сообщение…"><button onclick="sendMsg()">↑</button></div></div>`;
+function openChat(t){
+ currentChat=t;
+ currentProduct=PRODUCTS.find(p=>p.name===t)||null;
+ route='chat';
+ attachmentPanelOpen=false;
+ render();
+ setTimeout(()=>document.querySelector('.messages')?.scrollTo(0,99999),50);
 }
-function sendMsg(){let i=document.getElementById('msg');let t=i.value.trim();if(!t)return;messages.push({from:'me',text:t,product:currentProduct?.id});localStorage.setItem('sreda:messages',JSON.stringify(messages));render()}
+
+function escapeHTML(s){
+ return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
+}
+function msgTime(){return new Date().toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'})}
+function formatBytes(n){
+ if(!n)return '0 КБ';
+ if(n<1024*1024)return Math.max(1,Math.round(n/1024))+' КБ';
+ return (n/1024/1024).toFixed(1)+' МБ';
+}
+function formatDuration(s){return Math.floor(s/60)+':'+String(s%60).padStart(2,'0')}
+
+function chatMessageHTML(m){
+ let body='';
+ if(m.product){
+   const p=PRODUCTS.find(x=>x.id===m.product);
+   if(p)body+=`<div class="bubble-product" onclick="openProduct('${p.id}')"><img src="${p.image}"><div><b>${p.name}</b><small>${p.type} · ${p.priceLabel}</small></div></div>`;
+ }
+ if(m.attachment){
+   const a=m.attachment;
+   if(a.type==='image')body+=`<img class="chat-photo" src="${a.url}" alt="">`;
+   else if(a.type==='video')body+=`<video class="chat-video" controls playsinline src="${a.url}"></video>`;
+   else if(a.type==='audio')body+=`<div class="voice-msg"><span class="voice-wave">▂▄▆▃▅▇▄▂</span><audio controls src="${a.url}"></audio><small>${a.duration||''}</small></div>`;
+   else body+=`<div class="file-msg"><span class="file-doc">⌑</span><div><b>${escapeHTML(a.name||'Файл')}</b><small>${escapeHTML(a.meta||'Вложение')}</small></div></div>`;
+ }
+ if(m.text)body+=`<div class="bubble-text">${escapeHTML(m.text)}</div>`;
+ return `<div class="bubble ${m.from==='me'?'me':''}">${body}<small class="msg-time">${m.time||''}</small></div>`;
+}
+
+function renderChat(){
+ const rel=messages.filter(m=>!m.chat||m.chat===currentChat);
+ return `<section class="telegram-chat">
+   <header class="chat-head">
+     <button class="chat-back" onclick="go('chats')">‹</button>
+     <div class="chat-avatar">${currentChat.slice(0,2).toUpperCase()}</div>
+     <div class="chat-head-main"><b>${currentChat}</b><small>в сети</small></div>
+     <button class="chat-more" onclick="openSharedMedia()">•••</button>
+   </header>
+
+   <div class="messages">
+     ${rel.length?rel.map(chatMessageHTML).join(''):`<div class="bubble"><div class="bubble-text">Здравствуйте! Напишите, что вас интересует.</div><small class="msg-time">сейчас</small></div>`}
+   </div>
+
+   ${attachmentPanelOpen?renderAttachPanel():''}
+
+   <div class="composer">
+     <button class="composer-icon" onclick="toggleAttachPanel()" aria-label="Вложения">＋</button>
+     <input id="msg" placeholder="${voiceRecording?'Идёт запись…':'Сообщение'}" onkeydown="if(event.key==='Enter')sendMsg()">
+     <button class="mic-btn ${voiceRecording?'recording':''}" onclick="toggleVoice()" aria-label="Голосовое">${voiceRecording?'■':'◉'}</button>
+     <button class="send-btn" onclick="sendMsg()" aria-label="Отправить">↑</button>
+   </div>
+
+   <input id="photoInput" type="file" accept="image/*" multiple hidden onchange="sendAttachments(this.files,'image')">
+   <input id="videoInput" type="file" accept="video/*" multiple hidden onchange="sendAttachments(this.files,'video')">
+   <input id="fileInput" type="file" multiple hidden onchange="sendAttachments(this.files,'file')">
+ </section>`;
+}
+
+function sendMsg(){
+ const input=document.getElementById('msg');
+ const text=(input?.value||'').trim();
+ if(!text)return;
+ messages.push({chat:currentChat,from:'me',text,time:msgTime()});
+ localStorage.setItem('sreda:messages',JSON.stringify(messages.filter(m=>!m.attachment)));
+ render();
+}
+
+function toggleAttachPanel(){
+ attachmentPanelOpen=!attachmentPanelOpen;
+ render();
+}
+function renderAttachPanel(){
+ return `<div class="attach-sheet">
+   <div class="attach-grabber"></div>
+   <div class="attach-actions">
+     <button onclick="document.getElementById('photoInput').click()"><span>▧</span><small>Фото</small></button>
+     <button onclick="document.getElementById('videoInput').click()"><span>▷</span><small>Видео</small></button>
+     <button onclick="document.getElementById('fileInput').click()"><span>⌑</span><small>Файл</small></button>
+     <button onclick="sendDemoLink()"><span>⌁</span><small>Ссылка</small></button>
+   </div>
+ </div>`;
+}
+function sendAttachments(files,type){
+ [...files].forEach(file=>{
+   messages.push({
+     chat:currentChat,from:'me',time:msgTime(),
+     attachment:{
+       type:type==='file'?'file':type,
+       url:URL.createObjectURL(file),
+       name:file.name,
+       meta:`${file.type||'Файл'} · ${formatBytes(file.size)}`
+     }
+   });
+ });
+ attachmentPanelOpen=false;
+ render();
+}
+function sendDemoLink(){
+ messages.push({chat:currentChat,from:'me',text:'https://sterkhova97-design.github.io/sreda/',time:msgTime()});
+ attachmentPanelOpen=false;
+ render();
+}
+
+async function toggleVoice(){
+ if(voiceRecording){
+   if(mediaRecorder&&mediaRecorder.state!=='inactive')mediaRecorder.stop();
+   return;
+ }
+ if(!navigator.mediaDevices?.getUserMedia||typeof MediaRecorder==='undefined'){
+   alert('В этом браузере запись голосовых недоступна.');
+   return;
+ }
+ try{
+   const stream=await navigator.mediaDevices.getUserMedia({audio:true});
+   mediaChunks=[];
+   mediaRecorder=new MediaRecorder(stream);
+   voiceStartedAt=Date.now();
+   voiceRecording=true;
+   mediaRecorder.ondataavailable=e=>{if(e.data.size)mediaChunks.push(e.data)};
+   mediaRecorder.onstop=()=>{
+     const blob=new Blob(mediaChunks,{type:mediaRecorder.mimeType||'audio/webm'});
+     const duration=Math.max(1,Math.round((Date.now()-voiceStartedAt)/1000));
+     messages.push({
+       chat:currentChat,from:'me',time:msgTime(),
+       attachment:{type:'audio',url:URL.createObjectURL(blob),duration:formatDuration(duration)}
+     });
+     stream.getTracks().forEach(t=>t.stop());
+     voiceRecording=false;
+     clearInterval(voiceTimer);
+     render();
+   };
+   mediaRecorder.start();
+   render();
+   voiceTimer=setInterval(()=>{
+     const i=document.getElementById('msg');
+     if(i)i.placeholder='Запись '+formatDuration(Math.round((Date.now()-voiceStartedAt)/1000))+'…';
+   },500);
+ }catch(e){
+   voiceRecording=false;
+   alert('Разрешите доступ к микрофону в настройках браузера.');
+ }
+}
+
+function openSharedMedia(){
+ sharedTab='photo';
+ renderSharedMediaModal();
+}
+function renderSharedMediaModal(){
+ const modal=document.getElementById('modal');
+ modal.className='modal';
+ modal.innerHTML=`<div class="modal-card shared-modal">
+   <div class="modal-head"><b>Вложения</b><button onclick="closeModal()">×</button></div>
+   <div class="shared-tabs">
+     ${[['photo','Фото'],['video','Видео'],['file','Файлы'],['link','Ссылки']].map(([k,n])=>`<button class="${sharedTab===k?'active':''}" onclick="sharedTab='${k}';renderSharedMediaModal()">${n}</button>`).join('')}
+   </div>
+   <div class="shared-content">${sharedMediaContent()}</div>
+ </div>`;
+}
+function sharedMediaContent(){
+ const items=messages.filter(m=>m.chat===currentChat&&m.attachment);
+ if(sharedTab==='photo'){
+   const rows=items.filter(m=>m.attachment.type==='image');
+   return rows.length?`<div class="shared-grid">${rows.map(m=>`<img src="${m.attachment.url}">`).join('')}</div>`:`<div class="shared-empty">Здесь будут отправленные фото</div>`;
+ }
+ if(sharedTab==='video'){
+   const rows=items.filter(m=>m.attachment.type==='video');
+   return rows.length?rows.map(m=>`<video controls playsinline src="${m.attachment.url}"></video>`).join(''):`<div class="shared-empty">Здесь будут отправленные видео</div>`;
+ }
+ if(sharedTab==='file'){
+   const rows=items.filter(m=>m.attachment.type==='file');
+   return rows.length?rows.map(m=>`<div class="shared-file"><b>${escapeHTML(m.attachment.name||'Файл')}</b><small>${escapeHTML(m.attachment.meta||'')}</small></div>`).join(''):`<div class="shared-empty">Здесь будут отправленные файлы</div>`;
+ }
+ return `<div class="shared-file"><b>sreda · демо</b><small>sterkhova97-design.github.io/sreda/</small></div>`;
+}
 
 function renderProfile(){
  return `<div class="profile-switch"><button class="${profileRole==='designer'?'active':''}" onclick="profileRole='designer';profileTab='projects';render()">Дизайнер</button><button class="${profileRole==='supplier'?'active':''}" onclick="profileRole='supplier';profileTab='cards';render()">Поставщик</button></div>${profileRole==='designer'?designerProfile():supplierProfile()}`;
