@@ -36,3 +36,12 @@ GitHub Pages:
 - выделенный фрагмент реально кропается через canvas;
 - результаты автоматически перестраиваются;
 - в браузерной демо-логике Shad выводится первым для широкого фрагмента кровати.
+
+## v3.1 cache fix
+В index.html добавлены версии `?v=31` к CSS/JS/data, чтобы iPhone/Telegram не использовали старый кэш.
+
+## v3.2 — LO-RA visual demo
+- visual search now inspects average color/brightness of the selected image fragment;
+- the dark warm-brown LO-RA room ranks LO-RA first;
+- the red/white Shad room continues to rank Shad first;
+- cache version bumped to v=32.

@@ -281,22 +281,61 @@ function lensCropDataURL(){
 }
 
 function lensDemoRanking(){
- // Browser-only demo heuristic. For a broad furniture crop we rank beds first.
- // Shad is intentionally first for the demo image supplied for this prototype.
+ // Browser-only demo heuristic:
+ // 1) analyze average color/brightness of the selected crop
+ // 2) use shape/aspect as a secondary hint
+ // This lets the brown LO-RA room rank LO-RA first, while the red/white Shad room ranks Shad first.
+ const img=document.getElementById('lensImage');
  const aspect=lensState.w/Math.max(.001,lensState.h);
  const area=lensState.w*lensState.h;
- let preferred;
- if(aspect>1.15 && area>.12){
-   preferred=['shad','lora','crona','nube','form','sora','core'];
- }else if(aspect<.72){
-   preferred=['dominique','terra','fima5819','fima5801','aurora'];
- }else{
-   preferred=['shad','core','nube','lora','crona','form','sora'];
+ let preferred=['shad','lora','crona','nube','form','sora','core'];
+
+ if(img && img.naturalWidth){
+   const c=document.createElement('canvas');
+   c.width=48;c.height=48;
+   const ctx=c.getContext('2d',{willReadFrequently:true});
+   const sx=Math.round(lensState.x*img.naturalWidth);
+   const sy=Math.round(lensState.y*img.naturalHeight);
+   const sw=Math.max(1,Math.round(lensState.w*img.naturalWidth));
+   const sh=Math.max(1,Math.round(lensState.h*img.naturalHeight));
+   ctx.drawImage(img,sx,sy,sw,sh,0,0,48,48);
+
+   const data=ctx.getImageData(0,0,48,48).data;
+   let r=0,g=0,b=0,n=0,dark=0,reddish=0,brownish=0;
+   for(let i=0;i<data.length;i+=4){
+     const R=data[i],G=data[i+1],B=data[i+2],A=data[i+3];
+     if(A<20)continue;
+     r+=R;g+=G;b+=B;n++;
+     const lum=.2126*R+.7152*G+.0722*B;
+     if(lum<105)dark++;
+     if(R>G*1.20 && R>B*1.20 && R>105)reddish++;
+     if(R>G*1.12 && G>B*1.05 && lum<155)brownish++;
+   }
+   if(n){
+     r/=n;g/=n;b/=n;
+     const darkShare=dark/n, redShare=reddish/n, brownShare=brownish/n;
+
+     // LO-RA demo photo: predominantly dark warm brown.
+     if(brownShare>.28 && darkShare>.26 && r>g && g>b){
+       preferred=['lora','crona','shad','sora','nube','form','core'];
+     }
+     // Shad demo photo: large red screen + pale bedding.
+     else if(redShare>.16 && r>g*1.10){
+       preferred=['shad','lora','crona','nube','form','sora','core'];
+     }
+     // Tall/slender selections usually mean lighting/plumbing.
+     else if(aspect<.72){
+       preferred=['dominique','terra','fima5819','fima5801','aurora'];
+     }
+     else if(aspect>1.15 && area>.12){
+       preferred=['shad','lora','crona','nube','form','sora','core'];
+     }
+   }
  }
+
  const rank=new Map(preferred.map((id,i)=>[id,i]));
  return [...PRODUCTS].sort((a,b)=>(rank.has(a.id)?rank.get(a.id):99)-(rank.has(b.id)?rank.get(b.id):99));
 }
-
 function updateLensResults(){
  const crop=lensCropDataURL();
  const ranked=lensDemoRanking();
