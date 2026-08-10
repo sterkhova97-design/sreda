@@ -45,3 +45,8 @@ GitHub Pages:
 - the dark warm-brown LO-RA room ranks LO-RA first;
 - the red/white Shad room continues to rank Shad first;
 - cache version bumped to v=32.
+
+## v3.5
+- добавлен радиатор MODEL A H, бренд METALNO, цена от 13 000 ₽;
+- категория: Радиаторы;
+- добавлено новое изображение карточки.

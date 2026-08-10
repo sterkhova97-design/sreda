@@ -403,9 +403,91 @@ function supplierProfile(){
  let tabs=['cards','requests','analytics','marks'];
  let names={cards:'Карточки',requests:'Запросы',analytics:'Аналитика',marks:'Отметки'};
  return `<div class="profile-head"><div class="avatar">FD</div><h2>Forma Dom</h2><div class="meta">Поставщик мебели · Москва</div><div class="stats"><div><b>98</b><small>Публикации</small></div><div><b>2 340</b><small>Подписчики</small></div><div><b>150</b><small>Подписки</small></div></div><div class="profile-description">Современная мебель собственного производства для частных и общественных интерьеров.</div></div>
- <div class="profile-tabs" style="grid-template-columns:repeat(4,1fr)">${tabs.map(t=>`<button class="profile-tab ${profileTab===t?'active':''}" onclick="profileTab='${t}';render()"><span class="tabicon">${t==='cards'?'▦':t==='requests'?'⌁':t==='analytics'?'▥':'⌑'}</span>${names[t]}</button>`).join('')}</div>
- <div class="empty">Раздел «${names[profileTab]||'Карточки'}» в разработке.</div>`;
+ <div class="profile-tabs supplier-tabs" style="grid-template-columns:repeat(4,1fr)">${tabs.map(t=>`<button class="profile-tab ${profileTab===t?'active':''}" onclick="profileTab='${t}';render()"><span class="tabicon">${t==='cards'?'▦':t==='requests'?'⌁':t==='analytics'?'▥':'⌑'}</span>${names[t]}</button>`).join('')}</div>
+ ${profileTab==='cards'?renderSupplierCards():profileTab==='analytics'?renderSupplierAnalytics():profileTab==='requests'?renderSupplierRequests():renderSupplierMarks()}`;
 }
+
+function renderSupplierCards(){
+ const soft=PRODUCTS.filter(p=>p.category==='Мягкая мебель'||['Диван','Кресло','Кровать'].includes(p.type));
+ return `<div class="supplier-section">
+   <div class="supplier-headline"><b>Карточки товаров</b><span>${soft.length} товаров</span></div>
+   <div class="supplier-card-grid">${soft.map(p=>`
+     <article class="supplier-product-card" onclick="openProduct('${p.id}')">
+       <img src="${p.image}" alt="${p.name}">
+       <div class="supplier-product-copy">
+         <div><b>${p.name}</b><span>${p.priceLabel}</span></div>
+         <small>${p.type} · ${p.brand}</small>
+       </div>
+     </article>`).join('')}
+   </div>
+ </div>`;
+}
+
+const SUPPLIER_ANALYTICS={
+ '7d':{label:'7 дней',views:18420,opens:6240,specs:428,paid:96,marks:214},
+ '1m':{label:'Месяц',views:76480,opens:24790,specs:1834,paid:412,marks:889},
+ '6m':{label:'Пол года',views:398700,opens:128440,specs:9560,paid:2248,marks:4380},
+ '1y':{label:'Год',views:781300,opens:255620,specs:19140,paid:4680,marks:9270}
+};
+let analyticsPeriod=window.analyticsPeriod||'1m';
+
+function renderSupplierAnalytics(){
+ const a=analyticsPeriod==='custom'
+   ?{label:'Свой период',views:52340,opens:17180,specs:1210,paid:286,marks:604}
+   :SUPPLIER_ANALYTICS[analyticsPeriod];
+ const cards=[
+   ['Просмотры',a.views],
+   ['Переходы в карточку',a.opens],
+   ['Добавлено в спецификацию',a.specs],
+   ['Оплачено',a.paid],
+   ['Отметки',a.marks]
+ ];
+ return `<div class="supplier-section analytics-section">
+   <div class="analytics-toolbar">
+     <div class="analytics-periods">
+       ${[['7d','7 дней'],['1m','Месяц'],['6m','Пол года'],['1y','Год'],['custom','Свой период']].map(([k,n])=>`<button class="${analyticsPeriod===k?'active':''}" onclick="analyticsPeriod='${k}';window.analyticsPeriod=analyticsPeriod;render()">${n}</button>`).join('')}
+     </div>
+     ${analyticsPeriod==='custom'?`<div class="custom-period"><label>С <input type="date" value="2026-07-01"></label><label>По <input type="date" value="2026-08-10"></label></div>`:''}
+   </div>
+   <div class="analytics-summary">${cards.map(([name,val],i)=>`
+     <div class="metric-card">
+       <small>${name}</small>
+       <b>${new Intl.NumberFormat('ru-RU').format(val)}</b>
+       <span>${i===0?'+18%':i===1?'+12%':i===2?'+9%':i===3?'+6%':'+14%'} к прошлому периоду</span>
+     </div>`).join('')}
+   </div>
+   <div class="analytics-funnel">
+     <div class="supplier-headline"><b>Воронка</b><span>${a.label}</span></div>
+     ${[
+       ['Просмотры',a.views,100],
+       ['Карточка',a.opens,Math.max(8,Math.round(a.opens/a.views*100))],
+       ['Спецификация',a.specs,Math.max(5,Math.round(a.specs/a.views*100))],
+       ['Оплачено',a.paid,Math.max(3,Math.round(a.paid/a.views*100))]
+     ].map(([n,v,p])=>`<div class="funnel-row"><div><span>${n}</span><b>${new Intl.NumberFormat('ru-RU').format(v)}</b></div><div class="funnel-track"><i style="width:${p}%"></i></div></div>`).join('')}
+   </div>
+ </div>`;
+}
+
+function renderSupplierRequests(){
+ return `<div class="supplier-section">
+   <div class="supplier-headline"><b>Запросы на расчёт</b><span>Демо</span></div>
+   <div class="supplier-list">
+     <div class="supplier-list-row"><div><b>Nube</b><small>Квартира на Патриках · сегодня, 12:40</small></div><span>Новый</span></div>
+     <div class="supplier-list-row"><div><b>Shad</b><small>Дом в Подмосковье · вчера</small></div><span>В работе</span></div>
+     <div class="supplier-list-row"><div><b>Core × 4</b><small>Офисное пространство · 08.08</small></div><span>Расчёт отправлен</span></div>
+   </div>
+ </div>`;
+}
+
+function renderSupplierMarks(){
+ return `<div class="supplier-section">
+   <div class="supplier-headline"><b>Отметки</b><span>27 новых</span></div>
+   <div class="supplier-card-grid marks-grid">
+     ${VISUALS.slice(0,6).map(v=>`<article class="supplier-product-card"><img src="${v.image}" alt=""><div class="supplier-product-copy"><div><b>${v.title}</b></div><small>${v.subtitle}</small></div></article>`).join('')}
+   </div>
+ </div>`;
+}
+
 function renderProjects(){return `<div class="project-list">${Object.keys(specData).map((p,i)=>`<div class="project-card"><span><b>${p}</b><small>${i===0?'Москва · 120 м²':i===1?'Московская область · 250 м²':'Москва · 300 м²'}</small></span><span>›</span></div>`).join('')}</div>`}
 function renderSpecsRoot(){if(currentProject)return renderProjectSpec(currentProject);return `<div class="project-list">${Object.keys(specData).map(p=>`<div class="project-card" onclick="currentProject='${p}';render()"><span><b>${p}</b><small>${Object.keys(specData[p]).length} помещений</small></span><span>›</span></div>`).join('')}</div>`}
 function renderProjectSpec(name){

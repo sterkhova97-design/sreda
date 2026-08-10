@@ -434,7 +434,32 @@ window.SREDA_PRODUCTS = [
     "availability": "На заказ",
     "material": "Шерсть / шёлк",
     "color": "Розовый / оливковый"
+  }  ,
+  {
+    "id": "modelah",
+    "type": "Радиатор",
+    "category": "Радиаторы",
+    "name": "MODEL A H",
+    "price": 13000,
+    "priceLabel": "от 13 000 ₽",
+    "brand": "METALNO",
+    "image": "assets/products/model-a-h.webp",
+    "description": "Лаконичный трубчатый радиатор с мягко скруглёнными секциями и чистой архитектурной формой. Подходит для современных жилых и общественных интерьеров.",
+    "production": "Под заказ",
+    "finishes": [
+      "Белый",
+      "Чёрный",
+      "RAL по каталогу"
+    ],
+    "sizes": [
+      "Размер под проект",
+      "Индивидуальная конфигурация"
+    ],
+    "availability": "На заказ",
+    "material": "Металл",
+    "color": "Белый"
   }
+
 ];
 
 window.SREDA_VISUALS = [
