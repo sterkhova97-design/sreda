@@ -4,14 +4,17 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
   <meta name="theme-color" content="#ffffff">
-  <title>среда. — demo</title>
-  <link rel="stylesheet" href="css/style.css?v=36">
+  <title>среда. — функциональный прототип</title>
+  <link rel="stylesheet" href="css/style.css?v=40">
 </head>
 <body>
 <div id="app">
   <header class="topbar">
     <button class="brand" onclick="go('home')" aria-label="Главная">
       <img src="assets/logo.png" alt="среда.">
+    </button>
+    <button class="top-notifications" onclick="openNotifications()" aria-label="Уведомления">
+      <span class="bell-glyph">♢</span><i></i>
     </button>
   </header>
 
@@ -28,7 +31,7 @@
 
 <div id="modal" class="modal hidden"></div>
 
-<script src="data/catalog.js?v=36"></script>
-<script src="js/app.js?v=36"></script>
+<script src="data/catalog.js?v=40"></script>
+<script src="js/app.js?v=40"></script>
 </body>
 </html>
