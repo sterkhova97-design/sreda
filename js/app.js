@@ -761,6 +761,7 @@ let moderatorTabV4='products';
 let productEditStepV4=1;
 let uploadedProductPhotoV4='';
 let aiProcessedPhotoV4='';
+let productDraftCategoryV4='Мягкая мебель';
 let photoQualityV4=null;
 let storyIndexV4=0;
 let storyFrameV4=0;
@@ -857,11 +858,26 @@ function feedCardV4(item){
 }
 function renderAdCarouselV4(){
  const ads=[
-  ['Forma Dom','Новая коллекция мягкой мебели','assets/products/nube.webp'],
-  ['METALNO','Архитектурные радиаторы','assets/products/model-a-h.webp'],
-  ['Laminam','Новые поверхности 2026','assets/products/travertino-classico.jpg']
+  {kind:'promo',title:'Финальная распродажа',brand:'среда.',image:'assets/ads/final-sale.jpg'},
+  {kind:'brand',title:'Новая коллекция мягкой мебели',brand:'Forma Dom',image:'assets/products/nube.webp'},
+  {kind:'brand',title:'Архитектурные радиаторы',brand:'METALNO',image:'assets/products/model-a-h.webp'}
  ];
- return `<div class="ad-strip">${ads.map(([b,t,img])=>`<div class="ad-card" onclick="openBrandV4('${b}')"><img src="${img}"><div><small>Реклама</small><b>${b}</b><span>${t}</span></div><em>→</em></div>`).join('')}</div>`;
+ return `<div class="ad-carousel-wrap">
+   <div class="ad-wide-track">${ads.map((a,i)=>`<button class="ad-wide-card" onclick="${a.kind==='promo'?`openPromoV4()`:`openBrandV4('${a.brand}')`}">
+     <img src="${a.image}" alt="${a.title}">
+     ${i===0?'':`<span class="ad-wide-copy"><small>Реклама</small><b>${a.brand}</b><em>${a.title}</em></span>`}
+   </button>`).join('')}</div>
+   <div class="ad-dots">${ads.map((_,i)=>`<i class="${i===0?'active':''}"></i>`).join('')}</div>
+ </div>`;
+}
+function openPromoV4(){
+ const m=document.getElementById('modal');m.className='modal';
+ m.innerHTML=`<div class="sheet promo-sheet">
+   <div class="sheet-title"><div><small>Реклама</small><h3>Финальная распродажа</h3></div><button class="close" onclick="closeModal()">×</button></div>
+   <img class="promo-hero" src="assets/ads/final-sale.jpg" alt="Финальная распродажа">
+   <p>Специальная подборка товаров участников площадки.</p>
+   <button class="btn primary" onclick="closeModal();selectedCategory='Все';go('home')">Перейти к товарам</button>
+ </div>`;
 }
 
 function openStoryV4(i){storyIndexV4=i;storyFrameV4=0;route='story';render();scrollTo(0,0)}
@@ -1105,14 +1121,27 @@ function runAIProcessingV4(){
 }
 function renderProductEditorInfoV4(){
  return `<div class="editor-card"><h2>Информация о товаре</h2>
- ${[['Название','Например, Nube'],['Категория','Мягкая мебель'],['Цена','497 000'],['Срок производства','6–8 недель']].map(([l,p])=>`<label class="editor-field"><span>${l}</span><input placeholder="${p}"></label>`).join('')}
+ <label class="editor-field"><span>Название</span><input placeholder="Например, Nube"></label>
+ <div class="editor-field"><span>Категория</span>
+   <button class="editor-select" onclick="openCategoryPickerV4()"><b>${productDraftCategoryV4}</b><em>⌄</em></button>
+ </div>
+ <label class="editor-field"><span>Цена</span><input placeholder="497 000" inputmode="numeric"></label>
+ <label class="editor-field"><span>Срок производства</span><input placeholder="6–8 недель"></label>
  <label class="editor-field"><span>Описание</span><textarea placeholder="Описание товара"></textarea></label>
  <div class="editor-docs"><h3>Документы и материалы</h3><button>＋ Схема с размерами</button><button>＋ Инструкция / PDF</button><button>＋ Рекомендации по уходу</button></div>
  <button class="btn primary" onclick="productEditStepV4=3;render()">Предпросмотр</button></div>`;
 }
+function openCategoryPickerV4(){
+ const cats=CATEGORIES.filter(x=>x!=='Все');
+ const m=document.getElementById('modal');m.className='modal';
+ m.innerHTML=`<div class="picker-overlay" onclick="if(event.target===this)closeModal()"><div class="v4-picker-sheet category-sheet">
+   <div class="picker-handle"></div><h3>Категория</h3>
+   ${cats.map(x=>`<button class="${x===productDraftCategoryV4?'selected':''}" onclick="productDraftCategoryV4='${x}';closeModal();render()"><b>${x}</b><span>${x===productDraftCategoryV4?'Выбрано':''}</span></button>`).join('')}
+ </div></div>`;
+}
 function renderProductEditorPreviewV4(){
  return `<div class="editor-card"><h2>Карточка готова к модерации</h2>
-  <div class="editor-preview-product"><img src="${aiProcessedPhotoV4||uploadedProductPhotoV4||'assets/products/nube.webp'}"><div><b>Новый товар</b><small>Forma Dom · Мягкая мебель</small><strong>Цена будет указана поставщиком</strong></div></div>
+  <div class="editor-preview-product"><img src="${aiProcessedPhotoV4||uploadedProductPhotoV4||'assets/products/nube.webp'}"><div><b>Новый товар</b><small>Forma Dom · ${productDraftCategoryV4}</small><strong>Цена будет указана поставщиком</strong></div></div>
   <div class="quality-pass">✓ Фотография соответствует требованиям Среды</div>
   <button class="btn primary" onclick="alert('Товар отправлен модератору');route='profile';profileRole='supplier';profileTab='cards';render()">Отправить на модерацию</button>
   <button class="btn" onclick="productEditStepV4=2;render()">Вернуться к редактированию</button>
@@ -1127,11 +1156,19 @@ function moderatorProfileV4(){
  </div>`;
 }
 function renderModerationProductsV4(){
- return `<div class="moderation-list">${[
- ['Nube Compact','Forma Dom','assets/products/nube.webp','Фото · цена · категория · характеристики'],
- ['MODEL V','METALNO','assets/products/model-a-h.webp','Фото · документы · описание'],
- ['Travertino Light','Laminam','assets/products/travertino-classico.jpg','Фото · материал · декор']
- ].map(x=>`<article><img src="${x[2]}"><div><b>${x[0]}</b><small>${x[1]}</small><p>${x[3]}</p></div><div class="moderation-actions"><button onclick="this.closest('article').remove()">Отклонить</button><button class="approve" onclick="this.closest('article').remove()">Одобрить</button></div></article>`).join('')}</div>`;
+ const pending=[
+  {title:'Nube Compact',brand:'Forma Dom',image:'assets/products/nube.webp',check:'Фото · цена · категория · характеристики',productId:'nube'},
+  {title:'MODEL V',brand:'METALNO',image:'assets/products/model-a-h.webp',check:'Фото · документы · описание',productId:'modelah'},
+  {title:'Travertino Light',brand:'Laminam',image:'assets/products/travertino-classico.jpg',check:'Фото · материал · декор',productId:'travertino'}
+ ];
+ return `<div class="moderation-list">${pending.map(x=>`<article class="moderation-product" onclick="openProduct('${x.productId}')">
+   <img src="${x.image}">
+   <div><b>${x.title}</b><small>${x.brand}</small><p>${x.check}</p><span class="moderation-open">Открыть карточку →</span></div>
+   <div class="moderation-actions">
+     <button onclick="event.stopPropagation();this.closest('article').remove()">Отклонить</button>
+     <button class="approve" onclick="event.stopPropagation();this.closest('article').remove()">Одобрить</button>
+   </div>
+ </article>`).join('')}</div>`;
 }
 function renderModerationBrandsV4(){
  return `<div class="moderation-list"><article><div class="brand-avatar">NB</div><div><b>New Brand</b><small>Регистрация бренда</small><p>Карточка компании загружена · адрес производства указан</p></div><div class="moderation-actions"><button>Отклонить</button><button class="approve">Одобрить</button></div></article></div>`;
@@ -1173,9 +1210,9 @@ function openNotifications(){
 function renderFavoritesV4(){
  const items=PRODUCTS.filter(p=>favorites.has(p.id));
  return `<div class="favorites-v4">
-  <div class="favorites-head"><div><h2>Избранное</h2><small>Товары сохраняются даже после снятия с публикации</small></div><button onclick="createFavoriteFolderV4()">＋ Папка</button></div>
-  <div class="favorite-folders"><button>Все товары <span>${items.length}</span></button><button>Гостиная <span>8</span></button><button>Проект Патрики <span>12</span></button><button>Для клиента <span>5</span></button></div>
-  <div class="feed-tabs">${['Все','Мебель','Свет','Материалы','Сантехника'].map((x,i)=>`<button class="${i===0?'active':''}">${x}</button>`).join('')}</div>
+  <div class="favorites-head"><div><h2>Избранное</h2><small>Товары сохраняются даже после снятия с публикации</small></div><button class="favorite-new-folder" onclick="createFavoriteFolderV4()">＋ Папка</button></div>
+  <div class="favorite-folders"><button class="active">Все товары <span>${items.length}</span></button><button>Гостиная <span>8</span></button><button>Проект Патрики <span>12</span></button><button>Для клиента <span>5</span></button></div>
+  <div class="favorites-category-tabs">${['Все','Мебель','Свет','Материалы','Сантехника'].map((x,i)=>`<button class="${i===0?'active':''}">${x}</button>`).join('')}</div>
   <div class="masonry">${items.length?items.map(feedCardV4).join(''):'<div class="empty">Нажмите ♡ у товара, чтобы сохранить его.</div>'}</div>
  </div>`;
 }
