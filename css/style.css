@@ -812,3 +812,344 @@ button.is-favorite img{filter:none}
  .ad-wide-copy{position:absolute!important;left:22px!important;bottom:20px!important;background:rgba(255,255,255,.92)!important;border-radius:14px;padding:11px 14px}
  .ad-dots{padding:8px 0 4px!important}
 }
+
+
+/* ==================== SREDA v6.1 project desktop ==================== */
+@media(min-width:900px){
+  .desktop-project-categories-v61{
+    position:sticky; top:0; z-index:35;
+    display:flex; align-items:center; gap:28px;
+    padding:14px 34px 13px; border-bottom:1px solid #ececec; background:#fff;
+    overflow-x:auto; white-space:nowrap;
+  }
+  .desktop-project-categories-v61 button{
+    border:0; background:transparent; padding:0 0 8px; font-size:16px; color:#111; flex:0 0 auto;
+  }
+  .desktop-project-categories-v61 button.active{border-bottom:2px solid #111}
+  .desktop-project-search-v61{
+    margin-left:auto; min-width:260px; max-width:340px; flex:0 0 300px;
+    display:flex; align-items:center; gap:10px; border-bottom:1.5px solid #888; padding:3px 0 8px;
+  }
+  .desktop-project-search-v61 input{
+    border:0; outline:0; flex:1; font-size:16px; color:#888; background:transparent;
+  }
+  .desktop-project-search-v61 input::placeholder{color:#888;opacity:1}
+  .desktop-project-search-v61 img{width:20px;height:20px;opacity:.6}
+  .desktop-project-page-v61{
+    max-width:1500px; margin:0 auto; padding:58px 44px 90px;
+  }
+  .project-topline-v61{
+    position:relative; display:grid; grid-template-columns:48px 1fr 48px; align-items:start;
+    gap:18px; margin-bottom:34px;
+  }
+  .project-back-v61,.project-more-v61{
+    width:44px;height:44px;border:0;background:transparent;display:grid;place-items:center;padding:0;
+  }
+  .project-back-v61 img{width:28px;height:28px}
+  .project-more-v61 img{width:24px;height:24px}
+  .project-title-block-v61 h1{margin:0 0 10px;font-size:34px;line-height:1.05}
+  .project-download-v61{border:0;background:transparent;padding:0;color:#111;font-size:14px}
+  .project-popover-desktop-v61{top:50px;right:0}
+  .project-room-section-v61{margin:0 0 56px}
+  .project-room-title-v61{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+  .project-room-title-v61 h2{font-size:22px;margin:0}
+  .project-pinterest-grid-v61{
+    column-count:5; column-gap:16px;
+  }
+  .project-pin-v61{
+    display:block; width:100%; margin:0 0 16px; break-inside:avoid;
+    border:0; background:transparent; padding:0; border-radius:18px; overflow:hidden; cursor:pointer;
+  }
+  .project-pin-v61 img{display:block;width:100%;height:auto;border-radius:18px}
+}
+@media(min-width:900px) and (max-width:1200px){
+  .project-pinterest-grid-v61{column-count:4}
+  .desktop-project-categories-v61{gap:20px}
+}
+
+/* ==================== SREDA v6.2 category clipping fix ==================== */
+@media(min-width:900px){
+  .desktop-project-categories-v61{
+    padding-left:48px !important;
+    padding-right:48px !important;
+    scroll-padding-left:48px;
+    overflow-x:auto;
+    overflow-y:visible;
+  }
+  .desktop-project-categories-v61::before{
+    content:"";
+    flex:0 0 1px;
+  }
+  .desktop-project-categories-v61 button{
+    overflow:visible !important;
+    text-indent:0 !important;
+  }
+}
+
+
+/* ==================== SREDA v6.3 desktop compact categories ==================== */
+@media(min-width:900px){
+  .desktop-catbar-v63{
+    position:relative;
+    display:flex;
+    align-items:center;
+    gap:22px;
+    padding:15px 36px 12px;
+    border-bottom:1px solid #ececec;
+    background:#fff;
+    white-space:nowrap;
+    z-index:40;
+  }
+  .desktop-cat-group-v63{position:relative;flex:0 0 auto}
+  .desktop-cat-main-v63{
+    border:0;
+    background:transparent;
+    padding:0 0 8px;
+    font-size:15px;
+    line-height:1;
+    color:#111;
+    display:flex;
+    align-items:center;
+    gap:5px;
+  }
+  .desktop-cat-main-v63.active{border-bottom:2px solid #111}
+  .desktop-cat-chevron-v63{
+    font-size:13px;
+    line-height:1;
+    color:#777;
+    transform:translateY(-1px);
+  }
+  .desktop-cat-dropdown-v63{
+    position:absolute;
+    top:30px;
+    left:0;
+    min-width:230px;
+    max-height:420px;
+    overflow:auto;
+    background:#fff;
+    border:1px solid #e7e7e7;
+    border-radius:14px;
+    box-shadow:0 14px 34px rgba(0,0,0,.10);
+    padding:7px;
+    z-index:100;
+  }
+  .desktop-cat-dropdown-v63 button{
+    display:block;
+    width:100%;
+    border:0;
+    background:#fff;
+    text-align:left;
+    padding:10px 11px;
+    border-radius:8px;
+    font-size:14px;
+    color:#111;
+  }
+  .desktop-cat-dropdown-v63 button:hover{background:#f5f5f5}
+  .desktop-cat-search-v63{
+    margin-left:auto;
+    flex:1 1 220px;
+    min-width:180px;
+    max-width:280px;
+    display:flex;
+    align-items:center;
+    gap:8px;
+    border-bottom:1.5px solid #888;
+    padding:0 0 7px;
+  }
+  .desktop-cat-search-v63 input{
+    width:100%;
+    min-width:0;
+    border:0;
+    outline:0;
+    background:transparent;
+    font-size:15px;
+    color:#888;
+  }
+  .desktop-cat-search-v63 input::placeholder{color:#888;opacity:1}
+  .desktop-cat-search-v63 button{
+    border:0;
+    background:transparent;
+    padding:0;
+    display:grid;
+    place-items:center;
+  }
+  .desktop-cat-search-v63 img{
+    width:20px;
+    height:20px;
+    opacity:.58;
+  }
+
+  /* hide the obsolete separate desktop category/search lines when present */
+  .desktop-project-categories-v61{display:none!important}
+}
+
+/* make v6.3 category bar slightly tighter on medium desktop */
+@media(min-width:900px) and (max-width:1250px){
+  .desktop-catbar-v63{gap:15px;padding-left:24px;padding-right:24px}
+  .desktop-cat-main-v63{font-size:14px}
+  .desktop-cat-search-v63{max-width:220px}
+}
+
+
+/* ==================== SREDA v6.4 REVIEW CONSOLIDATION ==================== */
+
+/* Never put black text on black buttons. */
+.btn.primary,
+.primary,
+.analytics-periods-v64 button.active,
+.request-folders-v64 button.active,
+.support-status-tabs-v6 button.active,
+.desktop-cabinet-title button:first-child,
+button[style*="background:#111"],
+button[style*="background: #111"]{
+  color:#fff !important;
+  -webkit-text-fill-color:#fff !important;
+}
+
+/* Back button: arrow only everywhere, no square/circle/background. */
+.mobile-back-v5,.mobile-product-back-v6,.desktop-back,.v6-desktop-back,
+.project-back-v61,.plain-back-v64,.chat-back{
+  background:transparent!important;border:0!important;box-shadow:none!important;border-radius:0!important;
+  padding:0!important;
+}
+.mobile-back-v5 img,.mobile-product-back-v6 img,.project-back-v61 img,.plain-back-v64 img{
+  width:28px!important;height:28px!important;object-fit:contain;
+}
+
+/* Bell: no container/frame. */
+.top-notifications,.desktop-icon{
+  background:transparent!important;border:0!important;box-shadow:none!important;
+}
+.top-notifications img,.desktop-icon img{background:transparent!important;border:0!important}
+
+/* Filter launch: icon only, no gray circle. */
+.filter-launch,.icon-filter-v52{
+  background:transparent!important;border:0!important;box-shadow:none!important;border-radius:0!important;
+}
+.filter-launch img,.icon-filter-v52 img{background:transparent!important}
+
+/* Hide obsolete separate desktop search line; search now lives at category row end. */
+@media(min-width:900px){.desktop-search-row{display:none!important}}
+
+/* Settings */
+.settings-page-v64{width:min(960px,calc(100% - 40px));margin:0 auto;padding:34px 0 80px}
+.settings-title-v64{display:flex;align-items:center;gap:18px;margin-bottom:24px}
+.settings-title-v64 h1{font-size:28px;margin:0}
+.settings-group-v64{border-top:1px solid #eee;padding:20px 0 8px}
+.settings-group-v64 h2{font-size:16px;color:#888;margin:0 0 10px;font-weight:600}
+.settings-row-v64{width:100%;border:0;border-bottom:1px solid #eee;background:#fff;display:grid;grid-template-columns:38px 1fr 20px;gap:12px;align-items:center;text-align:left;padding:15px 4px}
+.settings-icon-v64{width:25px;height:25px;object-fit:contain}
+.settings-row-v64 span b{display:block;font-size:16px;font-weight:600}
+.settings-row-v64 span small{display:block;font-size:13px;color:#888;margin-top:3px}
+.settings-row-v64 em{font-style:normal;font-size:22px;color:#888}
+.settings-logout-group-v64{margin-top:8px}.settings-logout-v64{border-bottom:0}
+
+/* Supplier desktop layout and typography */
+@media(min-width:900px){
+ .desktop-cabinet{width:min(1280px,calc(100% - 80px))!important;max-width:none!important;margin:0 auto!important;padding:38px 0 80px!important}
+ .desktop-cabinet-title h1{font-size:34px!important}.desktop-cabinet-title small{font-size:14px!important}
+ .desktop-cabinet-tabs button{font-size:16px!important}
+ .supplier-requests-v64{max-width:900px;margin-top:34px}
+ .supplier-headline-v64 b{font-size:18px}.supplier-headline-v64 span{font-size:13px;color:#888}
+ .request-row-v64 b{font-size:16px}.request-row-v64 small,.request-row-v64 time{font-size:13px}
+}
+
+/* Supplier request folders */
+.supplier-headline-v64{display:flex;align-items:center;justify-content:space-between;margin-bottom:13px}
+.request-folders-v64{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:11px}
+.request-folders-v64 button{border:1px solid #e2e2e2;background:#f2f2f2;border-radius:999px;padding:8px 12px;font-size:13px;color:#111}
+.request-folders-v64 button small{margin-left:5px;color:inherit}
+.request-folders-v64 button.active{background:#111;border-color:#111}
+.request-list-v64{border-top:1px solid #eee}
+.request-row-v64{width:100%;display:grid;grid-template-columns:48px 1fr auto;gap:12px;align-items:center;border:0;border-bottom:1px solid #eee;background:#fff;text-align:left;padding:13px 2px;color:#111}
+.request-avatar-v64{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;background:#f0f0f0;font-size:12px}
+.request-row-v64 b{display:block}.request-row-v64 small{display:block;color:#888;margin-top:3px}
+.request-status-v64{text-align:right}.request-status-v64 time{display:block;color:#999}.request-status-v64 span{display:inline-block;margin-top:5px;background:#f1f1f1;border-radius:999px;padding:4px 8px;font-size:11px;color:#666}
+
+/* One analytics controls row; custom range has dash only */
+.analytics-controls-v64{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin:8px 0 18px}
+.analytics-periods-v64{display:flex;gap:7px;align-items:center;flex-wrap:wrap}
+.analytics-periods-v64 button{border:1px solid #ddd;background:#fff;border-radius:999px;padding:8px 13px;font-size:13px;color:#111;-webkit-text-fill-color:#111}
+.analytics-periods-v64 button.active{background:#111;border-color:#111;color:#fff!important;-webkit-text-fill-color:#fff!important}
+.analytics-dates-v64{display:flex;align-items:center;gap:8px}
+.analytics-dates-v64 input{width:145px;border:1px solid #ddd;border-radius:10px;padding:9px 11px;font-size:13px}
+.analytics-dates-v64 span{font-size:18px;color:#777}
+.analytics-download-v64{margin-left:auto;border:1px solid #111;background:#fff;border-radius:10px;padding:9px 13px;font-size:13px;color:#111}
+.analytics-section-v64 .metric-card b{font-size:28px!important}
+
+/* Favorites */
+.favorites-head-v64{display:flex;align-items:center;justify-content:space-between;padding:16px 0}
+.favorites-head-v64 h2{font-size:28px;margin:0}.favorites-head-v64 small{display:block;color:#888;font-size:12px;margin-top:6px}
+.favorite-plus-v64{border:0!important;background:transparent!important;padding:4px!important;width:38px;height:38px}
+.favorite-plus-v64 img{width:28px;height:28px;object-fit:contain}
+
+/* Product brand line: no separator and no chevron */
+.brand-inline-v64{border:0!important;background:transparent!important;padding:12px 0 3px!important;font-size:16px;text-align:left;color:#111}
+.mobile-product-description-v64{padding:27px 0 20px;border-bottom:1px solid #eee}
+.mobile-product-description-v64 h3{font-size:20px;margin:0 0 18px}
+.mobile-product-description-v64 p{font-size:15px;line-height:1.55;margin:0}
+.product-ref-accordions-v64 summary{font-size:17px!important;padding:18px 0!important}
+.product-ref-accordions-v64 details>div{font-size:14px!important}
+.product-ref-accordions-v64 summary::after{font-size:24px!important}
+
+/* Profile quick actions slightly smaller */
+@media(max-width:899px){
+ .mobile-profile-quick button{font-size:14px!important}
+}
+
+/* Resident/offline-place badge = shop icon instead of words */
+.platform-member{font-size:0!important;color:transparent!important;background:transparent!important;border:0!important;padding:0!important;width:22px!important;height:22px!important;display:inline-block!important;vertical-align:middle;background-image:url("../assets/icons/resident-v64.png")!important;background-repeat:no-repeat!important;background-position:center!important;background-size:contain!important}
+
+/* Fullscreen chat; no leftover content above header and no global nav */
+@media(max-width:899px){
+ .chat-fullscreen-v64{position:fixed!important;inset:0!important;z-index:420!important;background:#f6f6f4!important;display:flex!important;flex-direction:column!important;overflow:hidden!important}
+ .chat-head-v64{flex:0 0 64px;background:#fff;border-bottom:1px solid #e8e8e8;display:grid;grid-template-columns:34px 42px 1fr 42px;gap:9px;align-items:center;padding:8px 14px}
+ .chat-head-v64 .chat-more{margin:0!important}
+ .messages-v64{flex:1!important;min-height:0!important;overflow-y:auto!important;padding:18px 14px!important}
+ .composer-v64{position:relative!important;left:auto!important;right:auto!important;bottom:auto!important;flex:0 0 auto!important;margin:8px 12px calc(8px + env(safe-area-inset-bottom))!important}
+ .bottom-nav.route-hidden-v64{display:none!important}
+}
+
+/* Story is true fullscreen and always above app navigation */
+@media(max-width:899px){
+ .story-viewer{z-index:1000!important}
+ body.mobile-inner:has(.story-viewer) .bottom-nav,
+ body:has(.story-viewer) .bottom-nav{display:none!important}
+}
+
+/* Comments Instagram-like sheet */
+.comments-modal-v64{z-index:950!important;background:rgba(0,0,0,.48)!important;display:flex!important;align-items:flex-end!important}
+.comments-sheet-v64{width:100%;max-height:78dvh;background:#fff;border-radius:24px 24px 0 0;padding:8px 16px calc(16px + env(safe-area-inset-bottom));display:flex;flex-direction:column}
+.comments-handle-v64{width:42px;height:4px;border-radius:99px;background:#bbb;margin:3px auto 10px}
+.comments-title-v64{display:grid;grid-template-columns:40px 1fr 40px;align-items:center;border-bottom:1px solid #eee;padding-bottom:10px}.comments-title-v64 b{text-align:center;font-size:17px;grid-column:2}.comments-title-v64 button{grid-column:3;border:0;background:transparent;font-size:25px}
+.comments-list-v64{overflow:auto;flex:1;padding:7px 0 12px}
+.comment-row-v64{display:grid;grid-template-columns:38px 1fr 40px;gap:9px;padding:11px 0}
+.comment-avatar-v64{width:34px;height:34px;border-radius:50%;background:#eee;display:grid;place-items:center;font-size:10px}
+.comment-row-v64 p{margin:0;font-size:13px;line-height:1.35}.comment-row-v64 p small{color:#888;font-weight:400}.comment-row-v64>div>button{border:0;background:transparent;padding:5px 0 0;color:#888;font-size:11px}
+.comment-like-v64{border:0;background:transparent;font-size:22px}.comment-like-v64 small{display:block;font-size:9px;color:#888}
+.comment-reactions-v64{display:flex;justify-content:space-between;border-top:1px solid #eee;padding:10px 0;font-size:23px}
+.comment-composer-v64{display:grid;grid-template-columns:38px 1fr auto;gap:9px;align-items:center}.comment-composer-v64 input{border:1px solid #ddd;border-radius:999px;padding:11px 13px;font-size:14px}.comment-composer-v64 button{border:0;background:transparent;font-size:13px}
+body.modal-no-nav-v64 .bottom-nav{display:none!important}
+
+/* Project publication linked products: no price */
+.linked-products-v64 .mini small,.linked-products-v64 .mini strong{display:none!important}
+
+/* Filter layout: compact and strictly within viewport */
+.filter-sheet-v64{overflow-x:hidden!important}
+.range-list-v64{display:flex;flex-direction:column;gap:9px}
+.range-list-v64 label{display:grid!important;grid-template-columns:72px minmax(0,1fr) minmax(0,1fr)!important;gap:8px!important;align-items:center!important;width:100%!important}
+.range-list-v64 label span{font-size:13px}
+.range-list-v64 input,.price-range-v64 input{min-width:0!important;width:100%!important;box-sizing:border-box!important;border:1px solid #ddd;border-radius:10px;padding:10px 11px;font-size:14px}
+.price-range-v64{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.filter-detail-v64{border-bottom:1px solid #eee}.filter-detail-v64 summary{list-style:none;padding:16px 0;display:flex;justify-content:space-between;font-size:16px}.filter-detail-v64 summary::-webkit-details-marker{display:none}.filter-detail-v64>div{padding-bottom:14px}
+.filter-actions-v64{display:flex;flex-direction:column;gap:9px;padding:16px 0 145px}.filter-actions-v64 .btn{width:100%;font-size:16px}
+
+/* Desktop settings and product/project typography consistency */
+@media(min-width:900px){
+ .settings-page-v64{padding-top:42px}
+ .settings-row-v64{grid-template-columns:42px 1fr 22px;padding:17px 5px}
+ .settings-row-v64 span b{font-size:17px}.settings-row-v64 span small{font-size:14px}
+}
+
+/* keep the active favorites heart red */
+.is-favorite,.saved{color:#e53935!important;-webkit-text-fill-color:#e53935!important}

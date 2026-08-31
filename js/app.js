@@ -2115,3 +2115,378 @@ render = function(){
  else renderBeforeV6();
  shellSyncV5(); ensureSupportBubbleV5(); setTimeout(enhanceV6,0);
 };
+
+
+/* ==================== SREDA v6.1 project desktop layout ==================== */
+function desktopProjectCategoriesV61(){
+  if(!isDesktopV5()) return '';
+  return `<div class="desktop-project-categories-v61">
+    ${CATEGORIES.map((c,i)=>`<button class="${i===0?'active':''}" onclick="go('home')">${c}</button>`).join('')}
+    <div class="desktop-project-search-v61"><input placeholder="Поиск"><img src="assets/icons/search-v6.png" alt=""></div>
+  </div>`;
+}
+
+renderDesignerProjectV4 = function(){
+ const p=DESIGNER_PROJECTS_V4.find(x=>x.id===currentProject)||DESIGNER_PROJECTS_V4[0];
+ const supplierAccess=(profileRole==='supplier'), canDownload=(profileRole==='supplier'||profileRole==='designer');
+
+ const allRoomCards = p.rooms.map((r,ri)=>`
+   <section class="project-room-section-v61">
+     <div class="project-room-title-v61"><h2>${r.name}</h2></div>
+     <div class="project-pinterest-grid-v61">
+       ${r.images.map((img,i)=>`
+         <button class="project-pin-v61 ${((i+ri)%3===1)?'tall':''} ${((i+ri)%4===2)?'wide':''}" onclick="openProjectPostV6('${img}','${r.name}')">
+           <img src="${img}" alt="${r.name}">
+         </button>`).join('')}
+     </div>
+     ${supplierAccess?'<button class="room-spec-link">Открыть спецификацию комнаты →</button>':''}
+   </section>`).join('');
+
+ if(isDesktopV5()){
+  return `${desktopProjectCategoriesV61()}
+  <div class="desktop-project-page-v61">
+    <div class="project-topline-v61">
+      <button class="project-back-v61" onclick="route='designerPublic';render()">${iconV6('back','Назад')}</button>
+      <div class="project-title-block-v61">
+        <h1>${p.title}</h1>
+        ${canDownload?`<button class="project-download-v61" onclick="downloadProjectV5('${p.title}')">↓ Скачать проект</button>`:''}
+      </div>
+      <button class="project-more-v61" onclick="projectMenuOpenV6=!projectMenuOpenV6;render()">${iconV6('more','Ещё')}</button>
+      ${projectMenuOpenV6?`<div class="project-popover-v6 project-popover-desktop-v61"><button onclick="toastV5('Редактирование проекта')">Редактировать проект</button><button onclick="toastV5('Настройки видимости проекта')">Видимость проекта</button></div>`:''}
+    </div>
+    ${allRoomCards}
+  </div>`;
+ }
+
+ return `<div class="designer-project-page mobile-gutter">
+  <div class="mobile-project-toolbar v6-project-toolbar"><button class="mobile-back-v5" onclick="route='designerPublic';render()">${iconV6('back','Назад')}</button><b>${p.title}</b><button class="project-more-v6" onclick="projectMenuOpenV6=!projectMenuOpenV6;render()">${iconV6('more','Ещё')}</button></div>
+  ${projectMenuOpenV6?`<div class="project-popover-v6"><button onclick="toastV5('Редактирование проекта')">Редактировать проект</button><button onclick="toastV5('Настройки видимости проекта')">Видимость проекта</button></div>`:''}
+  ${canDownload?`<button class="project-download-row-v6" onclick="downloadProjectV5('${p.title}')">↓ Скачать проект</button>`:''}
+  <div class="room-folders">${p.rooms.map(r=>`<section><h3>${r.name}</h3><div class="project-room-grid">${r.images.map(img=>`<button class="project-image-button-v6" onclick="openProjectPostV6('${img}','${r.name}')"><img src="${img}"></button>`).join('')}</div>${supplierAccess?'<button class="room-spec-link">Открыть спецификацию комнаты →</button>':''}</section>`).join('')}</div>
+ </div>`;
+};
+
+
+/* ==================== SREDA v6.3 desktop compact categories ==================== */
+const DESKTOP_CATEGORY_GROUPS_V63 = [
+  ['Мебель', ['Стулья','Столы','Комоды','Тумбы','Шкафы','Буфеты','Кровати','Диваны','Кресла','Журнальные столики','Гардеробные','Банкетки','Пуфы']],
+  ['Напольные покрытия', ['Инженерная доска','Керамогранит','Микроцемент','Ковролин']],
+  ['Настенные покрытия', ['Обои','Краска','Фреска','Штукатурка','Керамогранит','Лепнина']],
+  ['Сантехника', ['Раковина','Мойки','Смесители','Душевые стойки','Душевые комплекты','Унитазы','Ванны','Инсталляции','Кнопки','Гиг. душ','Трап','Душевое ограждение']],
+  ['Текстиль', ['Ковры','Шторы','Ткани']],
+  ['Декор', ['Подушки','Вазы','Скатерти','Посуда','Скульптуры','Картины']],
+  ['Освещение', ['Люстры','Бра','Торшер','Встроенные треки','Встроенные точки','Настенные','Подвесные']],
+  ['Двери', ['Скрытые','Раздвижные','Классические','Стеклянные перегородки','Входные','Фурнитура']],
+  ['Техника', ['Варочная панель','Духовой шкаф','Холодильник','Посудомоечная машина','Стиральная машина','Сушильная машина','Винный холодильник']],
+  ['Услуги', ['Строительная бригада','Сантехника','Монтаж дверей','Монтаж мебели']]
+];
+let desktopCatOpenV63 = null;
+
+function desktopTopCategoriesV63(){
+  return `<div class="desktop-catbar-v63">
+    <button class="desktop-cat-main-v63 active" onclick="go('home')">Все</button>
+    ${DESKTOP_CATEGORY_GROUPS_V63.map(([name,items],idx)=>`
+      <div class="desktop-cat-group-v63">
+        <button class="desktop-cat-main-v63" onclick="desktopCatOpenV63=desktopCatOpenV63===${idx}?null:${idx};render()">
+          ${name}<span class="desktop-cat-chevron-v63">⌄</span>
+        </button>
+        ${desktopCatOpenV63===idx?`
+          <div class="desktop-cat-dropdown-v63">
+            ${items.map(item=>`<button onclick="desktopCatOpenV63=null; toastV5('${item}');">${item}</button>`).join('')}
+          </div>`:''}
+      </div>`).join('')}
+    <div class="desktop-cat-search-v63">
+      <input placeholder="Поиск" onkeydown="if(event.key==='Enter'){q=this.value;go('search')}">
+      <button onclick="q=this.previousElementSibling.value;go('search')"><img src="assets/icons/search-v6.png" alt="Поиск"></button>
+    </div>
+  </div>`;
+}
+
+/* Replace the desktop project category row with the same compact grouped bar */
+desktopProjectCategoriesV61 = function(){
+  return isDesktopV5() ? desktopTopCategoriesV63() : '';
+};
+
+/* Desktop home header categories override */
+function desktopHomeCategoryBarV63(){
+  if(!isDesktopV5()) return '';
+  return desktopTopCategoriesV63();
+}
+
+
+const renderV63Base = render;
+render = function(){
+  renderV63Base();
+  if(!isDesktopV5()) return;
+  const v=document.getElementById('view');
+  if(!v) return;
+  const shouldShow=['home','search','designerPublic','brand','designerProject'].includes(route);
+  if(shouldShow && !v.querySelector('.desktop-catbar-v63')){
+    v.insertAdjacentHTML('afterbegin', desktopTopCategoriesV63());
+  }
+};
+
+
+/* ==================== SREDA v6.4 REVIEW CONSOLIDATION ==================== */
+
+/* ---------- modal / fullscreen navigation state ---------- */
+let commentsOpenV64 = false;
+const closeModalV64Base = closeModal;
+closeModal = function(){
+  closeModalV64Base();
+  commentsOpenV64 = false;
+  document.body.classList.remove('modal-no-nav-v64');
+};
+
+/* ---------- settings: one clean Instagram-like list, same icons desktop/mobile ---------- */
+function settingsIconV64(file, alt=''){
+  return `<img class="settings-icon-v64" src="assets/icons/${file}" alt="${alt}">`;
+}
+renderSettingsV4 = function(){
+ const groups = [
+  ['Ваш аккаунт', [
+    ['profile','Изменить данные','Имя, фото, описание, контакты','settings-edit-v64.png'],
+    ['security','Безопасность','Пароль и активные сессии','settings-security-v64.png']
+  ]],
+  ['Как вы используете Среду', [
+    ['history','Вы смотрели','История просмотренных товаров','settings-history-v64.png'],
+    ['notifications','Уведомления','Настроить события и push','notification-plain-v64.png']
+  ]],
+  ['Приватность', [
+    ['privacy','Видимость проектов','Публичные проекты и доступ поставщиков','settings-visibility-v64.png'],
+    ['blacklist','Чёрный список','Заблокированные пользователи и бренды','settings-blacklist-v64.png']
+  ]],
+  ['Помощь', [
+    ['support','Поддержка','Связаться с командой Среды','settings-support-v64.png']
+  ]]
+ ];
+ return `<div class="settings-page-v64">
+   <div class="settings-title-v64">
+     ${mobileBackV5("go('profile')")}
+     <h1>Настройки</h1>
+   </div>
+   ${groups.map(([name,items])=>`
+     <section class="settings-group-v64">
+       <h2>${name}</h2>
+       ${items.map(([k,n,d,ic])=>`
+        <button class="settings-row-v64" onclick="${k==='support'?'openSupportV5()':`settingsSectionV4='${k}';openSettingsDetailV4('${n}','${d}')`}">
+          ${settingsIconV64(ic,n)}
+          <span><b>${n}</b><small>${d}</small></span><em>›</em>
+        </button>`).join('')}
+     </section>`).join('')}
+   <section class="settings-group-v64 settings-logout-group-v64">
+     <button class="settings-row-v64 settings-logout-v64">
+       ${settingsIconV64('settings-logout-v64.png','Выйти')}
+       <span><b>Выйти</b></span>
+     </button>
+   </section>
+ </div>`;
+};
+
+/* ---------- analytics: exactly one period row ---------- */
+function analyticsControlsV64(kind){
+ const periods=[['7d','7 дней'],['1m','Месяц'],['6m','Полгода'],['1y','Год'],['custom','Свой период']];
+ return `<div class="analytics-controls-v64">
+   <div class="analytics-periods-v64">
+     ${periods.map(([k,n])=>`<button class="${analyticsPeriod===k?'active':''}" onclick="analyticsPeriod='${k}';render()">${n}</button>`).join('')}
+   </div>
+   ${analyticsPeriod==='custom'?`<div class="analytics-dates-v64"><input type="date" value="2026-08-01"><span>—</span><input type="date" value="2026-08-31"></div>`:''}
+   <button class="analytics-download-v64" onclick="downloadAnalyticsExcelV5('${kind}')">↓ Скачать</button>
+ </div>`;
+}
+renderSupplierAnalyticsV4 = function(){
+ const a=analyticsPeriod==='custom'?{impressions:52340,opens:17180,saves:2580,specs:1210,requests:242,offers:181}:SUPPLIER_ANALYTICS_V4[analyticsPeriod];
+ const metrics=[['Показы в ленте',a.impressions],['Открытия карточек',a.opens],['Сохранения',a.saves],['Добавления в спецификацию',a.specs],['Запросы расчёта',a.requests],['Предложения отправлены',a.offers]];
+ return `<div class="supplier-section analytics-section-v64">
+   ${analyticsControlsV64('аналитика-поставщика')}
+   <div class="analytics-summary">${metrics.map(([n,v])=>`<div class="metric-card"><small>${n}</small><b>${new Intl.NumberFormat('ru-RU').format(v)}</b><span>динамика к прошлому периоду</span></div>`).join('')}</div>
+   <div class="analytics-funnel"><div class="supplier-headline"><b>Воронка взаимодействия</b></div>
+   ${metrics.map(([n,v])=>`<div class="funnel-row"><div><span>${n}</span><b>${new Intl.NumberFormat('ru-RU').format(v)}</b></div><div class="funnel-track"><i style="width:${Math.max(4,Math.round(v/a.impressions*100))}%"></i></div></div>`).join('')}</div>
+   <div class="analytics-extra"><div><b>Топ товаров</b><span>Nube · Sora · Shad</span></div><div><b>Высокие просмотры / низкая конверсия</b><span>LO-RA · Core</span></div><div><b>Среднее время ответа</b><span>1 ч 24 мин</span></div></div>
+ </div>`;
+};
+renderProductAnalyticsV4 = function(){
+ const p=PRODUCTS.find(x=>x.id===selectedProductAnalyticsV4)||PRODUCTS[0];
+ const seed=(p.name.length*37)%400;
+ const a={impressions:8320+seed*10,opens:2870+seed*3,saves:524+seed,specs:218+Math.round(seed/2),requests:44+Math.round(seed/9),offers:31+Math.round(seed/12)};
+ return `<div class="product-analytics-v64">${mobileBackV5("route='profile';profileRole='supplier';profileTab='cards';render()")}
+   <h1>Аналитика ${p.name}</h1>${analyticsControlsV64('аналитика-товара')}
+   <div class="product-analytics-head"><img src="${p.image}"><div><b>${p.name}</b><small>${p.type} · ${p.priceLabel}</small></div></div>
+   <div class="analytics-summary">${[['Показы',a.impressions],['Открытия',a.opens],['Сохранения',a.saves],['В спецификацию',a.specs],['Запросы расчёта',a.requests],['Предложения',a.offers]].map(([n,v])=>`<div class="metric-card"><small>${n}</small><b>${new Intl.NumberFormat('ru-RU').format(v)}</b></div>`).join('')}</div>
+ </div>`;
+};
+
+/* moderator analytics also uses the same clean range row */
+moderatorAnalyticsV5 = function(){
+ const metrics=[['Новые пользователи','428'],['Активные пользователи','4 812'],['Бренды','184'],['Товары','3 942'],['Добавлено в спецификации','12 840'],['Запросы расчёта','1 624'],['Ошибки приложения','37']];
+ return `<div class="moderator-analytics">${analyticsControlsV64('аналитика-платформы')}
+   <div class="analytics-summary">${metrics.map(x=>`<button class="metric-card" onclick="openModeratorHistoryV6('${x[0]}')"><small>${x[0]}</small><b>${x[1]}</b></button>`).join('')}</div>
+   <div class="analytics-extra"><div><b>Ручные позиции дизайнеров</b><span>Шторы · столярные изделия · искусство</span></div><div><b>Чего не хватает в каталоге</b><span>Декоративный свет · двери · текстиль на заказ</span></div></div>
+ </div>`;
+};
+
+/* ---------- supplier requests: compact Telegram-like list, normal typography ---------- */
+renderSupplierRequests = function(){
+ const requests=[
+  {name:'Nube',project:'Квартира на Патриках',date:'сегодня, 12:40',status:'Новые'},
+  {name:'Shad',project:'Дом в Подмосковье',date:'вчера',status:'В работе'},
+  {name:'Core × 4',project:'Офисное пространство',date:'08.08',status:'Расчёт отправлен'}
+ ];
+ const statuses=['Все','Новые','В работе','Расчёт отправлен','Завершённые'];
+ const shown=supplierRequestFilter==='Все'?requests:requests.filter(r=>r.status===supplierRequestFilter);
+ return `<div class="supplier-requests-v64">
+   <div class="supplier-headline-v64"><b>Запросы на расчёт</b><span>${requests.length}</span></div>
+   <div class="request-folders-v64">${statuses.map(st=>`<button class="${supplierRequestFilter===st?'active':''}" onclick="supplierRequestFilter='${st}';render()">${st}<small>${st==='Все'?requests.length:requests.filter(r=>r.status===st).length}</small></button>`).join('')}</div>
+   <div class="request-list-v64">${shown.map(r=>`<button class="request-row-v64">
+     <div class="request-avatar-v64">${r.name.slice(0,2).toUpperCase()}</div>
+     <div><b>${r.name}</b><small>${r.project}</small></div>
+     <div class="request-status-v64"><time>${r.date}</time><span>${r.status}</span></div>
+   </button>`).join('')}</div>
+ </div>`;
+};
+
+/* ---------- favorites: plain + icon only ---------- */
+renderFavoritesV4 = function(){
+ const items=PRODUCTS.filter(p=>favorites.has(p.id)&&favCategoryMatchV5(p));
+ return `<div class="favorites-v4 mobile-gutter">
+   <div class="favorites-head-v64"><div><h2>Избранное</h2><small>Товары сохраняются даже после снятия с публикации</small></div>
+     <button class="favorite-plus-v64" onclick="createFavoriteFolderV4()" aria-label="Новая папка"><img src="assets/icons/plus-v64.png" alt=""></button>
+   </div>
+   <div class="favorite-folders"><button class="active">Все товары <span>${PRODUCTS.filter(p=>favorites.has(p.id)).length}</span></button>${favoriteFoldersV5.map((f,i)=>`<button>${f} <span>${[8,12,5,3][i]||0}</span></button>`).join('')}</div>
+   ${favoriteCategoryTabsV5()}
+   <div class="masonry">${items.length?items.map(feedCardV4).join(''):`<div class="favorite-empty">Нажмите ♡ у товара,<br>чтобы сохранить его.</div>`}</div>
+ </div>`;
+};
+
+/* ---------- product detail: remove separator/arrow under brand ---------- */
+function productDetailsV64(p,sizes){
+ return `<button class="brand-inline-v64" onclick="openBrandV4('${p.brand}')"><span>${p.brand}</span></button>
+   <div class="eyebrow">${p.type}</div><div class="product-title-row"><h1 class="product-name">${p.name}</h1><div class="product-big-price">${p.priceLabel}</div></div>
+   ${pickerButtonHTMLV5('Отделка',(p.finishes||['Стандарт'])[0],p.finishes||['Стандарт'])}
+   ${pickerButtonHTMLV5(p.bedSizes?'Спальное место':'Размер / формат',sizes[0],sizes)}
+   <button class="btn primary" onclick="specModal()">Добавить в спецификацию</button><button class="btn" onclick="requestCalc()">Запросить расчёт</button>
+   <div class="info-row"><span>Срок производства</span><b>${p.production}</b></div>
+   <section class="mobile-product-description-v64"><h3>Описание</h3><p>${p.description}</p></section>
+   <div class="v4-accordions product-ref-accordions-v64">
+    ${accordionV4('Характеристики',`<p>Материал: ${p.material||'—'}<br>Наличие: ${p.availability||'—'}<br>Цвет: ${p.color||'—'}</p>`)}
+    ${accordionV4('Схема с размерами',`<div class="doc-preview"><div class="dimension-demo">↔ ${sizes[0]}</div></div>`)}
+    ${accordionV4('Инструкция',`<div class="doc-row">PDF · Инструкция <button>Открыть</button></div>`)}
+    ${accordionV4('Рекомендации по уходу',`<p>Использовать мягкую сухую ткань.</p>`)}
+    ${accordionV4('Отзывы',`<div class="review-mini"><b>4,9 ★</b><span>12 отзывов</span></div>`)}
+   </div>`;
+}
+const renderProductV64Base = renderProductV4;
+renderProductV4 = function(){
+ const p=currentProduct, sizes=p.bedSizes||p.sizes||['Стандарт'];
+ if(isDesktopV5()) return renderProductV64Base();
+ return `<div class="mobile-product-v64">
+   <div class="product-hero v4-product-hero"><img src="${p.image}" alt="${p.name}">
+     <button class="mobile-product-back-v6" onclick="productBackV6()" aria-label="Назад">${iconV6('back','Назад')}</button>
+     <div class="product-actions-top v6-product-actions">
+       <button onclick="shareProductV4('${p.id}')" aria-label="Поделиться">${iconV6('share','Поделиться')}</button>
+       <button class="fav-v6 ${favorites.has(p.id)?'is-favorite':''}" onclick="toggleFav('${p.id}',event)">${favorites.has(p.id)?'♥':'♡'}</button>
+     </div>
+   </div>
+   <div class="product-content mobile-gutter">${productDetailsV64(p,sizes)}</div>
+ </div>`;
+};
+
+/* ---------- filter: compact vertical range rows ---------- */
+openFilters = function(){
+ const m=document.getElementById('modal');m.className='modal';
+ const details=(title,body,open='')=>`<details class="filter-detail-v64" ${open}><summary>${title}<span>⌄</span></summary><div>${body}</div></details>`;
+ m.innerHTML=`<div class="sheet filters filter-sheet-v64"><div class="sheet-title"><h3>Фильтры</h3><button class="close" onclick="closeModal()">×</button></div>
+ ${details('Категория',filterSectionBodyV6('category',CATEGORIES))}
+ ${details('Материал',filterSectionBodyV6('material',['Все',...MATERIAL_FILTERS_V5]),'open')}
+ ${details('Цвет',filterSectionBodyV6('color',['Все','Светлый','Чёрный','Коричневый','Зелёный','Терракотовый','Белый']),'open')}
+ ${details('Размер',`<div class="range-list-v64">
+   <label><span>Ширина</span><input placeholder="от"><input placeholder="до"></label>
+   <label><span>Глубина</span><input placeholder="от"><input placeholder="до"></label>
+   <label><span>Высота</span><input placeholder="от"><input placeholder="до"></label>
+ </div>`,'open')}
+ ${details('Декор',`<div class="filter-options">${['Все','Однотонный','Геометрия','Флора','Абстракция'].map(x=>`<button class="filter-option">${x}</button>`).join('')}</div>`)}
+ ${details('Цена',`<div class="price-range-v64"><input id="minP" type="number" value="${filters.minPrice}" placeholder="от"><input id="maxP" type="number" value="${filters.maxPrice}" placeholder="до"></div>`)}
+ <div class="filter-actions-v64"><button class="btn primary" onclick="applyFilters()">Показать</button><button class="btn" onclick="resetFilters()">Сбросить</button></div>
+ </div>`;
+};
+
+/* ---------- project publication + comments ---------- */
+function openProjectCommentsV64(){
+ commentsOpenV64 = true;
+ document.body.classList.add('modal-no-nav-v64');
+ const m=document.getElementById('modal');m.className='modal comments-modal-v64';
+ m.innerHTML=`<div class="comments-sheet-v64">
+   <div class="comments-handle-v64"></div><div class="comments-title-v64"><b>Комментарии</b><button onclick="closeModal()">×</button></div>
+   <div class="comments-list-v64">
+    ${[
+      ['ЕК','Елена Крылова','Очень нравится сочетание материалов ❤️','22 мин.','18'],
+      ['АС','Алексей Серов','Подскажите, пожалуйста, что за кровать?','1 ч.','4'],
+      ['МО','Мария Орлова','Красивый проект. Особенно спальня.','3 ч.','7']
+    ].map(c=>`<div class="comment-row-v64"><div class="comment-avatar-v64">${c[0]}</div><div><p><b>${c[1]}</b> <small>${c[3]}</small><br>${c[2]}</p><button>Ответить</button></div><button class="comment-like-v64">♡<small>${c[4]}</small></button></div>`).join('')}
+   </div>
+   <div class="comment-reactions-v64"><span>❤️</span><span>🙌</span><span>🔥</span><span>👏</span><span>🥲</span><span>😍</span><span>😮</span><span>😂</span></div>
+   <div class="comment-composer-v64"><div class="comment-avatar-v64">АС</div><input placeholder="Добавить комментарий…"><button>Отправить</button></div>
+ </div>`;
+}
+renderProjectPostV6 = function(){
+ const p=DESIGNER_PROJECTS_V4.find(x=>x.id===currentProject)||DESIGNER_PROJECTS_V4[0], post=projectPostV6||{img:p.cover,room:'Гостиная'};
+ const linked=PRODUCTS.filter(x=>['Forma Dom','METALNO'].includes(x.brand)).slice(0,3);
+ const similar=PRODUCTS.filter(x=>!linked.includes(x)).slice(0,6);
+ return `<div class="project-post-v64 mobile-gutter">
+   <div class="project-post-head">${mobileBackV5("route='designerProject';render()")}<div><b>Анна Смирнова</b><small>${p.title} · ${post.room}</small></div><button>${iconV6('more','Ещё')}</button></div>
+   <img class="project-post-image" src="${post.img}" alt="">
+   <div class="project-social-v6">
+     <button onclick="this.classList.toggle('liked');this.textContent=this.classList.contains('liked')?'♥':'♡'">♡</button>
+     <button onclick="openProjectCommentsV64()">◯</button>
+     <button onclick="toastV5('Можно отправить в чат')">${iconV6('messages','Отправить')}</button><span>124 отметки «Нравится»</span>
+   </div>
+   <div class="project-comments-preview-v64"><p><b>anna.smirnova</b> ${p.title}, ${post.room}</p><button onclick="openProjectCommentsV64()">Посмотреть все 18 комментариев</button></div>
+   <section><h2>Товары на этой визуализации</h2><div class="horizontal linked-products-v64">${linked.map(x=>`<div class="mini" onclick="openProduct('${x.id}')"><img src="${x.image}"><b>${x.name}</b></div>`).join('')}</div></section>
+   <section><h2>Похожие товары</h2><div class="masonry">${similar.map(feedCardV4).join('')}</div></section>
+ </div>`;
+};
+
+/* ---------- shell: hide app bottom nav in chat, story and comments ---------- */
+const shellSyncV64Base = shellSyncV5;
+shellSyncV5 = function(){
+ shellSyncV64Base();
+ const nav=document.querySelector('.bottom-nav');
+ if(!isDesktopV5() && (route==='chat'||route==='story'||commentsOpenV64)) nav?.classList.add('route-hidden-v64');
+ else nav?.classList.remove('route-hidden-v64');
+};
+
+/* ---------- chat opens as a clean fullscreen page on mobile ---------- */
+const renderChatV64DesktopBase = renderChat;
+renderChat = function(){
+ if(isDesktopV5()) return renderChatV64DesktopBase();
+ const rel=messages.filter(m=>!m.chat||m.chat===currentChat);
+ return `<section class="telegram-chat chat-fullscreen-v64">
+   <header class="chat-head-v64">
+     <button class="plain-back-v64" onclick="go('chats')">${iconV6('back','Назад')}</button>
+     <div class="chat-avatar">${currentChat.slice(0,2).toUpperCase()}</div>
+     <div class="chat-head-main"><b>${currentChat}</b><small>в сети</small></div>
+     <button class="chat-more" onclick="openSharedMedia()">•••</button>
+   </header>
+   <div class="messages messages-v64">${rel.length?rel.map(chatMessageHTML).join(''):`<div class="bubble"><div class="bubble-text">Здравствуйте! Напишите, что вас интересует.</div><small class="msg-time">сейчас</small></div>`}</div>
+   ${attachmentPanelOpen?renderAttachPanel():''}
+   <div class="composer composer-v64">
+     <button class="composer-icon" onclick="toggleAttachPanel()">＋</button>
+     <input id="msg" placeholder="${voiceRecording?'Идёт запись…':'Сообщение'}" onkeydown="if(event.key==='Enter')sendMsg()">
+     <button class="mic-btn ${voiceRecording?'recording':''}" onclick="toggleVoice()">${voiceRecording?'■':'◉'}</button>
+     <button class="send-btn" onclick="sendMsg()">↑</button>
+   </div>
+   <input id="photoInput" type="file" accept="image/*" multiple hidden onchange="sendAttachments(this.files,'image')">
+   <input id="videoInput" type="file" accept="video/*" multiple hidden onchange="sendAttachments(this.files,'video')">
+   <input id="fileInput" type="file" multiple hidden onchange="sendAttachments(this.files,'file')">
+ </section>`;
+};
+
+/* ---------- brand resident icon: markup stays, CSS converts label to icon ---------- */
+
+/* ---------- render final wrapper keeps nav state synchronized after every route ---------- */
+const renderV64Base = render;
+render = function(){
+ renderV64Base();
+ shellSyncV5();
+ setTimeout(()=>{ shellSyncV5(); },0);
+};

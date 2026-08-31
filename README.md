@@ -115,3 +115,18 @@ GitHub Pages:
 - фильтры переделаны в раскрывающиеся секции;
 - глобальный safe-area для нижних окон, чтобы нижнее меню не перекрывало контент;
 - рекламный блок мобильной главной восстановлен по высоте.
+
+
+## v6.4 review consolidation
+- fixed settings layout and installed supplied settings icons;
+- back arrows are icon-only everywhere;
+- plain notification bell and filter icon without background;
+- one supplier analytics period row only, custom period uses `date — date`;
+- supplier requests use compact Telegram-like list with readable typography;
+- favorites `+` is icon-only;
+- fullscreen chat/story and Instagram-style comments hide bottom navigation;
+- mobile product info typography reduced; brand separator/chevron removed;
+- filter size fields compact and stacked correctly;
+- project visualization linked products no longer show prices;
+- resident badge uses supplied shop icon;
+- black active buttons are forced to white text.
