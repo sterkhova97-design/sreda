@@ -12,6 +12,7 @@ const CATEGORIES = ['Все','Мягкая мебель','Стулья','Сто�
 
 let route='home', selectedCategory='Все', currentProduct=null, currentChat='Nube';
 let profileRole='designer', profileTab='projects', currentProject=null, selectMode=false;
+let supplierRequestFilter='Все';
 let favorites=new Set(JSON.parse(localStorage.getItem('sreda:favorites')||'[]'));
 let messages=JSON.parse(localStorage.getItem('sreda:messages')||'[]');
 let attachmentPanelOpen=false;
@@ -703,12 +704,19 @@ function renderSupplierAnalytics(){
 }
 
 function renderSupplierRequests(){
- return `<div class="supplier-section">
-   <div class="supplier-headline"><b>Запросы на расчёт</b><span>Демо</span></div>
-   <div class="supplier-list">
-     <div class="supplier-list-row"><div><b>Nube</b><small>Квартира на Патриках · сегодня, 12:40</small></div><span>Новый</span></div>
-     <div class="supplier-list-row"><div><b>Shad</b><small>Дом в Подмосковье · вчера</small></div><span>В работе</span></div>
-     <div class="supplier-list-row"><div><b>Core × 4</b><small>Офисное пространство · 08.08</small></div><span>Расчёт отправлен</span></div>
+ const requests=[
+  {name:'Nube',project:'Квартира на Патриках',date:'сегодня, 12:40',status:'Новые'},
+  {name:'Shad',project:'Дом в Подмосковье',date:'вчера',status:'В работе'},
+  {name:'Core × 4',project:'Офисное пространство',date:'08.08',status:'Расчёт отправлен'}
+ ];
+ const statuses=['Все','Новые','В работе','Расчёт отправлен','Завершённые'];
+ const shown=supplierRequestFilter==='Все'?requests:requests.filter(r=>r.status===supplierRequestFilter);
+ return `<div class="supplier-section supplier-requests-compact">
+   <div class="supplier-headline"><b>Запросы на расчёт</b><span>${requests.length}</span></div>
+   <div class="request-folders">${statuses.map(st=>`<button class="${supplierRequestFilter===st?'active':''}" onclick="supplierRequestFilter='${st}';render()"><span>${st}</span><small>${st==='Все'?requests.length:requests.filter(r=>r.status===st).length}</small></button>`).join('')}</div>
+   <div class="request-filter-row"><span>${supplierRequestFilter}</span><button onclick="supplierRequestFilter='Все';render()">Сбросить</button></div>
+   <div class="supplier-list telegram-list">
+    ${shown.length?shown.map(r=>`<div class="supplier-list-row telegram-row"><div class="request-avatar">${r.name.slice(0,2).toUpperCase()}</div><div class="request-main"><b>${r.name}</b><small>${r.project}</small></div><div class="request-meta"><small>${r.date}</small><span>${r.status}</span></div></div>`).join(''):`<div class="request-empty">В этой папке пока нет запросов</div>`}
    </div>
  </div>`;
 }
@@ -1410,7 +1418,7 @@ function renderFavoritesV4(){
 }
 
 function mobileBackV5(action){
- return `<button class="mobile-back-v5" onclick="${action||"history.back()"}" aria-label="Назад"><span>‹</span></button>`;
+ return `<button class="mobile-back-v5" onclick="${action||"history.back()"}" aria-label="Назад"><img src="assets/icons/back.png" alt=""></button>`;
 }
 
 function renderProductV4(){
@@ -1522,7 +1530,7 @@ function renderDesignerProfileUnifiedV5(own){
  if(isDesktopV5()){
   return `<div class="desktop-designer-profile">
     <header class="desktop-designer-head"><div class="designer-avatar">АС</div><div><h1>Анна Смирнова <span class="verified">✓</span></h1><p>Дизайнер интерьеров · Москва</p></div>
-    <div class="desktop-designer-actions">${own?`<button onclick="openDesignerV4('Анна Смирнова')">Публичный профиль</button><button onclick="openSettingsV4()">Настройки</button>`:`${followButtonV4(key)}<button onclick="currentChat='Анна Смирнова';route='chat';render()">Сообщение</button>`}</div></header>
+    <div class="desktop-designer-actions">${own?`<button onclick="openDesignerV4('Анна Смирнова')">Публичный профиль</button><button onclick="openSettingsV4()">Редактировать профиль</button>`:`${followButtonV4(key)}<button onclick="currentChat='Анна Смирнова';route='chat';render()">Сообщение</button>`}</div></header>
     <div class="desktop-designer-stats"><div><b>24</b><span>Проекты</span></div><div><b>1 245</b><span>Подписчики</span></div><div><b>320</b><span>Подписки</span></div></div>
     ${own?`<div class="desktop-profile-quick"><button onclick="profileTab='analytics';render()">Аналитика</button><button onclick="openSettingsV4()">Редактировать</button><button onclick="shareProfileV5()">Поделиться профилем</button></div>`:''}
     <p class="desktop-bio">Жилые и общественные интерьеры. Москва / Европа.</p>
@@ -1777,3 +1785,333 @@ window.addEventListener('resize',()=>{const before=document.body.classList.conta
 setTimeout(initSplashV5,0);
 
 render();
+
+
+/* ==================== SREDA v6.0 consolidated UX ==================== */
+let productReturnV6 = null;
+let projectPostV6 = null;
+let projectMenuOpenV6 = false;
+let moderatorHistoryTitleV6 = '';
+let selectedSupportTicketV6 = null;
+let supportStatusFilterV6 = 'Все';
+let customAnalyticsOpenV6 = false;
+
+function iconV6(name, alt=''){ return `<img class="v6-icon" src="assets/icons/${name}-v6.png" alt="${alt}">`; }
+function v6Escape(s){ return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m])); }
+
+const openProductBaseV6 = openProduct;
+openProduct = function(id){
+  if(route==='profile' && profileRole==='moderator'){
+    productReturnV6={route:'profile',role:'moderator',section:moderationSectionV5,type:moderationTypeV5,status:moderationStatusV5};
+  } else if(route==='designerProject'){
+    productReturnV6={route:'designerProject'};
+  } else {
+    productReturnV6={route:route};
+  }
+  return openProductBaseV6(id);
+};
+function productBackV6(){
+  if(productReturnV6?.role==='moderator'){
+    profileRole='moderator'; moderationSectionV5=productReturnV6.section||'verification';
+    moderationTypeV5=productReturnV6.type||'all'; moderationStatusV5=productReturnV6.status||'pending';
+    route='profile'; render(); scrollTo(0,0); return;
+  }
+  if(productReturnV6?.route==='designerProject'){route='designerProject';render();return;}
+  go('home');
+}
+
+/* Desktop picker is a compact dropdown; mobile stays a bottom sheet. */
+function pickerButtonHTMLV5(label,value,items){
+ return `<button class="v4-picker" onclick='openPickerV6(this,${JSON.stringify(label)},${JSON.stringify(items)})'><span><small>${label}</small><b>${value}</b></span><em>⌄</em></button>`;
+}
+function openPickerV6(anchor,title,items){
+ if(!isDesktopV5()) return openPickerV4(title,items);
+ document.querySelector('.desktop-picker-v6')?.remove();
+ const r=anchor.getBoundingClientRect();
+ const box=document.createElement('div'); box.className='desktop-picker-v6';
+ box.style.left=`${Math.max(12,r.left)}px`; box.style.top=`${r.bottom+6}px`; box.style.width=`${r.width}px`;
+ box.innerHTML=`<small>${v6Escape(title)}</small>${items.map((x,i)=>`<button onclick="this.closest('.desktop-picker-v6').remove()">${v6Escape(x)}${i===0?'<span>✓</span>':''}</button>`).join('')}`;
+ document.body.appendChild(box);
+ setTimeout(()=>document.addEventListener('pointerdown',function close(e){if(!box.contains(e.target)&&e.target!==anchor){box.remove();document.removeEventListener('pointerdown',close)}}, {capture:true}),0);
+}
+
+/* Centered specification modal + custom radio state */
+specModal = function(){
+ const m=document.getElementById('modal');m.className='modal v6-spec-modal';
+ m.innerHTML=`<div class="sheet v6-spec-sheet"><div class="sheet-title"><h3>Добавить в спецификацию</h3><button class="close" onclick="closeModal()">×</button></div>
+ ${Object.keys(specData).map((x,i)=>`<label class="project-card v6-project-radio"><span><b>${x}</b><small>${i===0?'Москва, 120 м²':i===1?'Московская обл., 250 м²':'Москва, 300 м²'}</small></span><input type="radio" name="p" ${i===0?'checked':''}><i></i></label>`).join('')}
+ <button class="btn v6-modal-action">＋ Создать новый проект</button>
+ <div class="field"><label>Помещение</label><select class="v6-room-select"><option>Гостиная</option><option>Спальня</option><option>Ванная</option><option>Кабинет</option></select></div>
+ <button class="btn primary v6-modal-action" onclick="closeModal()">Добавить</button></div>`;
+};
+
+/* Product card */
+renderProductV4 = function(){
+ const p=currentProduct; const sizes=p.bedSizes||p.sizes||['Стандарт'];
+ const mobile=`<div class="mobile-product-v6">
+  <div class="product-hero v4-product-hero">
+    <img src="${p.image}" alt="${p.name}">
+    <button class="mobile-product-back-v6" onclick="productBackV6()" aria-label="Назад">${iconV6('back','Назад')}</button>
+    <div class="product-actions-top v6-product-actions">
+      <button onclick="shareProductV4('${p.id}')" aria-label="Поделиться">${iconV6('share','Поделиться')}</button>
+      <button class="fav-v6 ${favorites.has(p.id)?'is-favorite':''}" onclick="toggleFav('${p.id}',event)">${favorites.has(p.id)?'♥':'♡'}</button>
+    </div>
+  </div>
+  <div class="product-content mobile-gutter">${productDetailsV5(p,sizes)}</div></div>`;
+ const desktop=`<div class="desktop-product-page">
+   <div class="desktop-product-gallery">
+     <button class="desktop-back v6-desktop-back" onclick="productBackV6()">${iconV6('back','Назад')}</button>
+     <img class="desktop-main-product-img" src="${p.image}" alt="${p.name}">
+     <div class="desktop-thumb-row"><img src="${p.image}"><img src="${findVisualForProductV5(p)}"><img src="${p.image}"></div>
+   </div>
+   <aside class="desktop-product-info">
+     <button class="desktop-brand-link" onclick="openBrandV4('${p.brand}')">${p.brand}<span>›</span></button>
+     <small>${p.type}</small>
+     <div class="desktop-product-title"><h1>${p.name}</h1><strong>${p.priceLabel}</strong></div>
+     ${pickerButtonHTMLV5('Отделка',(p.finishes||['Стандарт'])[0],p.finishes||['Стандарт'])}
+     ${pickerButtonHTMLV5(p.bedSizes?'Спальное место':'Размер / формат',sizes[0],sizes)}
+     <div class="desktop-product-cta"><button class="primary" onclick="specModal()">Добавить в спецификацию</button><button onclick="requestCalc()">Запросить расчёт</button></div>
+     <div class="desktop-meta"><span>Срок производства</span><b>${p.production}</b></div>
+     <div class="desktop-inline-icons v6-desktop-save-only"><button class="${favorites.has(p.id)?'is-favorite':''}" onclick="toggleFav('${p.id}',event)">${favorites.has(p.id)?'♥ Сохранено':'♡ В избранное'}</button></div>
+     <section class="desktop-description-v6"><h3>Описание</h3><p>${p.description}</p></section>
+     <div class="v4-accordions desktop-product-accordions v6-clean-accordions">
+       ${accordionV4('Характеристики',`<p>Материал: ${p.material||'—'}<br>Наличие: ${p.availability||'—'}<br>Цвет: ${p.color||'—'}</p>`)}
+       ${accordionV4('Схема с размерами',`<div class="doc-preview"><div class="dimension-demo">↔ ${sizes[0]}</div><small>Изображение или PDF поставщика.</small></div>`)}
+       ${accordionV4('Инструкция',`<div class="doc-row">PDF · Инструкция <button>Открыть</button></div>`)}
+       ${accordionV4('Рекомендации по уходу',`<p>Использовать мягкую сухую ткань. Для текстиля рекомендована профессиональная химчистка.</p>`)}
+       ${accordionV4('Отзывы',`<div class="review-mini"><b>4,9 ★</b><span>12 отзывов о товаре · 4,8 ★ о бренде</span></div>`)}
+     </div>
+   </aside>
+   <section class="desktop-similar"><h2>Похожие товары</h2><div class="desktop-product-grid">${PRODUCTS.filter(x=>x.id!==p.id&&(x.category===p.category||x.type===p.type)).slice(0,4).map(desktopProductCardV5).join('')}</div></section>
+ </div>`;
+ return isDesktopV5()?desktop:mobile;
+};
+
+/* Brand profile – same visual grammar as personal profiles, no giant black bars. */
+renderBrandV4 = function(){
+ const products=PRODUCTS.filter(p=>p.brand===currentBrandV4), key='brand:'+currentBrandV4;
+ const tabs=[['products','Товары'],['projects','Проекты'],['about','О бренде']];
+ if(isDesktopV5()){
+  return `<div class="desktop-brand-page v6-brand-page">
+    <header class="desktop-brand-head"><div class="desktop-brand-identity"><div class="brand-avatar">${currentBrandV4.slice(0,2).toUpperCase()}</div><div><h1>${currentBrandV4}</h1>${currentBrandV4==='Forma Dom'?'<span class="platform-member">Участник площадки</span>':''}<p>Поставщик мебели · Москва</p></div></div>
+    <div class="desktop-brand-actions"><button onclick="currentChat='${currentBrandV4}';route='chat';render()">Отправить сообщение</button>${followButtonV4(key)}</div></header>
+    ${isPartnerDesignerV4()&&currentBrandV4==='Forma Dom'?`<div class="desktop-partner-note">Ваша партнёрская скидка <b>15%</b></div>`:''}
+    <nav class="desktop-brand-tabs">${tabs.map(([k,n])=>`<button class="${brandTabV4===k?'active':''}" onclick="brandTabV4='${k}';render()">${n}</button>`).join('')}</nav>
+    ${brandTabV4==='products'?`${desktopBrandFiltersV5(products)}<div class="desktop-brand-masonry">${products.filter(brandFilterMatchV5).map(desktopProductCardV5).join('')}</div>`:brandTabV4==='projects'?renderBrandProjectsV5():renderBrandAboutV4()}
+  </div>`;
+ }
+ return `<div class="mobile-brand-profile-v6 mobile-gutter">
+   <div class="mobile-brand-profile-head"><div class="mobile-profile-avatar brand-avatar-mobile">${currentBrandV4.slice(0,2).toUpperCase()}</div><div><h1>${currentBrandV4}</h1><p>Поставщик мебели · Москва</p>${currentBrandV4==='Forma Dom'?'<span class="platform-member">Участник площадки</span>':''}</div></div>
+   <div class="mobile-brand-actions-v6"><button onclick="currentChat='${currentBrandV4}';route='chat';render()">Сообщение</button>${followButtonV4(key)}</div>
+   ${isPartnerDesignerV4()&&currentBrandV4==='Forma Dom'?`<div class="partner-discount"><small>Ваша партнёрская скидка</small><b>15%</b></div>`:''}
+   <div class="public-tabs">${tabs.map(([k,n])=>`<button class="${brandTabV4===k?'active':''}" onclick="brandTabV4='${k}';render()">${n}</button>`).join('')}</div>
+   ${brandTabV4==='products'?`<div class="masonry">${products.map(feedCardV4).join('')}</div>`:brandTabV4==='projects'?renderBrandProjectsV4():renderBrandAboutV4()}
+ </div>`;
+};
+
+/* Unified designer profile, restored specification */
+renderDesignerProfileUnifiedV5 = function(own){
+ const key='designer:'+currentDesignerV4;
+ const verified=`<img class="verified-icon-v6" src="assets/icons/verified-v6.png" alt="Верифицирован">`;
+ if(isDesktopV5()){
+  return `<div class="desktop-designer-profile">
+   <header class="desktop-designer-head"><div class="designer-avatar">АС</div><div><h1>Анна Смирнова ${verified}</h1><p>Дизайнер интерьеров · Москва</p></div>
+   <div class="desktop-designer-actions">${own?`<button onclick="openDesignerV4('Анна Смирнова')">Публичный профиль</button><button onclick="openSettingsV4()">Редактировать профиль</button>`:`${followButtonV4(key)}<button onclick="currentChat='Анна Смирнова';route='chat';render()">Сообщение</button>`}</div></header>
+   <div class="desktop-designer-stats"><div><b>24</b><span>Проекты</span></div><div><b>1 245</b><span>Подписчики</span></div><div><b>320</b><span>Подписки</span></div></div>
+   ${own?`<div class="desktop-profile-quick"><button onclick="profileTab='analytics';render()">Аналитика</button><button onclick="openSettingsV4()">Редактировать</button><button onclick="shareProfileV5()">Поделиться профилем</button></div>`:''}
+   <p class="desktop-bio">Жилые и общественные интерьеры. Москва / Европа.</p>
+   <div class="desktop-designer-tabs"><button class="${designerTabV4==='projects'?'active':''}" onclick="designerTabV4='projects';render()">Проекты</button><button class="${designerTabV4==='saved'?'active':''}" onclick="designerTabV4='saved';render()">Публикации</button>${own?`<button class="${designerTabV4==='specs'?'active':''}" onclick="designerTabV4='specs';render()">Спецификация</button>`:''}</div>
+   ${designerTabV4==='projects'?renderDesignerProjectsV5():designerTabV4==='specs'?renderSpecsRoot():`<div class="desktop-brand-masonry">${VISUALS.map(desktopVisualCardV5).join('')}</div>`}
+  </div>`;
+ }
+ return `<div class="mobile-profile-unified mobile-gutter">
+   ${own?`<div class="mobile-role-tabs v6-role-tabs"><button class="active" onclick="profileRole='designer';render()">Дизайнер</button><button onclick="profileRole='supplier';render()">Поставщик</button><button onclick="profileRole='moderator';render()">Модератор</button></div>`:''}
+   <div class="mobile-profile-top-actions"><span></span>${own?`<button class="hamburger-v5" onclick="openSettingsV4()">☰</button>`:''}</div>
+   <div class="mobile-profile-avatar">АС</div>
+   <h1 class="v6-name-line">Анна Смирнова ${verified}</h1><p class="mobile-profile-sub">Дизайнер интерьеров · Москва</p>
+   <div class="stats mobile-stats"><div><b>24</b><small>Проекты</small></div><div><b>1 245</b><small>Подписчики</small></div><div><b>320</b><small>Подписки</small></div></div>
+   ${own?`<div class="mobile-profile-quick"><button onclick="profileTab='analytics';render()">Аналитика</button><button onclick="openSettingsV4()">Редактировать</button><button onclick="shareProfileV5()">Поделиться профилем</button></div>`:`<div class="public-actions">${followButtonV4(key)}<button class="v4-message" onclick="currentChat='Анна Смирнова';route='chat';render()">Сообщение</button></div>`}
+   <p class="mobile-profile-bio">Жилые и общественные интерьеры. Москва / Европа.</p>
+   <div class="public-tabs mobile-profile-tabs v6-icon-tabs">
+     <button title="Проекты" class="${designerTabV4==='projects'?'active':''}" onclick="designerTabV4='projects';render()">${iconV6('projects-tab','Проекты')}</button>
+     ${own?`<button title="Спецификация" class="${designerTabV4==='specs'?'active':''}" onclick="designerTabV4='specs';currentProject=null;render()">${iconV6('spec','Спецификация')}</button>`:''}
+     <button class="${designerTabV4==='saved'?'active':''}" onclick="designerTabV4='saved';render()">Публикации</button>
+   </div>
+   ${designerTabV4==='projects'?renderDesignerProjectsV4():designerTabV4==='specs'?renderSpecsRoot():`<div class="masonry mobile-profile-grid">${VISUALS.map(feedCardV4).join('')}</div>`}
+ </div>`;
+};
+
+/* Project page: compact masonry desktop, separate download row mobile, dots settings */
+renderDesignerProjectV4 = function(){
+ const p=DESIGNER_PROJECTS_V4.find(x=>x.id===currentProject)||DESIGNER_PROJECTS_V4[0];
+ const supplierAccess=(profileRole==='supplier'), canDownload=(profileRole==='supplier'||profileRole==='designer');
+ const imageHtml=(r)=>r.images.map((img,i)=>`<button class="project-image-button-v6" onclick="openProjectPostV6('${img}','${r.name}')"><img src="${img}"></button>`).join('');
+ if(isDesktopV5()){
+  return `<div class="desktop-project-page-v5 v6-project-desktop">
+   <header><button class="mobile-back-v5" onclick="route='designerPublic';render()">${iconV6('back','Назад')}</button><h1>${p.title}</h1><span></span></header>
+   ${canDownload?`<button class="project-download-row-v6" onclick="downloadProjectV5('${p.title}')">↓ Скачать проект</button>`:''}
+   ${p.rooms.map(r=>`<section><h2>${r.name}</h2><div class="desktop-room-grid">${imageHtml(r)}</div>${supplierAccess?'<button class="room-spec-link">Открыть спецификацию комнаты →</button>':''}</section>`).join('')}
+  </div>`;
+ }
+ return `<div class="designer-project-page mobile-gutter">
+  <div class="mobile-project-toolbar v6-project-toolbar"><button class="mobile-back-v5" onclick="route='designerPublic';render()">${iconV6('back','Назад')}</button><b>${p.title}</b><button class="project-more-v6" onclick="projectMenuOpenV6=!projectMenuOpenV6;render()">${iconV6('more','Ещё')}</button></div>
+  ${projectMenuOpenV6?`<div class="project-popover-v6"><button onclick="toastV5('Редактирование проекта')">Редактировать проект</button><button onclick="toastV5('Настройки видимости проекта')">Видимость проекта</button></div>`:''}
+  ${canDownload?`<button class="project-download-row-v6" onclick="downloadProjectV5('${p.title}')">↓ Скачать проект</button>`:''}
+  <div class="room-folders">${p.rooms.map(r=>`<section><h3>${r.name}</h3><div class="project-room-grid">${imageHtml(r)}</div>${supplierAccess?'<button class="room-spec-link">Открыть спецификацию комнаты →</button>':''}</section>`).join('')}</div>
+ </div>`;
+};
+function openProjectPostV6(img,room){ projectPostV6={img,room}; route='projectPostV6'; render(); scrollTo(0,0); }
+function renderProjectPostV6(){
+ const p=DESIGNER_PROJECTS_V4.find(x=>x.id===currentProject)||DESIGNER_PROJECTS_V4[0], post=projectPostV6||{img:p.cover,room:'Гостиная'};
+ const linked=PRODUCTS.filter(x=>['Forma Dom','METALNO'].includes(x.brand)).slice(0,3);
+ const similar=PRODUCTS.filter(x=>!linked.includes(x)).slice(0,6);
+ return `<div class="project-post-v6 mobile-gutter">
+   <div class="project-post-head">${mobileBackV5("route='designerProject';render()")}<div><b>Анна Смирнова</b><small>${p.title} · ${post.room}</small></div><button>${iconV6('more','Ещё')}</button></div>
+   <img class="project-post-image" src="${post.img}" alt="">
+   <div class="project-social-v6"><button onclick="this.classList.toggle('liked');this.textContent=this.classList.contains('liked')?'♥':'♡'">♡</button><button onclick="document.getElementById('projectCommentV6').focus()">◯</button><button onclick="toastV5('Можно отправить в чат')">${iconV6('messages','Отправить')}</button><span>124 отметки «Нравится»</span></div>
+   <div class="project-comments-v6"><p><b>anna.smirnova</b> ${p.title}, ${post.room}</p><button>Посмотреть все 18 комментариев</button><div><input id="projectCommentV6" placeholder="Добавить комментарий…"><button>Отправить</button></div></div>
+   <section><h2>Товары на этой визуализации</h2><div class="horizontal">${linked.map(x=>`<div class="mini" onclick="openProduct('${x.id}')"><img src="${x.image}"><b>${x.name}</b><small>${x.priceLabel}</small></div>`).join('')}</div></section>
+   <section><h2>Похожие товары</h2><div class="masonry">${similar.map(feedCardV4).join('')}</div></section>
+ </div>`;
+}
+
+/* Supplier profile mobile icons, desktop consistency */
+supplierMobileV5 = function(){
+ const tabs=[['cards','products','Товары'],['requests','requests','Запросы'],['analytics','analytics','Аналитика'],['marks','projects-tab','Отметки']];
+ return `<div class="mobile-supplier-profile mobile-gutter">
+  <div class="mobile-role-tabs v6-role-tabs"><button onclick="profileRole='designer';render()">Дизайнер</button><button class="active">Поставщик</button><button onclick="profileRole='moderator';render()">Модератор</button></div>
+  <div class="mobile-profile-top-actions"><span></span><button class="hamburger-v5" onclick="openSettingsV4()">☰</button></div>
+  <div class="mobile-profile-avatar brand-avatar-mobile">FD</div><h1>Forma Dom</h1><p class="mobile-profile-sub">Поставщик мебели · Москва</p>
+  <div class="mobile-profile-quick"><button onclick="profileTab='analytics';render()">Аналитика</button><button onclick="openSettingsV4()">Редактировать</button><button onclick="shareProfileV5()">Поделиться профилем</button></div>
+  <div class="profile-tabs supplier-tabs v6-icon-tabs">${tabs.map(([t,ic,n])=>`<button title="${n}" class="profile-tab ${profileTab===t?'active':''}" onclick="profileTab='${t}';render()">${iconV6(ic,n)}</button>`).join('')}</div>
+  ${profileTab==='cards'?renderSupplierCardsV4():profileTab==='analytics'?renderSupplierAnalyticsV4():profileTab==='requests'?renderSupplierRequests():renderSupplierMarks()}
+ </div>`;
+};
+
+/* Orders: compact, 16px title/order/status + image + designer */
+renderOrdersV5 = function(){
+ const rows=[
+  {no:'№ 1284',name:'Nube',project:'Квартира на Патриках',designer:'Анна Смирнова',status:'В производстве',img:'assets/products/nube.webp'},
+  {no:'№ 1279',name:'Shad',project:'Спальня',designer:'Анна Смирнова',status:'Отгружено · Оставить отзыв',img:'assets/products/shad.webp'}
+ ];
+ return `<div class="orders-v6"><h2>Заказы</h2>${rows.map(x=>`<article><img src="${x.img}"><div><b>${x.no}</b><strong>${x.name}</strong><small>${x.project} · ${x.designer}</small></div><span>${x.status}</span></article>`).join('')}</div>`;
+};
+
+/* Universal analytics period controls */
+function analyticsControlsV6(kind){
+ return `<div class="analytics-controls-v6">
+   <div class="analytics-periods-v6">${[['7d','7 дней'],['1m','30 дней'],['6m','Полгода'],['1y','Год'],['custom','Свой период']].map(([k,n])=>`<button class="${analyticsPeriod===k?'active':''}" onclick="analyticsPeriod='${k}';customAnalyticsOpenV6=${k==='custom'};render()">${n}</button>`).join('')}</div>
+   ${analyticsPeriod==='custom'?`<div class="analytics-dates-v6"><label>С<input type="date" value="2026-08-01"></label><label>По<input type="date" value="2026-08-31"></label></div>`:''}
+   <button class="excel-download" onclick="downloadAnalyticsExcelV5('${kind}')">↓ Скачать</button>
+ </div>`;
+}
+const supplierAnalyticsBaseV6 = _renderSupplierAnalyticsV4;
+renderSupplierAnalyticsV4 = function(){ return `${analyticsControlsV6('аналитика-поставщика')}${supplierAnalyticsBaseV6()}`; };
+const productAnalyticsBaseV6 = _renderProductAnalyticsV4;
+renderProductAnalyticsV4 = function(){ return `<div class="product-analytics-wrap">${analyticsControlsV6('аналитика-товара')}${productAnalyticsBaseV6()}</div>`; };
+
+/* Moderator mobile as settings-like list, desktop full analytics/history/support */
+moderatorMobileV5 = function(){
+ return `<div class="moderator mobile-gutter">
+   <div class="mobile-role-tabs v6-role-tabs"><button onclick="profileRole='designer';render()">Дизайнер</button><button onclick="profileRole='supplier';render()">Поставщик</button><button class="active">Модератор</button></div>
+   <div class="moderator-head"><div><small>Личный кабинет</small><h2>Модератор</h2></div><span class="moderation-badge">7 новых</span></div>
+   <div class="moderator-list-v6">
+    <button onclick="moderationSectionV5='verification';render()"><span><b>Верификация</b><small>Товары, бренды и пользователи</small></span><em>›</em></button>
+    <button onclick="moderationSectionV5='analytics';render()"><span><b>Аналитика</b><small>Активность и ошибки приложения</small></span><em>›</em></button>
+    <button onclick="moderationSectionV5='support';render()"><span><b>Поддержка</b><small>Запросы пользователей</small></span><em>›</em></button>
+   </div>${moderationSectionV5==='verification'?moderatorVerificationMobileV6():moderationSectionV5==='analytics'?moderatorAnalyticsV5():moderatorSupportV5()}
+ </div>`;
+};
+function moderatorVerificationMobileV6(){
+ const items=[['Все','all'],['Товары','Товар'],['Бренды','Бренд'],['Дизайнеры','Дизайнер'],['Поставщики','Поставщик'],['На рассмотрении','pending'],['Архив','archive']];
+ return `<div class="moderator-sublist-v6">${items.map(([n,k])=>`<button onclick="${k==='pending'||k==='archive'?`moderationStatusV5='${k}'`:`moderationTypeV5='${k}'`};render()"><span>${n}</span><em>›</em></button>`).join('')}</div><div class="moderator-mobile-results-v6">${moderatorVerificationV5()}</div>`;
+}
+
+moderatorAnalyticsV5 = function(){
+ const metrics=[['Новые пользователи','428'],['Активные пользователи','4 812'],['Бренды','184'],['Товары','3 942'],['Добавлено в спецификации','12 840'],['Запросы расчёта','1 624'],['Ошибки приложения','37']];
+ return `<div class="moderator-analytics">${analyticsControlsV6('аналитика-платформы')}
+   <div class="analytics-summary">${metrics.map(x=>`<button class="metric-card" onclick="openModeratorHistoryV6('${x[0]}')"><small>${x[0]}</small><b>${x[1]}</b></button>`).join('')}</div>
+   <div class="analytics-extra"><div><b>Ручные позиции дизайнеров</b><span>Шторы · столярные изделия · искусство</span></div><div><b>Чего не хватает в каталоге</b><span>Декоративный свет · двери · текстиль на заказ</span></div></div>
+ </div>`;
+};
+function openModeratorHistoryV6(title){ moderatorHistoryTitleV6=title; route='moderatorHistoryV6'; render(); scrollTo(0,0); }
+function renderModeratorHistoryV6(){
+ const isErrors=moderatorHistoryTitleV6==='Ошибки приложения';
+ const rows=isErrors?[
+  ['TypeError','Карточка товара','Анна Смирнова','iPhone / Safari','31.08.2026','21:42','Ошибка открытия PDF'],
+  ['NetworkError','Сообщения','Forma Dom','Chrome / macOS','31.08.2026','19:18','Не загрузилось вложение'],
+  ['UI overflow','Фильтры','Анна Смирнова','iPhone / Safari','31.08.2026','18:53','Нижнее меню перекрыло кнопку']
+ ]:[
+  ['Действие','Анна Смирнова','Дизайнер','Nube · Квартира на Патриках','31.08.2026','14:42'],
+  ['Действие','Forma Dom','Поставщик','Shad','31.08.2026','13:18'],
+  ['Действие','Елена Крылова','Дизайнер','Core','30.08.2026','18:05']
+ ];
+ return `<div class="moderator-history-v6">${mobileBackV5("profileRole='moderator';moderationSectionV5='analytics';route='profile';render()")}<h1>${moderatorHistoryTitleV6}</h1>${analyticsControlsV6('история')}
+ <div class="history-table-v6">${rows.map(r=>`<div>${r.map((c,i)=>`<span class="c${i}">${c}</span>`).join('')}</div>`).join('')}</div></div>`;
+}
+
+/* Moderator support = Telegram-like ticket messenger */
+moderatorSupportV5 = function(){
+ const filtered=supportTicketsV5.filter(t=>supportStatusFilterV6==='Все'||t.status===supportStatusFilterV6);
+ if(isDesktopV5()){
+  const selected=selectedSupportTicketV6||filtered[0]?.id, t=supportTicketsV5.find(x=>x.id===selected);
+  return `<div class="support-messenger-v6">
+   <aside><div class="support-status-tabs-v6">${['Все','Новый','В работе','Закрыт'].map(s=>`<button class="${supportStatusFilterV6===s?'active':''}" onclick="supportStatusFilterV6='${s}';render()">${s}</button>`).join('')}</div>
+   ${filtered.map(x=>`<button class="ticket-row-v6 ${selected===x.id?'active':''}" onclick="selectedSupportTicketV6='${x.id}';render()"><b>${x.id}</b><span>${x.subject}</span><small>${x.user} · ${x.date}</small><em>${x.status}</em></button>`).join('')}</aside>
+   ${t?supportConversationV6(t):'<section class="support-empty-v6">Выберите обращение</section>'}
+  </div>`;
+ }
+ return `<div class="support-mobile-v6"><div class="support-status-tabs-v6">${['Все','Новый','В работе','Закрыт'].map(s=>`<button class="${supportStatusFilterV6===s?'active':''}" onclick="supportStatusFilterV6='${s}';render()">${s}</button>`).join('')}</div>
+ ${filtered.map(x=>`<button class="ticket-row-v6" onclick="selectedSupportTicketV6='${x.id}';openSupportTicketV5('${x.id}')"><b>${x.id}</b><span>${x.subject}</span><small>${x.user} · ${x.date}</small><em>${x.status}</em></button>`).join('')}</div>`;
+};
+function supportConversationV6(t){
+ return `<section class="support-conversation-v6"><header><div><b>${t.id} · ${t.subject}</b><small>${t.user} · ${t.role}</small></div><select><option>${t.status}</option><option>Новый</option><option>В работе</option><option>Ожидаем пользователя</option><option>Решён</option><option>Закрыт</option></select></header>
+ <div class="support-messages-v6"><div class="support-bubble incoming">Здравствуйте! Подскажите, пожалуйста, как решить этот вопрос в сервисе?<small>12:40</small></div><div class="support-bubble outgoing">Здравствуйте! Проверяем обращение.<small>12:44 ✓✓</small></div></div>
+ <div class="support-composer-v6"><label>＋<input type="file" accept="image/*,.pdf" hidden onchange="toastV5('Файл прикреплён')"></label><input placeholder="Сообщение..."><button>↑</button></div></section>`;
+}
+openSupportTicketV5 = function(id){
+ const t=supportTicketsV5.find(x=>x.id===id); if(!t)return;
+ const m=document.getElementById('modal');m.className='modal';
+ m.innerHTML=`<div class="sheet support-ticket-sheet-v6"><div class="sheet-title"><div><h3>${t.id} · ${t.subject}</h3><small>${t.user} · ${t.role}</small></div><button class="close" onclick="closeModal()">×</button></div>
+ <div class="support-messages-v6"><div class="support-bubble incoming">Здравствуйте! Подскажите, пожалуйста, как решить этот вопрос в сервисе?<small>12:40</small></div></div>
+ <select class="support-status-select-v6"><option>${t.status}</option><option>В работе</option><option>Ожидаем пользователя</option><option>Решён</option><option>Закрыт</option></select>
+ <div class="support-composer-v6"><label>＋<input type="file" accept="image/*,.pdf" hidden onchange="toastV5('Файл прикреплён')"></label><input placeholder="Сообщение..."><button onclick="toastV5('Ответ отправлен')">↑</button></div></div>`;
+};
+
+/* Filters: all sections expandable, compact range rows */
+openFilters = function(){
+ const m=document.getElementById('modal');m.className='modal';
+ const section=(title,body,open='')=>`<details class="filter-detail-v6" ${open}><summary>${title}<span>⌄</span></summary><div>${body}</div></details>`;
+ m.innerHTML=`<div class="sheet filters v6-filter-sheet"><div class="sheet-title"><h3>Фильтры</h3><button class="close" onclick="closeModal()">×</button></div>
+ ${section('Категория',filterSectionBodyV6('category',CATEGORIES))}
+ ${section('Материал',filterSectionBodyV6('material',['Все',...MATERIAL_FILTERS_V5]))}
+ ${section('Цвет',filterSectionBodyV6('color',['Все','Светлый','Чёрный','Коричневый','Зелёный','Терракотовый','Белый']))}
+ ${section('Размер',`<div class="range-grid-v6"><label>Ширина<input placeholder="от"><input placeholder="до"></label><label>Глубина<input placeholder="от"><input placeholder="до"></label><label>Высота<input placeholder="от"><input placeholder="до"></label></div>`)}
+ ${section('Декор',`<div class="filter-options">${['Все','Однотонный','Геометрия','Флора','Абстракция'].map(x=>`<button class="filter-option">${x}</button>`).join('')}</div>`)}
+ ${section('Цена',`<div class="price-range-v6"><input id="minP" type="number" value="${filters.minPrice}" placeholder="от, ₽"><input id="maxP" type="number" value="${filters.maxPrice}" placeholder="до, ₽"></div>`)}
+ <div class="filter-actions-v6"><button class="btn primary" onclick="applyFilters()">Показать</button><button class="btn" onclick="resetFilters()">Сбросить</button></div></div>`;
+};
+function filterSectionBodyV6(key,arr){ return `<div class="filter-options">${arr.map(x=>`<button class="filter-option" onclick="setFilter('${key}','${String(x).replace(/'/g,"\\'")}',this)">${x}</button>`).join('')}</div>`; }
+
+/* Notifications mobile safe area */
+openNotifications = function(){
+ if(isDesktopV5()){ desktopNotificationOpenV5=!desktopNotificationOpenV5; accountMenuOpenV5=false; renderDesktopOverlayV5(); return; }
+ const m=document.getElementById('modal');m.className='modal';
+ m.innerHTML=`<div class="sheet notifications-sheet v6-safe-sheet"><div class="sheet-title"><h3>Уведомления</h3><button class="close" onclick="closeModal()">×</button></div>
+ ${[['Forma Dom обновил стоимость Nube','497 000 ₽ → 523 000 ₽','2 мин'],['Запрос на расчёт принят','Shad · Квартира на Патриках','1 ч'],['Core отгружен','Оставьте отзыв о товаре и бренде','вчера'],['Новый подписчик','Studio Line подписался на вас','вчера']].map(x=>`<div class="notification-row"><i></i><div><b>${x[0]}</b><span>${x[1]}</span></div><small>${x[2]}</small></div>`).join('')}</div>`;
+};
+
+/* Favorites category typography + robust active-heart classes applied after render */
+function enhanceV6(){
+ document.querySelectorAll('.feed-heart,.desktop-card button,.product-actions-top button,.desktop-inline-icons button').forEach(b=>{
+   if((b.textContent||'').trim().startsWith('♥')) b.classList.add('is-favorite');
+ });
+}
+const renderBeforeV6 = render;
+render = function(){
+ const v=document.getElementById('view');
+ if(route==='projectPostV6') v.innerHTML=renderProjectPostV6();
+ else if(route==='moderatorHistoryV6') v.innerHTML=renderModeratorHistoryV6();
+ else renderBeforeV6();
+ shellSyncV5(); ensureSupportBubbleV5(); setTimeout(enhanceV6,0);
+};
