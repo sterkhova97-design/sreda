@@ -4,10 +4,31 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
   <meta name="theme-color" content="#ffffff">
-  <title>среда. — функциональный прототип</title>
-  <link rel="stylesheet" href="css/style.css?v=41">
+  <title>среда. — функциональный прототип v5</title>
+  <link rel="stylesheet" href="css/style.css?v=52">
 </head>
 <body>
+<div id="mobileSplash" class="mobile-splash"><img src="assets/logo.png" alt="среда."></div>
+
+<div id="desktopHeader" class="desktop-header">
+  <div class="desktop-header-main">
+    <button class="desktop-logo" onclick="go('home')" aria-label="Главная"><img src="assets/logo.png" alt="среда."></button>
+    <div class="desktop-actions">
+      <button onclick="openNotifications()" aria-label="Уведомления" class="desktop-icon">♢<i class="desktop-dot"></i></button>
+      <button onclick="openDesktopChatsV5()" aria-label="Сообщения" class="desktop-icon desktop-chat-icon">◌<i class="desktop-dot msg-dot"></i></button>
+      <button onclick="toggleAccountMenuV5()" aria-label="Профиль" class="desktop-avatar-btn">АС</button>
+    </div>
+  </div>
+  <div class="desktop-category-row">
+    <div id="desktopCategories" class="desktop-categories"></div>
+    <form class="desktop-search" onsubmit="desktopSearchV5(event)">
+      <input id="desktopSearchInput" placeholder="Поиск">
+      <button aria-label="Найти">⌕</button>
+    </form>
+  </div>
+</div>
+<div id="desktopOverlayRoot"></div>
+
 <div id="app">
   <header class="topbar">
     <button class="brand" onclick="go('home')" aria-label="Главная">
@@ -31,7 +52,7 @@
 
 <div id="modal" class="modal hidden"></div>
 
-<script src="data/catalog.js?v=41"></script>
-<script src="js/app.js?v=41"></script>
+<script src="data/catalog.js?v=52"></script>
+<script src="js/app.js?v=52"></script>
 </body>
 </html>

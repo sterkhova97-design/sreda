@@ -107,7 +107,7 @@ function renderHome(){
 }
 
 function storyDemo(title){
-  alert(title + '\n\nДемо-раздел. Позже сюда можно открыть отдельную подборку.');
+  sredaAlertV5(title + '\n\nРаздел открыт в прототипе.');
 }
 
 function openProduct(id){currentProduct=PRODUCTS.find(p=>p.id===id);route='product';setNav();render();scrollTo(0,0)}
@@ -154,7 +154,7 @@ function renderSearch(){
      <button class="search-icon-btn" onclick="document.getElementById('imageInput').click()"><img src="assets/icons/search.png" alt=""></button>
    </div>
    <input id="imageInput" type="file" accept="image/*" hidden onchange="imageSearch(event)">
-   <div class="section-line"><h3>Популярные запросы</h3><button class="filter-launch" onclick="openFilters()"><span class="filter-glyph">☷</span>Фильтры</button></div>
+   <div class="section-line"><h3>Популярные запросы</h3><button class="filter-launch icon-filter-v52" onclick="openFilters()" aria-label="Фильтры"><img src="assets/icons/filter.png" alt=""></button></div>
    <div class="quick-chips">${['диван модульный','кресло','кровать','букле','освещение','ковер','керамогранит'].map(x=>`<button class="qchip" onclick="document.getElementById('q').value='${x}';searchNow()">${x}</button>`).join('')}</div>
    <div id="imagePreview"></div>
    <div id="searchResults" class="masonry" style="margin-top:18px">${applySearchFilters(PRODUCTS).map(feedCard).join('')}</div>
@@ -557,7 +557,7 @@ async function toggleVoice(){
    return;
  }
  if(!navigator.mediaDevices?.getUserMedia||typeof MediaRecorder==='undefined'){
-   alert('В этом браузере запись голосовых недоступна.');
+   sredaAlertV5('В этом браузере запись голосовых недоступна.');
    return;
  }
  try{
@@ -589,7 +589,7 @@ async function toggleVoice(){
    },500);
  }catch(e){
    voiceRecording=false;
-   alert('Разрешите доступ к микрофону в настройках браузера.');
+   sredaAlertV5('Разрешите доступ к микрофону в настройках браузера.');
  }
 }
 
@@ -1004,10 +1004,10 @@ function renderDesignerProjectsV4(){
 function openDesignerProjectV4(id){currentProject=id;route='designerProject';render();scrollTo(0,0)}
 function renderDesignerProjectV4(){
  const p=DESIGNER_PROJECTS_V4.find(x=>x.id===currentProject)||DESIGNER_PROJECTS_V4[0];
- const supplierAccess=(profileRole==='supplier'); 
+ const supplierAccess=(profileRole==='supplier'); const canDownloadProject=(profileRole==='supplier'||profileRole==='designer'); 
  return `<div class="designer-project-page">
   <div class="project-toolbar"><button onclick="route='designerPublic';render()">‹ Назад</button><b>${p.title}</b><span></span></div>
-  ${supplierAccess?`<div class="private-access"><span>Доступ поставщика к проекту</span><button onclick="alert('АР-проект будет скачан поставщику, которому дизайнер открыл доступ.')">⇩ Скачать АР</button></div>`:''}
+  ${supplierAccess?`<div class="private-access"><span>Доступ поставщика к проекту</span><button onclick="sredaAlertV5('Доступ к АР-проекту открыт.')">⇩ Скачать АР</button></div>`:''}
   <div class="room-folders">${p.rooms.map(r=>`<section><h3>${r.name}</h3><div class="project-room-grid">${r.images.map(img=>`<img src="${img}">`).join('')}</div>${supplierAccess?'<button class="room-spec-link">Открыть спецификацию комнаты →</button>':''}</section>`).join('')}</div>
  </div>`;
 }
@@ -1143,7 +1143,7 @@ function renderProductEditorPreviewV4(){
  return `<div class="editor-card"><h2>Карточка готова к модерации</h2>
   <div class="editor-preview-product"><img src="${aiProcessedPhotoV4||uploadedProductPhotoV4||'assets/products/nube.webp'}"><div><b>Новый товар</b><small>Forma Dom · ${productDraftCategoryV4}</small><strong>Цена будет указана поставщиком</strong></div></div>
   <div class="quality-pass">✓ Фотография соответствует требованиям Среды</div>
-  <button class="btn primary" onclick="alert('Товар отправлен модератору');route='profile';profileRole='supplier';profileTab='cards';render()">Отправить на модерацию</button>
+  <button class="btn primary" onclick="toastV5('Товар отправлен модератору');route='profile';profileRole='supplier';profileTab='cards';render()">Отправить на модерацию</button>
   <button class="btn" onclick="productEditStepV4=2;render()">Вернуться к редактированию</button>
  </div>`;
 }
@@ -1238,5 +1238,542 @@ function render(){
  else if(route==='productEditor')v.innerHTML=renderProductEditorV4();
  else if(route==='productAnalytics')v.innerHTML=renderProductAnalyticsV4();
 }
+
+
+/* =========================================================
+   SREDA v5 — unified functional prototype
+   One web app, separate mobile and desktop compositions
+   ========================================================= */
+
+const V5_BREAKPOINT = 900;
+let accountMenuOpenV5=false;
+let desktopNotificationOpenV5=false;
+let desktopBrandFilterV5='Все';
+let moderationSectionV5='verification';
+let moderationStatusV5='pending';
+let moderationTypeV5='all';
+let favoriteFoldersV5=JSON.parse(localStorage.getItem('sreda:favoriteFolders')||'["Гостиная","Проект Патрики","Для клиента"]');
+let favoriteCategoryV5='Все';
+let supportTicketsV5=[
+ {id:'SR-1042',user:'Анна Смирнова',role:'Дизайнер',subject:'Не загружается PDF проекта',status:'Новый',date:'Сегодня, 14:21'},
+ {id:'SR-1038',user:'Forma Dom',role:'Поставщик',subject:'Вопрос по модерации товара',status:'В работе',date:'Сегодня, 11:05'},
+ {id:'SR-1021',user:'Ирина Волкова',role:'Частный клиент',subject:'Как скрыть проект?',status:'Закрыт',date:'29 авг.'}
+];
+let verificationArchiveV5=[
+ {name:'Studio Line',type:'Бренд',decision:'Принято',date:'30 авг.',comment:'Данные компании подтверждены.'},
+ {name:'Мария Орлова',type:'Дизайнер',decision:'Отклонено',date:'29 авг.',comment:'Нужно дополнить портфолио реализованными проектами.'}
+];
+
+function isDesktopV5(){ return window.innerWidth>=V5_BREAKPOINT; }
+
+function shellSyncV5(){
+  const desktop=isDesktopV5();
+  document.body.classList.toggle('is-desktop',desktop);
+  document.body.classList.toggle('is-mobile',!desktop);
+  document.body.classList.toggle('mobile-home',!desktop && route==='home');
+  document.body.classList.toggle('mobile-inner',!desktop && route!=='home' && route!=='story');
+  renderDesktopCategoriesV5();
+  if(desktop){ document.querySelector('.bottom-nav')?.classList.add('desktop-hidden'); }
+  else { document.querySelector('.bottom-nav')?.classList.remove('desktop-hidden'); }
+}
+
+function renderDesktopCategoriesV5(){
+ const host=document.getElementById('desktopCategories'); if(!host)return;
+ host.innerHTML=CATEGORIES.map(c=>`<button class="${selectedCategory===c?'active':''}" onclick="selectedCategory='${c}';go('home')">${c}</button>`).join('');
+}
+function desktopSearchV5(e){
+ e.preventDefault();
+ const v=(document.getElementById('desktopSearchInput')?.value||'').trim();
+ route='search'; setNav(); render();
+ setTimeout(()=>{ const inp=document.getElementById('q'); if(inp){inp.value=v; searchNow();}},0);
+}
+function openDesktopChatsV5(){ route='chats'; setNav(); closeDesktopOverlaysV5(); render(); scrollTo(0,0); }
+function closeDesktopOverlaysV5(){
+ accountMenuOpenV5=false; desktopNotificationOpenV5=false;
+ const r=document.getElementById('desktopOverlayRoot'); if(r)r.innerHTML='';
+}
+function toggleAccountMenuV5(){
+ if(!isDesktopV5())return go('profile');
+ accountMenuOpenV5=!accountMenuOpenV5; desktopNotificationOpenV5=false;
+ renderDesktopOverlayV5();
+}
+function renderDesktopOverlayV5(){
+ const root=document.getElementById('desktopOverlayRoot'); if(!root)return;
+ if(accountMenuOpenV5){
+  const roleName=profileRole==='supplier'?'Поставщик':profileRole==='moderator'?'Модератор':'Дизайнер';
+  const links=profileRole==='supplier'
+   ? [['profile','Профиль бренда'],['cards','Товары'],['add','Добавить товар'],['requests','Запросы на расчёт'],['orders','Заказы'],['analytics','Аналитика']]
+   : profileRole==='moderator'
+   ? [['verification','Верификация'],['analytics','Аналитика'],['support','Поддержка']]
+   : [['profile','Мой профиль'],['projects','Проекты'],['specs','Спецификации'],['orders','Заказы'],['favorites','Избранное'],['history','Вы смотрели']];
+  root.innerHTML=`<div class="desktop-popover-shade" onclick="closeDesktopOverlaysV5()"></div>
+   <aside class="account-popover">
+    <div class="account-now"><div class="account-avatar">${profileRole==='supplier'?'FD':profileRole==='moderator'?'М':'АС'}</div><div><small>Сейчас:</small><b>${profileRole==='supplier'?'Forma Dom':profileRole==='moderator'?'Модератор':'Анна Смирнова'}</b><span>${roleName}</span></div></div>
+    <div class="account-group"><small>Личный кабинет</small>
+    ${links.map(([k,n])=>`<button onclick="accountNavigateV5('${k}')">${n}<span>›</span></button>`).join('')}</div>
+    <div class="account-group"><small>Аккаунт</small>
+      <button onclick="closeDesktopOverlaysV5();openSettingsV4()">Настройки<span>›</span></button>
+      <button onclick="closeDesktopOverlaysV5();openSupportV5()">Поддержка<span>›</span></button>
+      <button>Выйти</button>
+    </div>
+   </aside>`;
+ } else if(desktopNotificationOpenV5){
+  root.innerHTML=desktopNotificationsHTMLV5();
+ } else root.innerHTML='';
+}
+function accountNavigateV5(k){
+ closeDesktopOverlaysV5();
+ if(profileRole==='moderator'){
+   route='profile'; profileTab='moderation'; moderationSectionV5=k; render(); return;
+ }
+ if(k==='profile'){route='profile';render();return}
+ if(k==='add'){openProductEditorV4();return}
+ if(k==='favorites'){go('favorites');return}
+ if(k==='history'){route='search';render();return}
+ route='profile'; profileTab=k; render();
+}
+function desktopNotificationsHTMLV5(){
+ const rows=[
+  ['price','Forma Dom обновил стоимость Nube','497 000 ₽ → 523 000 ₽','2 мин'],
+  ['calc','Расчёт по Shad готов','Квартира на Патриках','1 ч'],
+  ['review','Core отгружен','Оставьте отзыв о товаре и бренде','вчера'],
+  ['follow','Новый подписчик','Studio Line подписался на вас','вчера'],
+  ['comment','Новый комментарий','Проект «Квартира на Патриках»','2 дн.']
+ ];
+ return `<div class="desktop-popover-shade" onclick="closeDesktopOverlaysV5()"></div>
+ <aside class="notification-popover">
+   <div class="popover-title"><h3>Уведомления</h3><button onclick="closeDesktopOverlaysV5()">×</button></div>
+   <div class="notice-section-label">Сейчас</div>
+   ${rows.map((x,i)=>`<button class="desktop-notice ${i<2?'unread':''}" onclick="notificationActionV5('${x[0]}')">
+     <span class="notice-avatar">${i===0?'FD':i===1?'SH':i===2?'C':'●'}</span>
+     <span class="notice-copy"><b>${x[1]}</b><small>${x[2]}</small></span><time>${x[3]}</time>
+   </button>`).join('')}
+   <button class="all-activity">Посмотреть всю активность <span>›</span></button>
+ </aside>`;
+}
+function notificationActionV5(kind){
+ closeDesktopOverlaysV5();
+ if(kind==='price'){openProduct('nube');return}
+ if(kind==='calc'){currentProject='Квартира на Патриках';route='designerProject';render();return}
+ route='profile';render();
+}
+
+function customDialogV5({title,subtitle='',input=false,placeholder='',primary='Готово',secondary='Отмена',onPrimary=null}={}){
+ const m=document.getElementById('modal'); m.className='modal';
+ m.innerHTML=`<div class="sreda-dialog-overlay" onclick="if(event.target===this)closeModal()">
+   <div class="sreda-dialog">
+    <div class="sreda-dialog-head"><h3>${title}</h3><button onclick="closeModal()">×</button></div>
+    ${subtitle?`<p>${subtitle}</p>`:''}
+    ${input?`<label><span>${placeholder||'Введите значение'}</span><input id="sredaDialogInput" autocomplete="off"></label>`:''}
+    <div class="sreda-dialog-actions"><button class="secondary" onclick="closeModal()">${secondary}</button><button class="primary" id="sredaDialogPrimary">${primary}</button></div>
+   </div></div>`;
+ const btn=document.getElementById('sredaDialogPrimary');
+ btn.onclick=()=>{const val=document.getElementById('sredaDialogInput')?.value?.trim(); if(input&&!val)return; closeModal(); if(onPrimary)onPrimary(val)};
+ setTimeout(()=>document.getElementById('sredaDialogInput')?.focus(),50);
+}
+
+function sredaAlertV5(text){customDialogV5({title:'среда.',subtitle:String(text),primary:'Хорошо',secondary:'Закрыть'});}
+function sredaPromptLegacyV5(label){
+ customDialogV5({title:'Новая папка',input:true,placeholder:label||'Введите значение',primary:'Создать',onPrimary:(v)=>toastV5(`Создано: ${v}`)});
+ return null;
+}
+function toastV5(text){
+ let t=document.getElementById('sredaToastV5');
+ if(!t){t=document.createElement('div');t.id='sredaToastV5';t.className='sreda-toast';document.body.appendChild(t)}
+ t.textContent=text;t.classList.add('show');clearTimeout(t._tm);t._tm=setTimeout(()=>t.classList.remove('show'),1800);
+}
+
+function createFavoriteFolderV4(){
+ customDialogV5({title:'Новая папка',input:true,placeholder:'Название папки',primary:'Создать',onPrimary:(name)=>{
+   favoriteFoldersV5.push(name);localStorage.setItem('sreda:favoriteFolders',JSON.stringify(favoriteFoldersV5));render();toastV5(`Папка «${name}» создана`);
+ }});
+}
+function favoriteCategoryTabsV5(){
+ const cats=['Все','Мебель','Свет','Материалы','Сантехника'];
+ return `<div class="mobile-category-tabs favorites-category-tabs">${cats.map(x=>`<button class="${favoriteCategoryV5===x?'active':''}" onclick="favoriteCategoryV5='${x}';render()">${x}</button>`).join('')}</div>`;
+}
+function favCategoryMatchV5(p){
+ if(favoriteCategoryV5==='Все')return true;
+ if(favoriteCategoryV5==='Мебель')return ['Мягкая мебель','Стулья','Столы','Корпусная мебель'].includes(p.category);
+ if(favoriteCategoryV5==='Свет')return p.category==='Освещение';
+ if(favoriteCategoryV5==='Сантехника')return p.category==='Сантехника';
+ return ['Напольные покрытия','Настенные покрытия','Ткани','Декор'].includes(p.category);
+}
+function renderFavoritesV4(){
+ const items=PRODUCTS.filter(p=>favorites.has(p.id)&&favCategoryMatchV5(p));
+ return `<div class="favorites-v4 mobile-gutter">
+  <div class="favorites-head"><div><h2>Избранное</h2><small>Товары сохраняются даже после снятия с публикации</small></div><button class="favorite-new-folder" onclick="createFavoriteFolderV4()">＋ Папка</button></div>
+  <div class="favorite-folders"><button class="active">Все товары <span>${PRODUCTS.filter(p=>favorites.has(p.id)).length}</span></button>${favoriteFoldersV5.map((f,i)=>`<button>${f} <span>${[8,12,5,3][i]||0}</span></button>`).join('')}</div>
+  ${favoriteCategoryTabsV5()}
+  <div class="masonry">${items.length?items.map(feedCardV4).join(''):`<div class="favorite-empty">Нажмите ♡ у товара,<br>чтобы сохранить его.</div>`}</div>
+ </div>`;
+}
+
+function mobileBackV5(action){
+ return `<button class="mobile-back-v5" onclick="${action||"history.back()"}" aria-label="Назад"><span>‹</span></button>`;
+}
+
+function renderProductV4(){
+ const p=currentProduct; const sizes=p.bedSizes||p.sizes||['Стандарт'];
+ const mobile=`<div class="mobile-product-v5">
+  <div class="product-hero v4-product-hero"><img src="${p.image}" alt="${p.name}">${mobileBackV5("go('home')")}
+    <div class="product-actions-top"><button onclick="shareProductV4('${p.id}')">↥</button><button class="${favorites.has(p.id)?'saved':''}" onclick="toggleFav('${p.id}',event)">${favorites.has(p.id)?'♥':'♡'}</button></div>
+  </div>
+  <div class="product-content mobile-gutter">${productDetailsV5(p,sizes)}</div></div>`;
+ const desktop=`<div class="desktop-product-page">
+   <div class="desktop-product-gallery">
+     <button class="desktop-back" onclick="go('home')">‹</button>
+     <img class="desktop-main-product-img" src="${p.image}" alt="${p.name}">
+     <div class="desktop-thumb-row"><img src="${p.image}"><img src="${findVisualForProductV5(p)}"><img src="${p.image}"></div>
+   </div>
+   <aside class="desktop-product-info">
+     <button class="desktop-brand-link" onclick="openBrandV4('${p.brand}')">${p.brand}<span>›</span></button>
+     <small>${p.type}</small>
+     <div class="desktop-product-title"><h1>${p.name}</h1><strong>${p.priceLabel}</strong></div>
+     ${pickerButtonHTMLV5('Отделка',(p.finishes||['Стандарт'])[0],p.finishes||['Стандарт'])}
+     ${pickerButtonHTMLV5(p.bedSizes?'Спальное место':'Размер / формат',sizes[0],sizes)}
+     <div class="desktop-product-cta"><button class="primary" onclick="specModal()">Добавить в спецификацию</button><button onclick="requestCalc()">Запросить расчёт</button></div>
+     <div class="desktop-meta"><span>Срок производства</span><b>${p.production}</b></div>
+     <div class="desktop-inline-icons"><button onclick="shareProductV4('${p.id}')">↗ Поделиться</button><button onclick="toggleFav('${p.id}',event)">${favorites.has(p.id)?'♥ Сохранено':'♡ В избранное'}</button></div>
+     <div class="v4-accordions desktop-product-accordions">
+       ${accordionV4('Описание',`<p>${p.description}</p>`,true)}
+       ${accordionV4('Характеристики',`<p>Материал: ${p.material||'—'}<br>Наличие: ${p.availability||'—'}<br>Цвет: ${p.color||'—'}</p>`)}
+       ${accordionV4('Схема с размерами',`<div class="doc-preview"><div class="dimension-demo">↔ ${sizes[0]}</div><small>Изображение или PDF поставщика.</small></div>`)}
+       ${accordionV4('Инструкция',`<div class="doc-row">PDF · Инструкция <button>Открыть</button></div>`)}
+       ${accordionV4('Рекомендации по уходу',`<p>Использовать мягкую сухую ткань. Для текстиля рекомендована профессиональная химчистка.</p>`)}
+       ${accordionV4('Отзывы',`<div class="review-mini"><b>4,9 ★</b><span>12 отзывов о товаре · 4,8 ★ о бренде</span></div>`)}
+     </div>
+   </aside>
+   <section class="desktop-similar"><h2>Похожие товары</h2><div class="desktop-product-grid">${PRODUCTS.filter(x=>x.id!==p.id&&(x.category===p.category||x.type===p.type)).slice(0,4).map(desktopProductCardV5).join('')}</div></section>
+ </div>`;
+ return isDesktopV5()?desktop:mobile;
+}
+function productDetailsV5(p,sizes){
+ return `<button class="brand-inline" onclick="openBrandV4('${p.brand}')"><span>${p.brand}</span><em>›</em></button>
+   <div class="eyebrow">${p.type}</div><div class="product-title-row"><h1 class="product-name">${p.name}</h1><div class="product-big-price">${p.priceLabel}</div></div>
+   ${pickerButtonHTMLV5('Отделка',(p.finishes||['Стандарт'])[0],p.finishes||['Стандарт'])}
+   ${pickerButtonHTMLV5(p.bedSizes?'Спальное место':'Размер / формат',sizes[0],sizes)}
+   <button class="btn primary" onclick="specModal()">Добавить в спецификацию</button><button class="btn" onclick="requestCalc()">Запросить расчёт</button>
+   <div class="info-row"><span>Срок производства</span><b>${p.production}</b></div>
+   <section class="mobile-product-description-v52"><h3>Описание</h3><p>${p.description}</p></section>
+   <div class="v4-accordions product-ref-accordions-v52">
+    ${accordionV4('Характеристики',`<p>Материал: ${p.material||'—'}<br>Наличие: ${p.availability||'—'}<br>Цвет: ${p.color||'—'}</p>`)}
+    ${accordionV4('Схема с размерами',`<div class="doc-preview"><div class="dimension-demo">↔ ${sizes[0]}</div></div>`)}
+    ${accordionV4('Инструкция',`<div class="doc-row">PDF · Инструкция <button>Открыть</button></div>`)}
+    ${accordionV4('Рекомендации по уходу',`<p>Использовать мягкую сухую ткань.</p>`)}
+    ${accordionV4('Отзывы',`<div class="review-mini"><b>4,9 ★</b><span>12 отзывов</span></div>`)}
+   </div>`;
+}
+function pickerButtonHTMLV5(label,value,items){
+ return `<button class="v4-picker" onclick='openPickerV4(${JSON.stringify(label)},${JSON.stringify(items)})'><span><small>${label}</small><b>${value}</b></span><em>⌄</em></button>`;
+}
+function findVisualForProductV5(p){
+ const v=VISUALS.find(x=>(x.subtitle||'').includes(p.brand)); return v?.image||p.image;
+}
+function desktopProductCardV5(p){
+ return `<article class="desktop-card" onclick="openProduct('${p.id}')"><div><img src="${p.image}"><button onclick="event.stopPropagation();toggleFav('${p.id}',event)">${favorites.has(p.id)?'♥':'♡'}</button></div><h3>${p.name}</h3><span>${p.type} · ${p.brand}</span><b>${p.priceLabel}</b></article>`;
+}
+
+function renderBrandV4(){
+ const products=PRODUCTS.filter(p=>p.brand===currentBrandV4);
+ const key='brand:'+currentBrandV4;
+ if(isDesktopV5()){
+  return `<div class="desktop-brand-page">
+   <header class="desktop-brand-head">
+    <div class="desktop-brand-identity"><div class="brand-avatar">${currentBrandV4.slice(0,2).toUpperCase()}</div><div><h1>${currentBrandV4}</h1>${currentBrandV4==='Forma Dom'?'<span class="platform-member">Участник площадки</span>':''}</div></div>
+    <div class="desktop-brand-actions"><button onclick="currentChat='${currentBrandV4}';route='chat';render()">Отправить сообщение</button>${followButtonV4(key)}</div>
+   </header>
+   ${isPartnerDesignerV4()&&currentBrandV4==='Forma Dom'?`<div class="desktop-partner-note">Ваша партнёрская скидка <b>15%</b></div>`:''}
+   <nav class="desktop-brand-tabs">${[['products','Товары'],['projects','Проекты'],['about','О бренде']].map(([k,n])=>`<button class="${brandTabV4===k?'active':''}" onclick="brandTabV4='${k}';render()">${n}</button>`).join('')}</nav>
+   ${brandTabV4==='products'?`${desktopBrandFiltersV5(products)}<div class="desktop-brand-masonry">${products.filter(brandFilterMatchV5).map(desktopProductCardV5).join('')}</div>`:brandTabV4==='projects'?renderBrandProjectsV5():renderBrandAboutV4()}
+  </div>`;
+ }
+ return `<div class="public-profile mobile-brand-v5">
+   <div class="mobile-brand-head mobile-gutter">
+     <div class="brand-avatar">${currentBrandV4.slice(0,2).toUpperCase()}</div>
+     <div class="public-title"><h1>${currentBrandV4}</h1>${currentBrandV4==='Forma Dom'?'<span class="platform-member">Участник площадки</span>':''}</div>
+   </div>
+   <div class="public-actions mobile-gutter">${followButtonV4(key)}<button class="v4-message" onclick="currentChat='${currentBrandV4}';route='chat';render()">Сообщение</button></div>
+   ${isPartnerDesignerV4()&&currentBrandV4==='Forma Dom'?`<div class="partner-discount mobile-gutter"><small>Ваша партнёрская скидка</small><b>15%</b></div>`:''}
+   <div class="public-tabs mobile-gutter">${[['products','Товары'],['projects','Проекты'],['about','О бренде']].map(([k,n])=>`<button class="${brandTabV4===k?'active':''}" onclick="brandTabV4='${k}';render()">${n}</button>`).join('')}</div>
+   ${brandTabV4==='products'?`<div class="masonry mobile-gutter">${products.map(feedCardV4).join('')}</div>`:brandTabV4==='projects'?renderBrandProjectsV4():renderBrandAboutV4()}
+ </div>`;
+}
+function desktopBrandFiltersV5(products){
+ const types=['Все',...new Set(products.map(p=>p.type))];
+ return `<div class="desktop-brand-filters">
+   ${types.map(x=>`<button class="${desktopBrandFilterV5===x?'active':''}" onclick="desktopBrandFilterV5='${x}';render()">${x}</button>`).join('')}
+   <button onclick="openFilters()">Материал⌄</button><button onclick="openFilters()">Размер⌄</button><button onclick="openFilters()">Цена⌄</button><button onclick="openFilters()">Наличие⌄</button>
+ </div>`;
+}
+function brandFilterMatchV5(p){return desktopBrandFilterV5==='Все'||p.type===desktopBrandFilterV5}
+function renderBrandProjectsV5(){
+ return `<div class="desktop-project-masonry">${DESIGNER_PROJECTS_V4.map(p=>`<article><img src="${p.cover}"><h3>${p.title}</h3><span>${p.city}</span></article>`).join('')}</div>`;
+}
+
+function renderDesignerPublicV4(){
+ return renderDesignerProfileUnifiedV5(false);
+}
+function designerProfileV4(){
+ return renderDesignerProfileUnifiedV5(true);
+}
+function renderDesignerProfileUnifiedV5(own){
+ const key='designer:'+currentDesignerV4;
+ if(isDesktopV5()){
+  return `<div class="desktop-designer-profile">
+    <header class="desktop-designer-head"><div class="designer-avatar">АС</div><div><h1>Анна Смирнова <span class="verified">✓</span></h1><p>Дизайнер интерьеров · Москва</p></div>
+    <div class="desktop-designer-actions">${own?`<button onclick="openDesignerV4('Анна Смирнова')">Публичный профиль</button><button onclick="openSettingsV4()">Настройки</button>`:`${followButtonV4(key)}<button onclick="currentChat='Анна Смирнова';route='chat';render()">Сообщение</button>`}</div></header>
+    <div class="desktop-designer-stats"><div><b>24</b><span>Проекты</span></div><div><b>1 245</b><span>Подписчики</span></div><div><b>320</b><span>Подписки</span></div></div>
+    ${own?`<div class="desktop-profile-quick"><button onclick="profileTab='analytics';render()">Аналитика</button><button onclick="openSettingsV4()">Редактировать</button><button onclick="shareProfileV5()">Поделиться профилем</button></div>`:''}
+    <p class="desktop-bio">Жилые и общественные интерьеры. Москва / Европа.</p>
+    <div class="desktop-designer-tabs"><button class="${designerTabV4==='projects'?'active':''}" onclick="designerTabV4='projects';render()">Проекты</button><button class="${designerTabV4==='saved'?'active':''}" onclick="designerTabV4='saved';render()">Публикации</button></div>
+    ${designerTabV4==='projects'?renderDesignerProjectsV5():`<div class="desktop-brand-masonry">${VISUALS.map(desktopVisualCardV5).join('')}</div>`}
+  </div>`;
+ }
+ return `<div class="mobile-profile-unified mobile-gutter">
+   ${own?`<div class="mobile-role-tabs"><button class="${profileRole==='designer'?'active':''}" onclick="profileRole='designer';render()">Дизайнер</button><button onclick="profileRole='supplier';render()">Поставщик</button><button onclick="profileRole='moderator';render()">Модератор</button></div>`:''}
+   <div class="mobile-profile-top-actions">${own?`<span></span><button class="hamburger-v5" onclick="openSettingsV4()">☰</button>`:''}</div>
+   <div class="mobile-profile-avatar">АС</div>
+   <h1>Анна Смирнова <span class="verified">✓</span></h1><p class="mobile-profile-sub">Дизайнер интерьеров · Москва</p>
+   <div class="stats mobile-stats"><div><b>24</b><small>Проекты</small></div><div><b>1 245</b><small>Подписчики</small></div><div><b>320</b><small>Подписки</small></div></div>
+   ${own?`<div class="mobile-profile-quick"><button onclick="profileTab='analytics';render()">Аналитика</button><button onclick="openSettingsV4()">Редактировать</button><button onclick="shareProfileV5()">Поделиться профилем</button></div>`:`<div class="public-actions">${followButtonV4(key)}<button class="v4-message" onclick="currentChat='Анна Смирнова';route='chat';render()">Сообщение</button></div>`}
+   <p class="mobile-profile-bio">Жилые и общественные интерьеры. Москва / Европа.</p>
+   <div class="public-tabs mobile-profile-tabs"><button class="${designerTabV4==='projects'?'active':''}" onclick="designerTabV4='projects';render()">Проекты</button><button class="${designerTabV4==='saved'?'active':''}" onclick="designerTabV4='saved';render()">Публикации</button></div>
+   ${designerTabV4==='projects'?renderDesignerProjectsV4():`<div class="masonry mobile-profile-grid">${VISUALS.map(feedCardV4).join('')}</div>`}
+ </div>`;
+}
+function renderDesignerProjectsV5(){return `<div class="desktop-project-masonry">${DESIGNER_PROJECTS_V4.map(p=>`<article onclick="openDesignerProjectV4('${p.id}')"><img src="${p.cover}"><h3>${p.title}</h3><span>${p.city}</span></article>`).join('')}</div>`}
+function desktopVisualCardV5(v){return `<article class="desktop-card"><div><img src="${v.image}"><button>♡</button></div><h3>${v.title}</h3><span>${v.subtitle||''}</span></article>`}
+function shareProfileV5(){toastV5('Ссылка на профиль готова к отправке')}
+
+function renderDesignerProjectV4(){
+ const p=DESIGNER_PROJECTS_V4.find(x=>x.id===currentProject)||DESIGNER_PROJECTS_V4[0];
+ const supplierAccess=(profileRole==='supplier'); const canDownloadProject=(profileRole==='supplier'||profileRole==='designer');
+ if(isDesktopV5()){
+  return `<div class="desktop-project-page-v5"><header>${mobileBackV5("route='designerPublic';render()")}<h1>${p.title}</h1>${canDownloadProject?`<button onclick="downloadProjectV5('${p.title}')">↓ Скачать проект</button>`:'<span></span>'}</header>
+   ${p.rooms.map(r=>`<section><h2>${r.name}</h2><div class="desktop-room-grid">${r.images.map(img=>`<img src="${img}">`).join('')}</div>${supplierAccess?'<button>Открыть спецификацию комнаты →</button>':''}</section>`).join('')}</div>`;
+ }
+ return `<div class="designer-project-page mobile-gutter">
+  <div class="mobile-project-toolbar">${mobileBackV5("route='designerPublic';render()")}<b>${p.title}</b>${canDownloadProject?`<button class="download-project-mobile" onclick="downloadProjectV5('${p.title}')">↓ Проект</button>`:'<span></span>'}</div>
+  <div class="room-folders">${p.rooms.map(r=>`<section><h3>${r.name}</h3><div class="project-room-grid">${r.images.map(img=>`<img src="${img}">`).join('')}</div>${supplierAccess?'<button class="room-spec-link">Открыть спецификацию комнаты →</button>':''}</section>`).join('')}</div>
+ </div>`;
+}
+function downloadProjectV5(name){
+ const blob=new Blob([`Архитектурный проект: ${name}\nДемо-файл прототипа Среда.`],{type:'text/plain;charset=utf-8'});
+ const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`${name}-АР.txt`;a.click();URL.revokeObjectURL(a.href);
+ toastV5('Проект скачан');
+}
+
+function supplierProfileV4(){
+ if(isDesktopV5()) return supplierDesktopV5();
+ return supplierMobileV5();
+}
+function supplierMobileV5(){
+ let tabs=['cards','requests','analytics','marks']; let names={cards:'Товары',requests:'Запросы',analytics:'Аналитика',marks:'Отметки'};
+ return `<div class="mobile-supplier-profile mobile-gutter">
+   <div class="mobile-role-tabs"><button onclick="profileRole='designer';render()">Дизайнер</button><button class="active">Поставщик</button><button onclick="profileRole='moderator';render()">Модератор</button></div>
+   <div class="mobile-profile-top-actions"><span></span><button class="hamburger-v5" onclick="openSettingsV4()">☰</button></div>
+   <div class="mobile-profile-avatar brand-avatar-mobile">FD</div><h1>Forma Dom</h1><p class="mobile-profile-sub">Поставщик мебели · Москва</p>
+   <div class="mobile-profile-quick"><button onclick="profileTab='analytics';render()">Аналитика</button><button onclick="openSettingsV4()">Редактировать</button><button onclick="shareProfileV5()">Поделиться профилем</button></div>
+   <div class="profile-tabs supplier-tabs">${tabs.map(t=>`<button class="profile-tab ${profileTab===t?'active':''}" onclick="profileTab='${t}';render()">${names[t]}</button>`).join('')}</div>
+   ${profileTab==='cards'?renderSupplierCardsV4():profileTab==='analytics'?renderSupplierAnalyticsV4():profileTab==='requests'?renderSupplierRequests():renderSupplierMarks()}
+ </div>`;
+}
+function supplierDesktopV5(){
+ const tabs=[['cards','Товары'],['requests','Запросы'],['orders','Заказы'],['analytics','Аналитика']];
+ return `<div class="desktop-cabinet">
+   <header class="desktop-cabinet-title"><div><small>Личный кабинет поставщика</small><h1>Forma Dom</h1></div><div><button onclick="openProductEditorV4()">＋ Добавить товар</button><button onclick="openSettingsV4()">Редактировать профиль</button></div></header>
+   <nav class="desktop-cabinet-tabs">${tabs.map(([k,n])=>`<button class="${profileTab===k?'active':''}" onclick="profileTab='${k}';render()">${n}</button>`).join('')}</nav>
+   ${profileTab==='cards'?renderSupplierCardsV4():profileTab==='analytics'?renderSupplierAnalyticsV4():profileTab==='requests'?renderSupplierRequests():renderOrdersV5()}
+ </div>`;
+}
+function renderOrdersV5(){return `<div class="desktop-list-card"><h2>Заказы</h2>${[['№ 1284','Nube · Квартира на Патриках','В производстве'],['№ 1279','Shad · Спальня','Отгружено · Оставить отзыв']].map(x=>`<div><span><b>${x[0]}</b><small>${x[1]}</small></span><strong>${x[2]}</strong></div>`).join('')}</div>`}
+
+function analyticsDownloadButtonV5(kind='Аналитика'){
+ return `<button class="excel-download" onclick="downloadAnalyticsExcelV5('${kind}')">↓ Скачать Excel</button>`;
+}
+function downloadAnalyticsExcelV5(kind){
+ const rows=[['Показатель','Значение'],['Показы',76480],['Открытия',24790],['Сохранения',3890],['Добавления в спецификацию',1834],['Запросы расчёта',362],['Предложения',271]];
+ const html=`<html><meta charset="utf-8"><table>${rows.map(r=>`<tr><td>${r[0]}</td><td>${r[1]}</td></tr>`).join('')}</table></html>`;
+ const blob=new Blob([html],{type:'application/vnd.ms-excel'});
+ const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=`Среда-${kind}.xls`; a.click(); URL.revokeObjectURL(a.href); toastV5('Аналитика скачана');
+}
+const _renderSupplierAnalyticsV4=renderSupplierAnalyticsV4;
+renderSupplierAnalyticsV4=function(){
+ const base=_renderSupplierAnalyticsV4();
+ return `<div class="analytics-download-row">${analyticsDownloadButtonV5('аналитика-поставщика')}</div>${base}`;
+}
+const _renderProductAnalyticsV4=renderProductAnalyticsV4;
+renderProductAnalyticsV4=function(){return `<div class="analytics-download-row">${analyticsDownloadButtonV5('аналитика-товара')}</div>${_renderProductAnalyticsV4()}`}
+
+function moderatorProfileV4(){
+ if(isDesktopV5()) return moderatorDesktopV5();
+ return moderatorMobileV5();
+}
+function moderatorMobileV5(){
+ return `<div class="moderator mobile-gutter"><div class="mobile-role-tabs"><button onclick="profileRole='designer';render()">Дизайнер</button><button onclick="profileRole='supplier';render()">Поставщик</button><button class="active">Модератор</button></div>
+ <div class="moderator-head"><div><small>Личный кабинет</small><h2>Модератор</h2></div><span class="moderation-badge">7 новых</span></div>
+ ${moderatorNavV5()}${moderatorSectionContentV5()}</div>`;
+}
+function moderatorDesktopV5(){
+ return `<div class="desktop-moderator-v5">
+  <header><div><small>Личный кабинет</small><h1>Модератор</h1></div><span>7 новых</span></header>
+  ${moderatorNavV5()}${moderatorSectionContentV5()}
+ </div>`;
+}
+function moderatorNavV5(){
+ return `<nav class="moderator-main-nav"><button class="${moderationSectionV5==='verification'?'active':''}" onclick="moderationSectionV5='verification';render()">Верификация</button><button class="${moderationSectionV5==='analytics'?'active':''}" onclick="moderationSectionV5='analytics';render()">Аналитика</button><button class="${moderationSectionV5==='support'?'active':''}" onclick="moderationSectionV5='support';render()">Поддержка</button></nav>`;
+}
+function moderatorSectionContentV5(){
+ if(moderationSectionV5==='analytics')return moderatorAnalyticsV5();
+ if(moderationSectionV5==='support')return moderatorSupportV5();
+ return moderatorVerificationV5();
+}
+function moderatorVerificationV5(){
+ const pending=[
+  {name:'Nube Compact',type:'Товар',brand:'Forma Dom',img:'assets/products/nube.webp',productId:'nube'},
+  {name:'METALNO',type:'Бренд',brand:'Адрес производства · карточка компании',img:'assets/products/model-a-h.webp'},
+  {name:'Елена Крылова',type:'Дизайнер',brand:'Портфолио · сайт · соцсети',img:''},
+  {name:'Travertino Light',type:'Товар',brand:'Laminam · материал · декор',img:'assets/products/travertino-classico.jpg',productId:'travertino'}
+ ].filter(x=>moderationTypeV5==='all'||x.type===moderationTypeV5);
+ return `<div class="moderation-toolbar">
+  <div>${['all','Товар','Бренд','Дизайнер','Поставщик'].map(x=>`<button class="${moderationTypeV5===x?'active':''}" onclick="moderationTypeV5='${x}';render()">${x==='all'?'Все':x==='Товар'?'Товары':x==='Бренд'?'Бренды':x==='Дизайнер'?'Дизайнеры':'Поставщики'}</button>`).join('')}</div>
+  <div><button class="${moderationStatusV5==='pending'?'active':''}" onclick="moderationStatusV5='pending';render()">На рассмотрении</button><button class="${moderationStatusV5==='archive'?'active':''}" onclick="moderationStatusV5='archive';render()">Архив</button></div></div>
+  ${moderationStatusV5==='archive'?`<div class="verification-table">${verificationArchiveV5.map(x=>`<article><div><b>${x.name}</b><small>${x.type} · ${x.date}</small></div><strong class="${x.decision==='Принято'?'ok':'bad'}">${x.decision}</strong><p>${x.comment}</p></article>`).join('')}</div>`:
+  `<div class="verification-table">${pending.map(x=>`<article class="verification-request" ${x.productId?`onclick="openProduct('${x.productId}')"`:''}>${x.img?`<img src="${x.img}">`:`<div class="request-avatar">${x.name[0]}</div>`}<div><b>${x.name}</b><small>${x.type}</small><p>${x.brand}</p></div><div class="verify-actions"><button onclick="event.stopPropagation();moderationDecisionV5('${x.name}','Отклонено')">Отклонить</button><button onclick="event.stopPropagation();moderationDecisionV5('${x.name}','Принято')">Принять</button></div></article>`).join('')}</div>`}`;
+}
+function moderationDecisionV5(name,decision){
+ customDialogV5({title:decision==='Принято'?'Принять заявку':'Отклонить заявку',subtitle:`${name}. Добавьте комментарий к решению.`,input:true,placeholder:'Комментарий модератора',primary:decision==='Принято'?'Принять':'Отклонить',onPrimary:(comment)=>{
+  verificationArchiveV5.unshift({name,type:'Заявка',decision,date:'сегодня',comment});toastV5('Решение сохранено');render();
+ }});
+}
+function moderatorAnalyticsV5(){
+ return `<div class="moderator-analytics">${analyticsDownloadButtonV5('аналитика-платформы')}
+ <div class="analytics-summary">${[['Новые пользователи','428'],['Активные пользователи','4 812'],['Бренды','184'],['Товары','3 942'],['Добавлено в спецификации','12 840'],['Запросы расчёта','1 624']].map(x=>`<div class="metric-card"><small>${x[0]}</small><b>${x[1]}</b></div>`).join('')}</div>
+ <div class="analytics-extra"><div><b>Ручные позиции дизайнеров</b><span>Шторы · столярные изделия · искусство</span></div><div><b>Чего не хватает в каталоге</b><span>Декоративный свет · двери · текстиль на заказ</span></div></div></div>`;
+}
+function moderatorSupportV5(){
+ return `<div class="support-admin"><div class="support-filter"><button class="active">Все</button><button>Новые</button><button>В работе</button><button>Закрытые</button></div>
+ ${supportTicketsV5.map(t=>`<article onclick="openSupportTicketV5('${t.id}')"><div><b>${t.subject}</b><small>${t.id} · ${t.user} · ${t.role}</small></div><span>${t.status}</span><time>${t.date}</time></article>`).join('')}</div>`;
+}
+function openSupportTicketV5(id){
+ const t=supportTicketsV5.find(x=>x.id===id); if(!t)return;
+ customDialogV5({title:`${t.id} · ${t.subject}`,subtitle:`${t.user} (${t.role})\n\n«Здравствуйте! Подскажите, пожалуйста, как решить этот вопрос в сервисе?»`,input:true,placeholder:'Ответ пользователю',primary:'Отправить ответ',onPrimary:()=>toastV5('Ответ отправлен')});
+}
+function openSupportV5(){
+ route='support';closeDesktopOverlaysV5();render();scrollTo(0,0);
+}
+function renderSupportV5(){
+ return `<div class="support-page mobile-gutter">${mobileBackV5("go('profile')")}<h1>Поддержка Среды</h1><p>Задайте вопрос о работе сервиса.</p>
+ <div class="support-quick">${['Работа с сервисом','Товары и спецификации','Проекты','Сообщения','Аккаунт и верификация'].map(x=>`<button>${x}<span>›</span></button>`).join('')}</div>
+ <button class="btn primary" onclick="openSupportQuestionV5()">Задать вопрос поддержке</button><button class="btn">Мои обращения</button></div>`;
+}
+function openSupportQuestionV5(){
+ customDialogV5({title:'Вопрос поддержке',subtitle:'Опишите вопрос. К обращению в рабочей версии можно будет приложить скриншот или файл.',input:true,placeholder:'Ваш вопрос',primary:'Отправить',onPrimary:()=>toastV5('Обращение SR-1047 создано')});
+}
+
+function renderSettingsV4(){
+ const groups=[
+  ['Ваш аккаунт',[['profile','Изменить данные','Имя, фото, описание, контакты','◎'],['security','Безопасность','Пароль и активные сессии','○']]],
+  ['Как вы используете Среду',[['history','Вы смотрели','История просмотренных товаров','↶'],['notifications','Уведомления','Настроить события и push','♢']]],
+  ['Приватность',[['privacy','Видимость проектов','Публичные проекты и доступ поставщиков','▣'],['blacklist','Чёрный список','Заблокированные пользователи и бренды','⊘']]],
+  ['Помощь',[['support','Поддержка','Связаться с командой Среды','?']]]
+ ];
+ return `<div class="settings-page insta-settings mobile-gutter">
+  <div class="settings-mobile-head">${mobileBackV5("go('profile')")}<b>Настройки</b><span></span></div>
+  ${groups.map(([g,items])=>`<section><h3>${g}</h3>${items.map(([k,n,d,ic])=>`<button class="insta-setting-row" onclick="${k==='support'?'openSupportV5()':`settingsSectionV4='${k}';openSettingsDetailV4('${n}','${d}')`}"><i>${ic}</i><span><b>${n}</b><small>${d}</small></span><em>›</em></button>`).join('')}</section>`).join('')}
+  <button class="insta-setting-row logout"><i>↪</i><span><b>Выйти</b></span></button>
+ </div>`;
+}
+
+
+const renderChatsLegacyV5 = renderChats;
+const renderChatLegacyV5 = renderChat;
+renderChats = function(){
+ if(!isDesktopV5()) return renderChatsLegacyV5();
+ const chats=[
+  ['Forma Dom','Расчёт по Nube готов','14:48','2'],['Nube','Отправлена карточка товара','14:36',''],['METALNO','Срок производства 4 недели','13:42','1'],['Анна Смирнова','Спасибо!','12:18',''],['Проект Патрики','Групповой чат · 4 участника','вчера','3']
+ ];
+ return `<div class="desktop-messenger">
+  <aside class="desktop-chat-list"><div class="desktop-chat-list-head"><h2>Чаты</h2><button onclick="toastV5('Создание группы')">＋</button></div><div class="desktop-chat-search">⌕ <input placeholder="Поиск"></div>
+  <div class="desktop-chat-folders"><button class="active">Все чаты</button><button>Проекты</button><button>Поставщики</button><button>＋ Папка</button></div>
+  ${chats.map((x,i)=>`<button class="desktop-chat-row ${i===0?'active':''}" onclick="currentChat='${x[0]}';route='chat';render()"><span class="chat-avatar">${x[0].slice(0,2)}</span><span><b>${x[0]}</b><small>${x[1]}</small></span><time>${x[2]}${x[3]?`<i>${x[3]}</i>`:''}</time></button>`).join('')}</aside>
+  <section class="desktop-chat-empty"><span>Выберите чат</span></section></div>`;
+}
+renderChat = function(){
+ if(!isDesktopV5()) return renderChatLegacyV5();
+ const msgs=messages.filter(m=>m.chat===currentChat);
+ return `<div class="desktop-messenger desktop-messenger-open">
+  <aside class="desktop-chat-list">${renderChats().match(/<aside class="desktop-chat-list">([\s\S]*?)<\/aside>/)?.[1]||''}</aside>
+  <section class="desktop-chat-pane">
+   <header><div class="chat-avatar">${currentChat.slice(0,2).toUpperCase()}</div><div><b>${currentChat}</b><small>в сети</small></div><button onclick="openSharedMedia()">⋯</button></header>
+   <div class="desktop-message-scroll">${msgs.length?msgs.map(chatMessageHTML).join(''):`<div class="desktop-chat-date">Сегодня</div><div class="bubble"><div class="bubble-text">Здравствуйте! Чем можем помочь?</div><span class="msg-time">12:40</span></div>`}</div>
+   <div class="desktop-composer"><button onclick="toggleAttachPanel()">⌕</button><input id="msgInput" placeholder="Сообщение..." onkeydown="if(event.key==='Enter')sendMsg()"><button onclick="sendMsg()">➤</button></div>
+  </section></div>`;
+}
+
+function openNotifications(){
+ if(isDesktopV5()){
+   desktopNotificationOpenV5=!desktopNotificationOpenV5;accountMenuOpenV5=false;renderDesktopOverlayV5();return;
+ }
+ const m=document.getElementById('modal');m.className='modal';
+ m.innerHTML=`<div class="sheet notifications-sheet"><div class="sheet-title"><h3>Уведомления</h3><button class="close" onclick="closeModal()">×</button></div>
+ ${[['Forma Dom обновил стоимость Nube','497 000 ₽ → 523 000 ₽','2 мин'],['Запрос на расчёт принят','Shad · Квартира на Патриках','1 ч'],['Core отгружен','Оставьте отзыв о товаре и бренде','вчера'],['Новый подписчик','Studio Line подписался на вас','вчера']].map(x=>`<div class="notification-row"><i></i><div><b>${x[0]}</b><span>${x[1]}</span></div><small>${x[2]}</small></div>`).join('')}</div>`;
+}
+
+/* expanded dynamic filters */
+const MATERIAL_FILTERS_V5=['Камень','Кварцевый агломерат','Мрамор','Травертин','Оникс','Гранит','Ткань','Букле','Велюр','Рогожка','Шенилл','ЛДСП','МДФ','Массив','Шпон дуба','Шпон ореха','Корень','Дизайн-шпон','Эмаль','Нержавеющая сталь'];
+function openFilters(){
+ const m=document.getElementById('modal');m.className='modal';
+ m.innerHTML=`<div class="sheet filters"><div class="sheet-title"><h3>Фильтры</h3><button class="close" onclick="closeModal()">×</button></div>
+ ${filterSection('Категория','category',CATEGORIES)}
+ ${filterSection('Материал','material',['Все',...MATERIAL_FILTERS_V5])}
+ ${filterSection('Цвет','color',['Все','Светлый','Чёрный','Коричневый','Зелёный','Терракотовый','Белый'])}
+ <div class="filter-block"><b>Размер</b><div class="dimension-filter-v5"><input placeholder="Ширина от"><input placeholder="до"><input placeholder="Глубина от"><input placeholder="до"><input placeholder="Высота от"><input placeholder="до"></div></div>
+ <div class="filter-block"><b>Декор</b><div class="filter-options">${['Все','Однотонный','Геометрия','Флора','Абстракция'].map(x=>`<button class="filter-option">${x}</button>`).join('')}</div></div>
+ <div class="price-range"><input id="minP" type="number" value="${filters.minPrice}" placeholder="Цена от"><input id="maxP" type="number" value="${filters.maxPrice}" placeholder="Цена до"></div>
+ <button class="btn primary" onclick="applyFilters()">Показать</button><button class="btn" onclick="resetFilters()">Сбросить</button></div>`;
+}
+
+/* Mobile splash: only first load of current page session */
+function initSplashV5(){
+ const s=document.getElementById('mobileSplash'); if(!s)return;
+ if(isDesktopV5()){s.remove();return}
+ requestAnimationFrame(()=>s.classList.add('visible'));
+ setTimeout(()=>{s.classList.add('hide');setTimeout(()=>s.remove(),350)},950);
+}
+
+/* Floating support only desktop */
+function ensureSupportBubbleV5(){
+ let b=document.getElementById('supportBubbleV5');
+ if(isDesktopV5()){
+  if(!b){b=document.createElement('button');b.id='supportBubbleV5';b.className='support-bubble-v5';b.textContent='?';b.onclick=openSupportV5;document.body.appendChild(b)}
+ } else b?.remove();
+}
+
+/* Shared mobile gutters and shell are updated after every render */
+const renderCoreV5 = render;
+render = function(){
+ const v=document.getElementById('view');
+ if(route==='home')v.innerHTML=renderHomeV4();
+ else if(route==='product')v.innerHTML=renderProductV4();
+ else if(route==='search')v.innerHTML=renderSearch();
+ else if(route==='favorites')v.innerHTML=renderFavoritesV4();
+ else if(route==='chats')v.innerHTML=renderChats();
+ else if(route==='chat')v.innerHTML=renderChat();
+ else if(route==='profile')v.innerHTML=renderProfileV4();
+ else if(route==='history')v.innerHTML=renderHistory();
+ else if(route==='brand')v.innerHTML=renderBrandV4();
+ else if(route==='designerPublic')v.innerHTML=renderDesignerPublicV4();
+ else if(route==='designerProject')v.innerHTML=renderDesignerProjectV4();
+ else if(route==='story')v.innerHTML=renderStoryV4();
+ else if(route==='settings')v.innerHTML=renderSettingsV4();
+ else if(route==='productEditor')v.innerHTML=renderProductEditorV4();
+ else if(route==='productAnalytics')v.innerHTML=renderProductAnalyticsV4();
+ else if(route==='support')v.innerHTML=renderSupportV5();
+ shellSyncV5();ensureSupportBubbleV5();
+};
+window.addEventListener('resize',()=>{const before=document.body.classList.contains('is-desktop');shellSyncV5();const after=document.body.classList.contains('is-desktop');if(before!==after)render()});
+setTimeout(initSplashV5,0);
 
 render();
