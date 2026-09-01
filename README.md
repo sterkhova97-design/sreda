@@ -130,3 +130,24 @@ GitHub Pages:
 - project visualization linked products no longer show prices;
 - resident badge uses supplied shop icon;
 - black active buttons are forced to white text.
+
+
+## v6.6 — consolidated responsive review
+- one desktop category row only; hover subcategories and inline search;
+- responsive full-width desktop layout and viewport-height chat/support;
+- unified mobile gutters and content-sized bottom sheets;
+- all back actions use the supplied icon, no square backgrounds;
+- supplied dropdown, share, print/resident assets prepared;
+- favorites folder chips unified and subtitle removed;
+- mobile designer/supplier profile headers unified; share is icon-only;
+- supplier profile tabs span full width;
+- supplier requests now match messenger geometry and open chats;
+- unread chat counts use compact numeric badges;
+- attachments open as their own Telegram-like screen;
+- designer Orders page works and order statuses use muted color badges;
+- desktop product favorite moved to photo corner; brand separator/arrow removed;
+- filters use compact stacked range controls and supplied dropdown arrows;
+- project cards are responsive and shorter on desktop;
+- stories allow full two-line titles;
+- analytics/info typography and repeated UI chips normalized;
+- global black-button rule enforces white text/icons.
