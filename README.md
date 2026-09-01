@@ -132,7 +132,7 @@ GitHub Pages:
 - black active buttons are forced to white text.
 
 
-## v6.6 — consolidated responsive review
+## v6.7 — consolidated responsive review
 - one desktop category row only; hover subcategories and inline search;
 - responsive full-width desktop layout and viewport-height chat/support;
 - unified mobile gutters and content-sized bottom sheets;

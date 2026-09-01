@@ -2873,3 +2873,47 @@ window.addEventListener('resize',()=>{
  clearTimeout(resizeTimerV66);
  resizeTimerV66=setTimeout(()=>{shellSyncV5();render();},120);
 });
+
+/* ==================== SREDA v6.7 — verified cleanup ==================== */
+const designerProfileBaseV67 = renderDesignerProfileUnifiedV5;
+renderDesignerProfileUnifiedV5 = function(own){
+  if(!isDesktopV5()) return designerProfileBaseV67(own);
+  const key='designer:'+currentDesignerV4;
+  const verified=`<img class="verified-icon-v6" src="assets/icons/verified-v6.png" alt="Верифицирован">`;
+  return `<div class="desktop-designer-profile desktop-designer-profile-v67">
+    <header class="desktop-designer-head"><div class="designer-avatar">АС</div><div><h1>Анна Смирнова ${verified}</h1><p>Дизайнер интерьеров · Москва</p></div>
+      <div class="desktop-designer-actions">${own?`<button onclick="openDesignerV4('Анна Смирнова')">Публичный профиль</button><button onclick="openSettingsV4()">Редактировать профиль</button>`:`${followButtonV4(key)}<button onclick="currentChat='Анна Смирнова';route='chat';render()">Сообщение</button>`}</div>
+    </header>
+    ${own?`<button class="desktop-designer-share-v67" onclick="shareProfileV5()" aria-label="Поделиться профилем">${shareIconV66()}</button>`:''}
+    <div class="desktop-designer-stats"><div><b>24</b><span>Проекты</span></div><div><b>1 245</b><span>Подписчики</span></div><div><b>320</b><span>Подписки</span></div></div>
+    ${own?`<div class="desktop-profile-quick desktop-profile-quick-v67"><button onclick="profileTab='analytics';render()">Аналитика</button><button onclick="openSettingsV4()">Редактировать</button></div>`:''}
+    <p class="desktop-bio">Жилые и общественные интерьеры. Москва / Европа.</p>
+    <div class="desktop-designer-tabs"><button class="${designerTabV4==='projects'?'active':''}" onclick="designerTabV4='projects';render()">Проекты</button><button class="${designerTabV4==='saved'?'active':''}" onclick="designerTabV4='saved';render()">Публикации</button>${own?`<button class="${designerTabV4==='specs'?'active':''}" onclick="designerTabV4='specs';render()">Спецификация</button>`:''}</div>
+    ${designerTabV4==='projects'?renderDesignerProjectsV5():designerTabV4==='specs'?renderSpecsRoot():`<div class="desktop-brand-masonry">${VISUALS.map(desktopVisualCardV5).join('')}</div>`}
+  </div>`;
+};
+
+const renderProductBaseV67 = renderProductV4;
+renderProductV4 = function(){
+  if(!isDesktopV5()) return renderProductBaseV67();
+  const p=currentProduct, sizes=p.bedSizes||p.sizes||['Стандарт'];
+  const similar=PRODUCTS.filter(x=>x.id!==p.id&&(x.category===p.category||x.type===p.type)).slice(0,4);
+  return `<div class="desktop-product-page desktop-product-v66 desktop-product-v67">
+    <div class="desktop-product-gallery desktop-product-gallery-v67">
+      <button class="desktop-back back-only-v66" onclick="productBackV6()">${backIconV66()}</button>
+      <div class="desktop-product-main-v66"><img class="desktop-main-product-img" src="${p.image}" alt="${p.name}"><button class="desktop-image-fav-v66 ${favorites.has(p.id)?'is-favorite':''}" onclick="toggleFav('${p.id}',event)">${favorites.has(p.id)?'♥':'♡'}</button></div>
+      <div class="desktop-thumb-row"><img src="${p.image}"><img src="${findVisualForProductV5(p)}"><img src="${p.image}"></div>
+    </div>
+    <aside class="desktop-product-info desktop-product-info-v67">
+      <button class="desktop-brand-link brand-clean-v66" onclick="openBrandV4('${p.brand}')">${p.brand}</button><small>${p.type}</small>
+      <div class="desktop-product-title"><h1>${p.name}</h1><strong>${p.priceLabel}</strong></div>
+      ${pickerButtonHTMLV5('Отделка',(p.finishes||['Стандарт'])[0],p.finishes||['Стандарт'])}
+      ${pickerButtonHTMLV5(p.bedSizes?'Спальное место':'Размер / формат',sizes[0],sizes)}
+      <div class="desktop-product-cta"><button class="primary" onclick="specModal()">Добавить в спецификацию</button><button onclick="requestCalc()">Запросить расчёт</button></div>
+      <div class="desktop-meta"><span>Срок производства</span><b>${p.production}</b></div>
+      <section class="desktop-description-v6"><h3>Описание</h3><p>${p.description}</p></section>
+      <div class="v4-accordions desktop-product-accordions v6-clean-accordions">${accordionV4('Характеристики',`<p>Материал: ${p.material||'—'}<br>Наличие: ${p.availability||'—'}<br>Цвет: ${p.color||'—'}</p>`)}${accordionV4('Схема с размерами',`<div class="doc-preview"><div class="dimension-demo">↔ ${sizes[0]}</div></div>`)}${accordionV4('Инструкция',`<div class="doc-row">PDF · Инструкция <button>Открыть</button></div>`)}${accordionV4('Рекомендации по уходу',`<p>Использовать мягкую сухую ткань.</p>`)}${accordionV4('Отзывы',`<div class="review-mini"><b>4,9 ★</b><span>12 отзывов</span></div>`)}</div>
+    </aside>
+    <section class="desktop-similar desktop-similar-v67"><h2>Похожие товары</h2><div class="desktop-product-grid">${similar.map(desktopProductCardV5).join('')}</div></section>
+  </div>`;
+};

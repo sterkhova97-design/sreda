@@ -1497,3 +1497,57 @@ details[open]>summary .dropdown-icon-v66{transform:rotate(180deg)}
    max-height:calc(100dvh - var(--bottom-dock-space) - 2*var(--page-pad-mobile) - env(safe-area-inset-bottom,0px))!important;
  }
 }
+
+/* ==================== SREDA v6.7 — verified layout cleanup ==================== */
+:root{--page-pad-desktop-v67:clamp(18px,1.7vw,32px)}
+@media(min-width:900px){
+  /* true full-width desktop canvas */
+  #view{width:100%!important;max-width:none!important;margin:0!important;padding-left:var(--page-pad-desktop-v67)!important;padding-right:var(--page-pad-desktop-v67)!important;box-sizing:border-box!important}
+  #view>*,.desktop-cabinet,.desktop-designer-profile,.desktop-moderator-v5,.desktop-project-page-v61,.desktop-project-page-v5,.settings-page-v64,.search-page,.favorites-v4{max-width:none!important}
+  .desktop-cabinet,.desktop-designer-profile,.desktop-moderator-v5,.desktop-project-page-v61,.desktop-project-page-v5,.settings-page-v64,.search-page,.favorites-v4{width:100%!important;margin-left:0!important;margin-right:0!important;box-sizing:border-box!important}
+  .desktop-compact-nav-v65{padding-left:var(--page-pad-desktop-v67)!important;padding-right:var(--page-pad-desktop-v67)!important}
+  .desktop-hero,.promo-banner,.desktop-promo,.feed-banner{max-width:none!important;width:100%!important}
+  .masonry,.desktop-brand-masonry{grid-template-columns:repeat(auto-fill,minmax(220px,1fr))!important;width:100%!important}
+
+  /* desktop header search */
+  .desktop-inline-search-v65,.desktop-inline-search-v66{border-bottom:1px solid #c8c8c8!important}
+  .desktop-inline-search-v65 input,.desktop-inline-search-v66 input,.desktop-inline-search-v65 input::placeholder,.desktop-inline-search-v66 input::placeholder{color:#aaa!important;-webkit-text-fill-color:#aaa!important}
+  .desktop-inline-search-v65 img,.desktop-inline-search-v66 img{opacity:.42!important}
+  .desktop-top-icons img,.desktop-icon img{width:23px!important;height:23px!important;object-fit:contain!important}
+
+  /* chat uses actual viewport height, never a fixed minimum */
+  .desktop-messenger,.desktop-messenger-v66{height:calc(100dvh - var(--desktop-shell-h,116px))!important;min-height:0!important;max-height:calc(100dvh - var(--desktop-shell-h,116px))!important;overflow:hidden!important;margin:0!important;width:100%!important;grid-template-columns:minmax(300px,34%) minmax(0,1fr)!important}
+  .desktop-chat-list{height:100%!important;min-height:0!important;overflow-y:auto!important}
+  .desktop-chat-pane{height:100%!important;min-height:0!important;display:flex!important;flex-direction:column!important;overflow:hidden!important}
+  .desktop-chat-pane>header{flex:0 0 auto!important}
+  .desktop-message-scroll{flex:1 1 auto!important;min-height:0!important;overflow-y:auto!important}
+  .desktop-composer{position:relative!important;bottom:auto!important;flex:0 0 auto!important;margin-top:0!important}
+  .desktop-chat-search-v66{border:1px solid #d6d6d6!important;background:#fff!important;border-radius:8px!important;margin:0 14px 10px!important;padding:7px 10px!important}
+  .desktop-chat-search-v66 input{width:100%!important;border:0!important;outline:0!important;font-size:15px!important}
+
+  /* designer share icon: right side under the menu area */
+  .desktop-designer-profile-v67{position:relative!important}
+  .desktop-designer-share-v67{position:absolute;right:0;top:122px;width:42px;height:42px;border:0;background:transparent;padding:8px;display:grid;place-items:center}
+  .desktop-designer-share-v67 img{width:25px;height:25px}
+  .desktop-profile-quick-v67{padding-right:58px}
+
+  /* product: compact right column + aligned gallery bottom + recommendations restored */
+  .desktop-product-v67{width:100%!important;padding-left:0!important;padding-right:0!important;grid-template-columns:minmax(0,1.12fr) minmax(360px,.88fr)!important;column-gap:clamp(28px,3vw,58px)!important;align-items:start!important}
+  .desktop-product-gallery-v67,.desktop-product-info-v67{min-width:0!important}
+  .desktop-product-gallery-v67 .desktop-main-product-img{height:clamp(390px,52vh,620px)!important;object-fit:contain!important}
+  .desktop-description-v6{padding:17px 0 13px!important}
+  .desktop-description-v6 h3{font-size:18px!important;margin-bottom:9px!important}
+  .desktop-description-v6 p{font-size:14px!important;line-height:1.42!important}
+  .desktop-product-accordions summary{font-size:15px!important;padding-top:13px!important;padding-bottom:13px!important}
+  .desktop-product-accordions .v4-accordion>div{font-size:13px!important}
+  .desktop-similar-v67{grid-column:1/-1!important;width:100%!important;margin-top:28px!important}
+  .desktop-similar-v67 .desktop-product-grid{grid-template-columns:repeat(auto-fill,minmax(220px,1fr))!important}
+}
+
+@media(max-width:899px){
+  /* compact product information typography */
+  .mobile-product-v64 .product-description h3,.mobile-product-v66 .product-description h3,.mobile-product-v64 .v4-accordions summary,.mobile-product-v66 .v4-accordions summary{font-size:18px!important}
+  .mobile-product-v64 .product-description p,.mobile-product-v66 .product-description p{font-size:15px!important;line-height:1.45!important}
+  /* every bottom sheet ends one standard gutter above dock and scrolls only when needed */
+  .modal .sheet,.filter-sheet-v66,.notifications-sheet,.support-ticket-sheet-v6,.picker-overlay .v4-picker-sheet,.promo-sheet{margin-bottom:calc(var(--bottom-dock-space) + var(--page-pad-mobile) + env(safe-area-inset-bottom,0px))!important;max-height:calc(100dvh - var(--bottom-dock-space) - 3*var(--page-pad-mobile) - env(safe-area-inset-bottom,0px))!important;padding-bottom:var(--page-pad-mobile)!important;overflow-y:auto!important}
+}
