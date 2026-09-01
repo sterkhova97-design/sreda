@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
   <meta name="theme-color" content="#ffffff">
   <title>среда. — функциональный прототип v5</title>
-  <link rel="stylesheet" href="css/style.css?v=64">
+  <link rel="stylesheet" href="css/style.css?v=65">
 </head>
 <body>
 <div id="mobileSplash" class="mobile-splash"><img src="assets/logo.png" alt="среда."></div>
@@ -19,13 +19,7 @@
       <button onclick="toggleAccountMenuV5()" aria-label="Профиль" class="desktop-avatar-btn">АС</button>
     </div>
   </div>
-  <div class="desktop-category-row desktop-search-row">
-    <div id="desktopCategories" class="desktop-categories" hidden></div>
-    <form class="desktop-search" onsubmit="desktopSearchV5(event)">
-      <input id="desktopSearchInput" placeholder="Поиск">
-      <button aria-label="Найти"><img src="assets/icons/search-v6.png" alt=""></button>
-    </form>
-  </div>
+  <div id="desktopCompactNavV65" class="desktop-compact-nav-host-v65"></div>
 </div>
 <div id="desktopOverlayRoot"></div>
 
@@ -52,7 +46,7 @@
 
 <div id="modal" class="modal hidden"></div>
 
-<script src="data/catalog.js?v=64"></script>
-<script src="js/app.js?v=64"></script>
+<script src="data/catalog.js?v=65"></script>
+<script src="js/app.js?v=65"></script>
 </body>
 </html>

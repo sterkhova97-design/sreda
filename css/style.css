@@ -1153,3 +1153,74 @@ body.modal-no-nav-v64 .bottom-nav{display:none!important}
 
 /* keep the active favorites heart red */
 .is-favorite,.saved{color:#e53935!important;-webkit-text-fill-color:#e53935!important}
+
+
+/* ==================== SREDA v6.5 desktop nav + grid stability ==================== */
+@media(min-width:900px){
+  .desktop-compact-nav-host-v65{display:block;border-top:1px solid #f3f3f3}
+  .desktop-compact-nav-v65{
+    display:flex;align-items:center;gap:18px;
+    padding:12px clamp(28px,4vw,72px) 10px;
+    background:#fff;border-bottom:1px solid #ececec;
+    white-space:nowrap;position:relative;z-index:105;
+  }
+  .desktop-nav-top-v65{
+    border:0;background:transparent;padding:0 0 8px;font-size:15px;color:#111;
+  }
+  .desktop-nav-top-v65.active{border-bottom:2px solid #111}
+  .desktop-nav-group-v65{position:relative;flex:0 0 auto}
+  .desktop-nav-group-v65 summary{
+    list-style:none;cursor:pointer;font-size:15px;display:flex;align-items:center;gap:5px;padding:0 0 8px;
+  }
+  .desktop-nav-group-v65 summary::-webkit-details-marker{display:none}
+  .desktop-nav-group-v65 summary span{font-size:12px;color:#777}
+  .desktop-nav-menu-v65{
+    position:absolute;left:0;top:30px;min-width:230px;max-height:430px;overflow:auto;
+    background:#fff;border:1px solid #e8e8e8;border-radius:14px;padding:7px;
+    box-shadow:0 14px 34px rgba(0,0,0,.10);z-index:300;
+  }
+  .desktop-nav-menu-v65 button{
+    width:100%;border:0;background:#fff;text-align:left;padding:10px 11px;border-radius:8px;font-size:14px;color:#111;
+  }
+  .desktop-nav-menu-v65 button:hover{background:#f5f5f5}
+  .desktop-inline-search-v65{
+    margin-left:auto;display:flex;align-items:center;gap:8px;
+    min-width:180px;max-width:250px;flex:1 1 210px;
+    border-bottom:1.5px solid #888;padding:0 0 7px;
+  }
+  .desktop-inline-search-v65 input{
+    min-width:0;width:100%;border:0;outline:0;background:transparent;
+    color:#888;font-size:15px;
+  }
+  .desktop-inline-search-v65 input::placeholder{color:#888;opacity:1}
+  .desktop-inline-search-v65 button{border:0;background:transparent;padding:0}
+  .desktop-inline-search-v65 img{width:20px;height:20px;opacity:.58;display:block}
+
+  /* remove every legacy/duplicated desktop category/search row */
+  .desktop-category-row,.desktop-search-row,.desktop-catbar-v63,.desktop-project-categories-v61{display:none!important}
+
+  /* stable product layout — prevents giant/stacked cards */
+  .desktop-brand-masonry{
+    columns:auto!important;
+    display:grid!important;
+    grid-template-columns:repeat(4,minmax(0,1fr))!important;
+    gap:24px 20px!important;
+  }
+  .desktop-brand-masonry .desktop-card{
+    width:auto!important;margin:0!important;break-inside:auto!important;min-width:0!important;
+  }
+  .desktop-brand-masonry .desktop-card>div{
+    aspect-ratio:1/1;background:#f7f7f7;border-radius:14px;overflow:hidden;
+  }
+  .desktop-brand-masonry .desktop-card img{
+    width:100%!important;height:100%!important;object-fit:contain!important;
+  }
+}
+@media(min-width:1450px){
+  .desktop-brand-masonry{grid-template-columns:repeat(5,minmax(0,1fr))!important}
+}
+@media(min-width:900px) and (max-width:1180px){
+  .desktop-compact-nav-v65{gap:12px;padding-left:24px;padding-right:24px}
+  .desktop-nav-group-v65 summary,.desktop-nav-top-v65{font-size:14px}
+  .desktop-inline-search-v65{max-width:210px}
+}

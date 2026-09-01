@@ -2490,3 +2490,58 @@ render = function(){
  shellSyncV5();
  setTimeout(()=>{ shellSyncV5(); },0);
 };
+
+
+/* ==================== SREDA v6.5 desktop nav + grid stability ==================== */
+const DESKTOP_NAV_V65 = [
+  ['Мебель',['Стулья','Столы','Комоды','Тумбы','Шкафы','Буфеты','Кровати','Диваны','Кресла','Журнальные столики','Гардеробные','Банкетки','Пуфы']],
+  ['Напольные покрытия',['Инженерная доска','Керамогранит','Микроцемент','Ковролин']],
+  ['Настенные покрытия',['Обои','Краска','Фреска','Штукатурка','Керамогранит','Лепнина']],
+  ['Сантехника',['Раковина','Мойки','Смесители','Душевые стойки','Душевые комплекты','Унитазы','Ванны','Инсталляции','Кнопки','Гиг. душ','Трап','Душевое ограждение']],
+  ['Текстиль',['Ковры','Шторы','Ткани']],
+  ['Декор',['Подушки','Вазы','Скатерти','Посуда','Скульптуры','Картины']],
+  ['Освещение',['Люстры','Бра','Торшер','Встроенные треки','Встроенные точки','Настенные','Подвесные']],
+  ['Двери',['Скрытые','Раздвижные','Классические','Стеклянные перегородки','Входные','Фурнитура']],
+  ['Техника',['Варочная панель','Духовой шкаф','Холодильник','Посудомоечная машина','Стиральная машина','Сушильная машина','Винный холодильник']],
+  ['Услуги',['Строительная бригада','Сантехника','Монтаж дверей','Монтаж мебели']]
+];
+
+function mountDesktopNavV65(){
+  const host=document.getElementById('desktopCompactNavV65');
+  if(!host || !isDesktopV5()) return;
+  host.innerHTML=`<div class="desktop-compact-nav-v65">
+    <button class="desktop-nav-top-v65 active" onclick="selectedCategory='Все';go('home')">Все</button>
+    ${DESKTOP_NAV_V65.map(([name,items])=>`
+      <details class="desktop-nav-group-v65">
+        <summary>${name}<span>⌄</span></summary>
+        <div class="desktop-nav-menu-v65">
+          ${items.map(item=>`<button onclick="selectedCategory='${item}';go('home');this.closest('details').removeAttribute('open')">${item}</button>`).join('')}
+        </div>
+      </details>`).join('')}
+    <form class="desktop-inline-search-v65" onsubmit="event.preventDefault();q=this.querySelector('input').value;go('search')">
+      <input placeholder="Поиск">
+      <button aria-label="Найти"><img src="assets/icons/search-v6.png" alt=""></button>
+    </form>
+  </div>`;
+}
+
+/* Never inject a second category row into page content. */
+desktopProjectCategoriesV61 = function(){ return ''; };
+desktopHomeCategoryBarV63 = function(){ return ''; };
+
+/* Stable desktop brand/product grids instead of CSS multi-columns. */
+const renderBrandV65Base = renderBrandV4;
+renderBrandV4 = function(){
+  const out = renderBrandV65Base();
+  return out;
+};
+
+const renderV65Base = render;
+render = function(){
+  renderV65Base();
+  mountDesktopNavV65();
+  document.querySelectorAll('#view > .desktop-catbar-v63, #view > .desktop-project-categories-v61').forEach(el=>el.remove());
+};
+
+/* Mount once on initial load too. */
+setTimeout(mountDesktopNavV65,0);
