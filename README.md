@@ -151,3 +151,7 @@ GitHub Pages:
 - stories allow full two-line titles;
 - analytics/info typography and repeated UI chips normalized;
 - global black-button rule enforces white text/icons.
+
+
+## v6.8
+Accumulated adaptive desktop/UI consistency fixes based on v6.7. Mobile changes are limited to logical shared sizing fixes.

@@ -2917,3 +2917,52 @@ renderProductV4 = function(){
     <section class="desktop-similar desktop-similar-v67"><h2>Похожие товары</h2><div class="desktop-product-grid">${similar.map(desktopProductCardV5).join('')}</div></section>
   </div>`;
 };
+
+
+/* ==================== SREDA v6.8 — accumulated desktop fixes ==================== */
+function mountDesktopNavV65(){
+ const host=document.getElementById('desktopCompactNavV65');
+ if(!host || !isDesktopV5()) return;
+ host.innerHTML=`<div class="desktop-nav-shell-v68">
+   <div class="desktop-compact-nav-v65 desktop-compact-nav-v66 desktop-compact-nav-v68">
+     <button class="desktop-nav-top-v65 ${selectedCategory==='Все'?'active':''}" onclick="selectedCategory='Все';go('home')">Все</button>
+     ${DESKTOP_NAV_V65.map(([name,items])=>`
+       <div class="desktop-nav-group-v66 desktop-nav-group-v68">
+         <button class="desktop-nav-group-button-v66 ${selectedCategory===name||items.includes(selectedCategory)?'active':''}">${name}</button>
+         <div class="desktop-nav-menu-v65 desktop-nav-menu-v66">
+           ${items.map(item=>`<button onclick="selectedCategory='${item}';go('home')">${item}</button>`).join('')}
+         </div>
+       </div>`).join('')}
+   </div>
+   <form class="desktop-global-search-v68" onsubmit="event.preventDefault();q=this.querySelector('input').value;go('search')">
+     <input id="desktopGlobalSearchV68" placeholder="Товар, модель или визуализация" value="${route==='search'?(q||''):''}">
+     <button aria-label="Найти"><img src="assets/icons/search-v6.png" alt=""></button>
+   </form>
+ </div>`;
+}
+
+const renderSearchBaseV68 = renderSearch;
+renderSearch = function(){
+ let html=renderSearchBaseV68();
+ if(isDesktopV5()){
+   html=html.replace(/<div class="searchbox">[\s\S]*?<\/div>\s*<input id="imageInput"/,'<input id="imageInput"');
+ }
+ return html;
+};
+
+const designerProfileBaseV68 = renderDesignerProfileUnifiedV5;
+renderDesignerProfileUnifiedV5 = function(own){
+ if(!isDesktopV5()) return designerProfileBaseV68(own);
+ const key='designer:'+currentDesignerV4;
+ const verified=`<img class="verified-icon-v6" src="assets/icons/verified-v6.png" alt="Верифицирован">`;
+ return `<div class="desktop-designer-profile desktop-designer-profile-v67 desktop-designer-profile-v68">
+   <header class="desktop-designer-head"><div class="designer-avatar">АС</div><div><h1>Анна Смирнова ${verified}</h1><p>Дизайнер интерьеров · Москва</p></div>
+     <div class="desktop-designer-actions">${own?`<button onclick="openDesignerV4('Анна Смирнова')">Публичный профиль</button><button onclick="openSettingsV4()">Редактировать профиль</button>`:`${followButtonV4(key)}<button onclick="currentChat='Анна Смирнова';route='chat';render()">Сообщение</button>`}</div>
+   </header>
+   <div class="desktop-designer-stats desktop-designer-stats-v68"><div><b>24</b><span>Проекты</span></div><div><b>1 245</b><span>Подписчики</span></div><div class="stat-with-share-v68"><div><b>320</b><span>Подписки</span></div>${own?`<button class="desktop-designer-share-v68" onclick="shareProfileV5()" aria-label="Поделиться профилем">${shareIconV66()}</button>`:''}</div></div>
+   ${own?`<div class="desktop-profile-quick desktop-profile-quick-v67"><button onclick="profileTab='analytics';render()">Аналитика</button><button onclick="openSettingsV4()">Редактировать</button></div>`:''}
+   <p class="desktop-bio">Жилые и общественные интерьеры. Москва / Европа.</p>
+   <div class="desktop-designer-tabs desktop-designer-tabs-v68"><button class="${designerTabV4==='projects'?'active':''}" onclick="designerTabV4='projects';currentProject=null;render()">Проекты</button><button class="${designerTabV4==='saved'?'active':''}" onclick="designerTabV4='saved';currentProject=null;render()">Публикации</button>${own?`<button class="${designerTabV4==='specs'?'active':''}" onclick="designerTabV4='specs';currentProject=null;render()">Спецификация</button>`:''}</div>
+   <div class="designer-tab-content-v68 ${designerTabV4==='saved'?'is-publications':''}">${designerTabV4==='projects'?renderDesignerProjectsV5():designerTabV4==='specs'?renderSpecsRoot():`<div class="desktop-brand-masonry">${VISUALS.map(desktopVisualCardV5).join('')}</div>`}</div>
+ </div>`;
+};
