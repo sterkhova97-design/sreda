@@ -155,3 +155,6 @@ GitHub Pages:
 
 ## v6.8
 Accumulated adaptive desktop/UI consistency fixes based on v6.7. Mobile changes are limited to logical shared sizing fixes.
+
+## v6.9
+Desktop consolidation: responsive-height workspaces, centered modals, account routing fixes, compact specifications/history/support, publication viewer, unified buttons/icons/statuses, category-home promo behavior and profile/moderator/supplier polish. Mobile changes remain limited to shared logical components.

@@ -781,7 +781,7 @@ const DESIGNER_PROJECTS_V4=[
  {id:'patriki',title:'Квартира на Патриках',city:'Москва',cover:'assets/visuals/living-room.jpg',rooms:[
    {name:'Гостиная',images:['assets/visuals/living-room.jpg','assets/products/nube.webp']},
    {name:'Спальня',images:['assets/visuals/shad-room.jpg','assets/products/shad.webp']},
-   {name:'Ванная',images:['assets/products/fima5801.webp']}
+   {name:'Ванная',images:['assets/products/fima-f5801.jpg']}
  ]},
  {id:'country',title:'Дом в Подмосковье',city:'Московская область',cover:'assets/visuals/lora-room.jpg',rooms:[
    {name:'Гостиная',images:['assets/products/sora.webp','assets/products/vista.webp']},
@@ -801,11 +801,11 @@ const STORIES_V4=[
  ]},
  {title:'Новинки Gessi',frames:[
    {image:'assets/stories/novinki-gessi.jpeg',caption:'Новые коллекции для ванной'},
-   {image:'assets/products/fima5801.webp',caption:'Подборка смесителей'}
+   {image:'assets/products/fima-f5801.jpg',caption:'Подборка смесителей'}
  ]},
  {title:'Isaloni',frames:[
    {image:'assets/stories/isaloni.jpg',caption:'Главные интерьерные направления сезона'},
-   {image:'assets/products/dominique.webp',caption:'Свет как архитектурный объект'}
+   {image:'assets/products/dominique.png',caption:'Свет как архитектурный объект'}
  ]},
  {title:'Выставка интерьера Москва',frames:[
    {image:'assets/stories/vystavka-moskva.jpg',caption:'Москва · ближайшее событие'},
@@ -2966,3 +2966,158 @@ renderDesignerProfileUnifiedV5 = function(own){
    <div class="designer-tab-content-v68 ${designerTabV4==='saved'?'is-publications':''}">${designerTabV4==='projects'?renderDesignerProjectsV5():designerTabV4==='specs'?renderSpecsRoot():`<div class="desktop-brand-masonry">${VISUALS.map(desktopVisualCardV5).join('')}</div>`}</div>
  </div>`;
 };
+
+
+/* ==================== SREDA v6.9 — desktop consolidation ==================== */
+let publicationV69=null;
+let designerOrdersProjectV69='Все проекты';
+let designerOrdersStatusV69='Все статусы';
+
+function uiBackV69(action){return `<button class="back-only-v66 ui-back-v69" onclick="${action}" aria-label="Назад">${backIconV66()}</button>`}
+function statusClassV69(s){return s==='Принято'||s==='Завершено'||s==='Отгружено'?'is-ok':s==='Отклонено'||s==='Рекламация'?'is-bad':'is-neutral'}
+
+/* Home promo/stories exist only on the true home feed (Все). */
+renderHomeV4 = function(){
+ let goods=PRODUCTS.filter(categoryMatch);
+ let mix=selectedCategory==='Все'?shuffled([...goods,...VISUALS]):shuffled(goods);
+ const promo=selectedCategory==='Все'?`<div class="stories stories-v69">${STORIES_V4.map((s,i)=>`<button class="story" onclick="openStoryV4(${i})"><span class="story-ring"><img src="${s.frames[0].image}" alt=""></span><span class="story-title">${s.title}</span></button>`).join('')}</div>${renderAdCarouselV4()}`:'';
+ return `<div class="feed-tabs">${CATEGORIES.map(c=>`<button class="feed-tab ${c===selectedCategory?'active':''}" onclick="selectedCategory='${c}';render()">${c}</button>`).join('')}</div>${promo}<div class="masonry ${selectedCategory==='Все'?'':'category-feed-v69'}">${mix.map(feedCardV4).join('')}</div>`;
+};
+
+/* Desktop profile share is public-only and sits by the name; statistics stay compact. */
+const designerProfileMobileV69=renderDesignerProfileUnifiedV5;
+renderDesignerProfileUnifiedV5 = function(own){
+ if(!isDesktopV5()) return designerProfileMobileV69(own);
+ const key='designer:'+currentDesignerV4;
+ const verified=`<img class="verified-icon-v6" src="assets/icons/verified-v6.png" alt="Верифицирован">`;
+ const content=profileTab==='orders'?renderDesignerOrdersV69():designerTabV4==='projects'?renderDesignerProjectsV5():designerTabV4==='specs'?renderSpecsRoot():`<div class="desktop-brand-masonry publication-grid-v69">${VISUALS.map(desktopVisualCardV5).join('')}</div>`;
+ return `<div class="desktop-designer-profile desktop-designer-profile-v67 desktop-designer-profile-v69">
+  <header class="desktop-designer-head"><div class="designer-avatar">АС</div><div class="designer-identity-v69"><div class="designer-name-row-v69"><h1>Анна Смирнова ${verified}</h1>${!own?`<button class="designer-public-share-v69" onclick="shareProfileV5()" aria-label="Поделиться профилем">${shareIconV66()}</button>`:''}</div><p>Дизайнер интерьеров · Москва</p></div>
+   <div class="desktop-designer-actions">${own?`<button onclick="openDesignerV4('Анна Смирнова')">Публичный профиль</button><button onclick="openSettingsV4()">Редактировать профиль</button>`:`${followButtonV4(key)}<button onclick="currentChat='Анна Смирнова';route='chat';render()">Сообщение</button>`}</div></header>
+  <div class="desktop-designer-stats designer-stats-v69"><div><b>24</b><span>Проекты</span></div><div><b>1 245</b><span>Подписчики</span></div><div><b>320</b><span>Подписки</span></div></div>
+  ${own?`<div class="desktop-profile-quick desktop-profile-quick-v67"><button onclick="profileTab='analytics';render()">Аналитика</button><button onclick="openSettingsV4()">Редактировать</button></div>`:''}
+  <p class="desktop-bio">Жилые и общественные интерьеры. Москва / Европа.</p>
+  ${profileTab==='orders'?'':`<div class="desktop-designer-tabs desktop-designer-tabs-v69"><button class="${designerTabV4==='projects'?'active':''}" onclick="profileTab='';designerTabV4='projects';currentProject=null;render()">Проекты</button><button class="${designerTabV4==='saved'?'active':''}" onclick="profileTab='';designerTabV4='saved';currentProject=null;render()">Публикации</button>${own?`<button class="${designerTabV4==='specs'?'active':''}" onclick="profileTab='';designerTabV4='specs';currentProject=null;render()">Спецификация</button>`:''}</div>`}
+  <div class="designer-tab-content-v69">${content}</div>
+ </div>`;
+};
+
+/* Publication viewer: Pinterest-like light overlay with comments and recommendations. */
+desktopVisualCardV5 = function(v){return `<article class="desktop-card visual-card-v69" onclick="openPublicationV69('${v.id}')"><div><img src="${v.image}" alt="${v.title}"><button onclick="event.stopPropagation();toggleFav('${v.id}',event)">${favorites.has(v.id)?'♥':'♡'}</button></div><h3>${v.title}</h3><span>${v.subtitle||''}</span></article>`};
+function openPublicationV69(id){
+ const v=VISUALS.find(x=>x.id===id)||VISUALS[0]; publicationV69=v;
+ const recs=VISUALS.filter(x=>x.id!==v.id).concat(PRODUCTS.slice(0,4));
+ const m=document.getElementById('modal'); m.className='modal publication-modal-v69';
+ m.innerHTML=`<div class="publication-view-v69" role="dialog" aria-modal="true">
+  <button class="publication-close-v69" onclick="closeModal()" aria-label="Закрыть">×</button>
+  <div class="publication-main-v69"><div class="publication-image-v69"><img src="${v.image}" alt="${v.title}"><div class="publication-image-actions-v69"><button onclick="toggleFav('${v.id}',event)">♡</button><button onclick="shareProfileV5()">${shareIconV66()}</button><button>•••</button></div></div>
+   <aside class="publication-side-v69"><div class="publication-author-v69"><div class="comment-avatar-v64">АС</div><div><b>Анна Смирнова</b><small>Дизайнер интерьеров</small></div></div><h2>${v.title}</h2><p>${v.subtitle||'Интерьерный проект'}</p><div class="publication-comments-v69"><div><b>Мария</b><p>Очень цельное решение, особенно сочетание фактур.</p></div><div><b>Ирина</b><p>Подскажите, какой здесь оттенок стен?</p></div></div><div class="publication-comment-box-v69"><input placeholder="Добавить комментарий"><button>Отправить</button></div></aside>
+  </div>
+  <section class="publication-recs-v69"><h3>Похожие проекты и товары</h3><div>${recs.slice(0,6).map(x=>`<article onclick="${x.kind==='visual'?`openPublicationV69('${x.id}')`:`openProduct('${x.id}');closeModal()`}"><img src="${x.image}" alt=""><b>${x.title||x.name}</b><small>${x.subtitle||x.type||''}</small></article>`).join('')}</div></section>
+ </div>`;
+}
+
+/* Dedicated designer account destinations. */
+function renderDesignerOrdersV69(){
+ const rows=[
+  {no:'№ 1284',project:'Квартира на Патриках',item:'Nube',sum:'523 000 ₽',date:'28.08.2026',status:'Производство'},
+  {no:'№ 1279',project:'Квартира на Патриках',item:'Shad',sum:'230 000 ₽',date:'20.08.2026',status:'Отгружено'},
+  {no:'№ 1268',project:'Дом в Подмосковье',item:'MODEL A H',sum:'52 000 ₽',date:'11.08.2026',status:'Ожидает оплаты'}
+ ];
+ const projects=['Все проекты',...new Set(rows.map(x=>x.project))]; const statuses=['Все статусы',...new Set(rows.map(x=>x.status))];
+ const shown=rows.filter(x=>(designerOrdersProjectV69==='Все проекты'||x.project===designerOrdersProjectV69)&&(designerOrdersStatusV69==='Все статусы'||x.status===designerOrdersStatusV69));
+ return `<section class="designer-orders-page-v69"><div class="orders-head-v69"><h2>Заказы</h2><div><select onchange="designerOrdersProjectV69=this.value;render()">${projects.map(x=>`<option ${x===designerOrdersProjectV69?'selected':''}>${x}</option>`).join('')}</select><select onchange="designerOrdersStatusV69=this.value;render()">${statuses.map(x=>`<option ${x===designerOrdersStatusV69?'selected':''}>${x}</option>`).join('')}</select></div></div><div class="designer-orders-list-v69">${shown.map(x=>`<button onclick="openOrderDetailV69('${x.no}')"><b>${x.no}</b><span>${x.item}</span><small>${x.project} · ${x.date}</small><strong>${x.sum}</strong><em class="status-badge-v69 ${statusClassV69(x.status)}">${x.status}</em></button>`).join('')}</div></section>`;
+}
+function openOrderDetailV69(no){customDialogV5({title:`Заказ ${no}`,subtitle:'Позиции, история статусов и данные заказа доступны в этом разделе.',primary:'Готово'});}
+function renderDesignerSpecsStandaloneV69(){return `<section class="designer-standalone-v69">${uiBackV69("route='profile';profileTab='';designerTabV4='projects';render()")}<h1>Спецификации</h1>${renderSpecsRoot()}</section>`}
+function renderDesignerOrdersStandaloneV69(){return `<section class="designer-standalone-v69">${uiBackV69("route='profile';profileTab='';designerTabV4='projects';render()")}${renderDesignerOrdersV69()}</section>`}
+const accountNavigateV69Base=accountNavigateV5;
+accountNavigateV5=function(k){
+ if(profileRole==='designer'){
+  closeDesktopOverlaysV5();
+  if(k==='projects'){route='profile';profileTab='';designerTabV4='projects';currentProject=null;render();return}
+  if(k==='specs'){route='designerSpecsV69';currentProject=null;render();return}
+  if(k==='orders'){route='designerOrdersV69';render();return}
+ }
+ accountNavigateV69Base(k);
+};
+
+/* Specification: compact desktop work layout, standard back and real print icon. */
+renderProjectSpec = function(name){
+ let rooms=specData[name],total=0; Object.values(rooms).flat().forEach(x=>{let p=PRODUCTS.find(y=>y.id===x.id);total+=p.price*x.qty});
+ return `<div class="project-spec-v69"><div class="project-toolbar project-toolbar-v69">${uiBackV69("currentProject=null;selectMode=false;render()")}<b>${name}</b><span><button onclick="selectMode=!selectMode;render()">${selectMode?'Готово':'Выбрать'}</button><button class="print-button-v69" onclick="window.print()" title="Печать"><img src="assets/icons/print-v69.png" alt="Печать"></button></span></div><div class="spec-groups-v69 ${selectMode?'select-mode':''}">${Object.entries(rooms).map(([room,items])=>renderRoom(room,items)).join('')}</div><div class="total"><span>ИТОГО</span><span>${money(total)}</span></div></div>`;
+};
+
+/* History: centered readable column + smaller upload zone. */
+renderHistory = function(){
+ let p=currentProduct; let hist=HISTORY[p.id]||[['10.08.2026','Добавлен в спецификацию','Позиция создана'],['10.08.2026','Статус изменён','Расчёт']];
+ return `<div class="history-page-v69"><div class="project-toolbar history-toolbar-v69">${uiBackV69("route='profile';profileRole='designer';profileTab='';designerTabV4='specs';render()")}<b>История позиции</b><span></span></div><div class="history-column-v69"><div class="history-head"><img src="${p.image}"><div><b>${p.name}</b><div class="caption-sub">${p.type} · ${p.brand}</div><div class="caption-sub">${p.priceLabel}</div></div></div><div class="timeline">${hist.map(h=>`<div class="event"><b>${h[1]}</b><small>${h[0]}</small><p>${h[2]}</p></div>`).join('')}</div><div class="upload-zone upload-zone-v69" onclick="document.getElementById('historyFiles').click()">＋ Прикрепить фото рекламации или фото в интерьере<input id="historyFiles" type="file" accept="image/*" multiple hidden onchange="historyUpload(event)"><div id="uploadPreview" class="upload-preview"></div></div></div></div>`;
+};
+
+/* Supplier product cards: analytics is an icon on the image. */
+renderSupplierCardsV4 = function(){
+ const own=PRODUCTS.filter(p=>p.brand==='Forma Dom');
+ return `<div class="supplier-section"><div class="supplier-headline"><b>Карточки товаров</b><span>${own.length} товаров</span></div><div class="supplier-card-grid supplier-card-grid-v69">${own.map(p=>`<article class="supplier-product-card supplier-product-card-v69"><div class="supplier-product-img" onclick="openProduct('${p.id}')"><img src="${p.image}"><button class="product-analytics-icon-v69" onclick="event.stopPropagation();openProductAnalyticsV4('${p.id}')" aria-label="Аналитика"><img src="assets/icons/analytics-v69.png" alt=""></button></div><div class="supplier-product-copy"><div><b>${p.name}</b><span>${p.priceLabel}</span></div><small>${p.type}</small></div></article>`).join('')}</div></div>`;
+};
+
+/* Moderator archive rows are wider, statuses are badges, every row opens details. */
+function openVerificationInfoV69(name,type,date,decision,comment){
+ const m=document.getElementById('modal');m.className='modal';
+ m.innerHTML=`<div class="sheet verification-info-v69"><div class="sheet-title"><h3>${name}</h3><button class="close" onclick="closeModal()">×</button></div><dl><div><dt>Тип заявки</dt><dd>${type}</dd></div><div><dt>Дата</dt><dd>${date}</dd></div><div><dt>Статус</dt><dd><span class="status-badge-v69 ${statusClassV69(decision)}">${decision}</span></dd></div><div><dt>Комментарий</dt><dd>${comment||'—'}</dd></div></dl></div>`;
+}
+moderatorVerificationV5 = function(){
+ const pending=[
+  {name:'Nube Compact',type:'Товар',brand:'Forma Dom',img:'assets/products/nube.webp',productId:'nube'},
+  {name:'METALNO',type:'Бренд',brand:'Адрес производства · карточка компании',img:'assets/products/model-a-h.webp'},
+  {name:'Елена Крылова',type:'Дизайнер',brand:'Портфолио · сайт · соцсети',img:''},
+  {name:'Travertino Light',type:'Товар',brand:'Laminam · материал · декор',img:'assets/products/travertino-classico.jpg',productId:'travertino'}
+ ].filter(x=>moderationTypeV5==='all'||x.type===moderationTypeV5);
+ return `<div class="moderation-toolbar"><div>${['all','Товар','Бренд','Дизайнер','Поставщик'].map(x=>`<button class="${moderationTypeV5===x?'active':''}" onclick="moderationTypeV5='${x}';render()">${x==='all'?'Все':x==='Товар'?'Товары':x==='Бренд'?'Бренды':x==='Дизайнер'?'Дизайнеры':'Поставщики'}</button>`).join('')}</div><div><button class="${moderationStatusV5==='pending'?'active':''}" onclick="moderationStatusV5='pending';render()">На рассмотрении</button><button class="${moderationStatusV5==='archive'?'active':''}" onclick="moderationStatusV5='archive';render()">Архив</button></div></div>${moderationStatusV5==='archive'?`<div class="verification-table verification-archive-v69">${verificationArchiveV5.map(x=>`<article onclick="openVerificationInfoV69('${x.name}','${x.type}','${x.date}','${x.decision}','${String(x.comment||'').replace(/'/g,"\\'")}')"><div><b>${x.name}</b><small>${x.type} · ${x.date}</small></div><strong class="status-badge-v69 ${statusClassV69(x.decision)}">${x.decision}</strong><p>${x.comment}</p></article>`).join('')}</div>`:`<div class="verification-table">${pending.map(x=>`<article class="verification-request" ${x.productId?`onclick="openProduct('${x.productId}')"`:''}>${x.img?`<img src="${x.img}">`:`<div class="request-avatar">${x.name[0]}</div>`}<div><b>${x.name}</b><small>${x.type}</small><p>${x.brand}</p></div><div class="verify-actions"><button onclick="event.stopPropagation();moderationDecisionV5('${x.name}','Отклонено')">Отклонить</button><button class="primary" onclick="event.stopPropagation();moderationDecisionV5('${x.name}','Принято')">Принять</button></div></article>`).join('')}</div>`}`;
+};
+
+/* Moderator analytics reuses the supplier KPI component visually. */
+moderatorAnalyticsV5 = function(){
+ const metrics=[['Новые пользователи','428'],['Активные пользователи','4 812'],['Товары','3 942'],['Добавлено в спецификации','12 840'],['Ошибки приложения','37']];
+ return `<div class="moderator-analytics moderator-analytics-v69">${analyticsControlsV64('аналитика-платформы')}<div class="analytics-summary">${metrics.map(x=>`<button class="metric-card" onclick="openModeratorHistoryV6('${x[0]}')"><small>${x[0]}</small><b>${x[1]}</b><span>динамика к прошлому периоду</span></button>`).join('')}</div><div class="analytics-extra"><div><b>Ручные позиции дизайнеров</b><span>Шторы · столярные изделия · искусство</span></div><div><b>Чего не хватает в каталоге</b><span>Декоративный свет · двери · текстиль на заказ</span></div></div></div>`;
+};
+
+/* Support messenger: custom compact status control and adaptive workspace. */
+function supportStatusPickerV69(t){return `<details class="support-status-picker-v69"><summary>${t.status}<span>⌄</span></summary><div>${['Новый','В работе','Ожидаем пользователя','Решён','Закрыт'].map(x=>`<button onclick="event.preventDefault();this.closest('details').removeAttribute('open');toastV5('Статус: ${x}')">${x}</button>`).join('')}</div></details>`}
+supportConversationV6 = function(t){return `<section class="support-conversation-v6"><header><div><b>${t.id} · ${t.subject}</b><small>${t.user} · ${t.role}</small></div>${supportStatusPickerV69(t)}</header><div class="support-messages-v6"><div class="support-bubble incoming">Здравствуйте! Подскажите, пожалуйста, как решить этот вопрос в сервисе?<small>12:40</small></div><div class="support-bubble outgoing">Здравствуйте! Проверяем обращение.<small>12:44 ✓✓</small></div></div><div class="support-composer-v6"><label>＋<input type="file" accept="image/*,.pdf" hidden onchange="toastV5('Файл прикреплён')"></label><input placeholder="Сообщение..."><button>↑</button></div></section>`};
+
+/* Support page is content-sized on desktop. */
+renderSupportV5 = function(){return `<div class="support-page support-page-v69 mobile-gutter">${mobileBackV5("go('profile')")}<div class="support-content-v69"><h1>Поддержка Среды</h1><p>Задайте вопрос о работе сервиса.</p><div class="support-quick">${['Работа с сервисом','Товары и спецификации','Проекты','Сообщения','Аккаунт и верификация'].map(x=>`<button>${x}<span>›</span></button>`).join('')}</div><div class="support-actions-v69"><button class="primary">Задать вопрос поддержке</button><button>Мои обращения</button></div></div></div>`};
+
+/* Attachments/info screen gets a Telegram-inspired structured layout. */
+renderAttachmentsV66 = function(){
+ const tabs=['Фото','Видео','Файлы','Ссылки']; const media=messages.filter(m=>m.chat===currentChat&&m.attachment);
+ return `<section class="attachments-page-v69 page-gutter-v66"><header class="attachments-profile-v69">${uiBackV69("route='chat';render()")}<div class="attachments-avatar-v69">${currentChat.slice(0,1).toUpperCase()}</div><div><h1>${currentChat}</h1><p>${currentChat.includes('Проект')?'4 участника':'в сети'}</p></div><button class="attachments-edit-v69">Изм.</button></header><div class="attachments-actions-v69"><button>Добавить</button><button>Звук</button><button>Жалоба</button><button>Выйти</button></div><nav class="attachments-tabs-v66 attachments-tabs-v69">${tabs.map(t=>`<button class="${attachmentsTabV66===t?'active':''}" onclick="attachmentsTabV66='${t}';render()">${t}</button>`).join('')}</nav><div class="attachments-content-v66 attachments-content-v69">${attachmentsTabV66==='Фото'?`<div class="attachments-photo-grid-v66">${media.filter(m=>m.attachment?.type==='image').map(m=>`<img src="${m.attachment.url}" alt="">`).join('')||'<div class="attachments-empty-v69"><b>Фотографий пока нет</b><span>Отправленные изображения появятся здесь.</span></div>'}</div>`:attachmentsTabV66==='Видео'?'<div class="attachments-empty-v69"><b>Видео пока нет</b></div>':attachmentsTabV66==='Файлы'?'<div class="attachments-empty-v69"><b>Файлов пока нет</b></div>':'<div class="attachments-empty-v69"><b>Ссылок пока нет</b></div>'}</div></section>`;
+};
+
+/* Global desktop modal behavior: centered, backdrop/ESC closes. */
+document.addEventListener('pointerdown',e=>{if(isDesktopV5()&&e.target?.id==='modal'&&!e.target.classList.contains('hidden'))closeModal()});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!document.getElementById('modal')?.classList.contains('hidden'))closeModal()});
+
+/* Workspaces fit the actual remaining viewport height, not a guessed device. */
+function fitDesktopWorkspacesV69(){
+ const activeWorkspace=(profileRole==='moderator'&&moderationSectionV5==='support'&&route==='profile');
+ document.body.classList.toggle('workspace-route-v69',isDesktopV5()&&(['chat','chats'].includes(route)||activeWorkspace));
+ document.body.classList.toggle('settings-route-v69',isDesktopV5()&&route==='settings');
+ if(!isDesktopV5())return;
+ document.querySelectorAll('.desktop-messenger,.support-messenger-v6').forEach(el=>{const top=el.getBoundingClientRect().top; el.style.height=`${Math.max(320,window.innerHeight-top)}px`; el.style.maxHeight=el.style.height;});
+}
+
+/* Main render extension for dedicated destinations + post-layout fit. */
+const renderV69Base=render;
+render=function(){
+ const v=document.getElementById('view');
+ if(route==='designerSpecsV69') v.innerHTML=renderDesignerSpecsStandaloneV69();
+ else if(route==='designerOrdersV69') v.innerHTML=renderDesignerOrdersStandaloneV69();
+ else renderV69Base();
+ mountDesktopNavV65();
+ setTimeout(fitDesktopWorkspacesV69,0);
+};
+window.addEventListener('resize',()=>setTimeout(fitDesktopWorkspacesV69,0));
+
+/* Apply the latest component definitions on initial load as well. */
+setTimeout(()=>render(),0);
