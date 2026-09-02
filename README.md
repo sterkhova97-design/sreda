@@ -166,5 +166,5 @@ Desktop consolidation: responsive-height workspaces, centered modals, account ro
 - The message pane and composer use the remaining device height with no artificial bottom gap.
 
 
-## v6.12
-Ordered desktop corrections from v6.11: chat viewport lock, nav/search spacing, specification layout, standardized back/title rows and disclosure arrows, orders styling, favorites header/chips, supplier edit action, moderator avatar sizing, global black-button contrast, product description color, and support bubble clearance.
+## v6.13
+Rebuilt from v6.11. Restores Pinterest masonry, rewrites desktop specification rows, fixes desktop chat viewport locking, publication modal responsiveness/comments/recommendations, compact orders, favorite controls, supplier analytics/edit actions, moderator avatar sizing, muted product descriptions, and safe black-button contrast.

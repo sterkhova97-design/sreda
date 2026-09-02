@@ -3143,142 +3143,88 @@ window.addEventListener('resize',()=>setTimeout(fitDesktopWorkspacesV69,0));
 setTimeout(()=>render(),0);
 
 
-/* ==================== SREDA v6.12 — ordered desktop fixes ==================== */
+/* ==================== SREDA v6.13 — rebuilt from v6.11 ==================== */
+let projectOwnerModeV613=false;
 
-let projectOpenSourceV612 = 'public';
-
-const openDesignerProjectV612Base = openDesignerProjectV4;
-openDesignerProjectV4 = function(id){
-  projectOpenSourceV612 = (route === 'profile') ? 'own' : 'public';
-  return openDesignerProjectV612Base(id);
+/* Public/own project mode is remembered at the moment a project is opened. */
+const openDesignerProjectV613Base=openDesignerProjectV4;
+openDesignerProjectV4=function(id){
+  projectOwnerModeV613=(route==='profile');
+  return openDesignerProjectV613Base(id);
 };
 
-const renderDesignerProjectV612Base = renderDesignerProjectV4;
-renderDesignerProjectV4 = function(){
-  let html = renderDesignerProjectV612Base();
-  if(isDesktopV5() && projectOpenSourceV612 !== 'own'){
-    html = html.replace(/<button class="project-more-v61"[\s\S]*?<\/button>/,'');
-    html = html.replace(/<div class="project-popover-v6 project-popover-desktop-v61">[\s\S]*?<\/div>/,'');
-  }
-  return html;
+/* Project desktop: owner menu only from own cabinet. */
+const renderDesignerProjectV613Mobile=renderDesignerProjectV4;
+renderDesignerProjectV4=function(){
+  if(!isDesktopV5()) return renderDesignerProjectV613Mobile();
+  const p=DESIGNER_PROJECTS_V4.find(x=>x.id===currentProject)||DESIGNER_PROJECTS_V4[0];
+  const supplierAccess=(profileRole==='supplier');
+  const canDownload=(profileRole==='supplier'||profileRole==='designer');
+  const rooms=p.rooms.map((r,ri)=>`<section class="project-room-section-v61"><div class="project-room-title-v61"><h2>${r.name}</h2></div><div class="project-pinterest-grid-v61">${r.images.map((img,i)=>`<button class="project-pin-v61 ${((i+ri)%3===1)?'tall':''} ${((i+ri)%4===2)?'wide':''}" onclick="openProjectPostV6('${img}','${r.name}')"><img src="${img}" alt="${r.name}"></button>`).join('')}</div>${supplierAccess?'<button class="room-spec-link">Открыть спецификацию комнаты →</button>':''}</section>`).join('');
+  return `${desktopProjectCategoriesV61()}<div class="desktop-project-page-v61 desktop-project-page-v613"><div class="project-topline-v61"><button class="project-back-v61" onclick="route='designerPublic';render()">${iconV6('back','Назад')}</button><div class="project-title-block-v61"><h1>${p.title}</h1>${canDownload?`<button class="project-download-v61" onclick="downloadProjectV5('${p.title}')">↓ Скачать проект</button>`:''}</div>${projectOwnerModeV613?`<button class="project-more-v61" onclick="projectMenuOpenV6=!projectMenuOpenV6;render()">${iconV6('more','Ещё')}</button>${projectMenuOpenV6?`<div class="project-popover-v6 project-popover-desktop-v61"><button onclick="toastV5('Редактирование проекта')">Редактировать проект</button><button onclick="toastV5('Настройки видимости проекта')">Видимость проекта</button></div>`:''}`:'<span></span>'}</div>${rooms}</div>`;
 };
 
-/* One shared disclosure icon for specification room accordions. */
-renderRoom = function(room,items){
-  return `<div class="room">
-    <button class="room-head" onclick="const body=this.nextElementSibling;body.hidden=!body.hidden;this.classList.toggle('is-collapsed',body.hidden)">
-      <span>${room}</span><img class="room-arrow-v612" src="assets/icons/dropdown-v612.png" alt="">
-    </button>
-    <div class="room-items">${items.map((x,i)=>specRow(room,x,i)).join('')}</div>
-  </div>`;
+/* Specification: real stable columns; selection is a reserved column and never shifts content. */
+renderRoom=function(room,items){
+  return `<div class="room room-v613"><button class="room-head room-head-v613" onclick="const b=this.nextElementSibling;b.hidden=!b.hidden;this.classList.toggle('collapsed',b.hidden)"><span>${room}</span><img class="room-arrow-v613" src="assets/icons/dropdown-v613.png" alt=""></button><div class="room-items">${items.map((x,i)=>specRow(room,x,i)).join('')}</div></div>`;
 };
-
-/* Specification row keeps a permanent selection column, so selection never shifts content. */
-specRow = function(room,x,i){
+specRow=function(room,x,i){
   const p=PRODUCTS.find(y=>y.id===x.id);
-  return `<div class="spec-row spec-row-v612" data-key="${room}:${i}" onclick="specClick(event,'${room}',${i},'${x.id}')" ontouchstart="holdStart(event,'${room}',${i})" ontouchend="holdEnd()">
-    <div class="select-box"></div>
-    <img src="${p.image}" alt="">
-    <div class="spec-info">
-      <div class="spec-name">${p.name}</div>
-      <div class="spec-conf">${x.conf}</div>
-      <span class="spec-status status-badge-v69 ${statusClassV69(x.status)}">${x.status}</span>
-    </div>
-    <div class="spec-right">
-      <div class="spec-price">${money(p.price*x.qty)}</div>
-      <div class="qty"><button onclick="changeQty(event,'${room}',${i},-1)">−</button><span>${x.qty}</span><button onclick="changeQty(event,'${room}',${i},1)">+</button></div>
-    </div>
-  </div>`;
+  return `<div class="spec-row spec-row-v613" data-key="${room}:${i}" onclick="specClick(event,'${room}',${i},'${x.id}')" ontouchstart="holdStart(event,'${room}',${i})" ontouchend="holdEnd()"><div class="select-box"></div><img src="${p.image}" alt=""><div class="spec-info spec-info-v613"><div class="spec-name">${p.name}</div><div class="spec-conf">${x.conf}</div></div><span class="spec-status status-badge-v69 ${statusClassV69(x.status)}">${x.status}</span><div class="spec-price">${money(p.price*x.qty)}</div><div class="qty qty-v613"><button onclick="changeQty(event,'${room}',${i},-1)">−</button><span>${x.qty}</span><button onclick="changeQty(event,'${room}',${i},1)">+</button></div></div>`;
+};
+renderProjectSpec=function(name){
+  let rooms=specData[name],total=0;Object.values(rooms).flat().forEach(x=>{const p=PRODUCTS.find(y=>y.id===x.id);total+=p.price*x.qty});
+  return `<div class="project-spec-v69 project-spec-v613"><div class="project-toolbar project-toolbar-v69 project-toolbar-v613">${uiBackV69("currentProject=null;selectMode=false;render()") }<b>${name}</b><span><button onclick="selectMode=!selectMode;render()">${selectMode?'Готово':'Выбрать'}</button><button class="print-button-v69 print-button-v613" onclick="window.print()" title="Печать"><img src="assets/icons/print-v69.png" alt="Печать"></button></span></div><div class="spec-groups-v69 ${selectMode?'select-mode':''}">${Object.entries(rooms).map(([room,items])=>renderRoom(room,items)).join('')}</div><div class="total"><span>ИТОГО</span><span>${money(total)}</span></div></div>`;
+};
+renderDesignerSpecsStandaloneV69=function(){return `<section class="designer-standalone-v69 designer-standalone-v613"><div class="page-title-row-v613">${uiBackV69("route='profile';profileTab='';designerTabV4='projects';render()") }<h1>Спецификации</h1></div>${renderSpecsRoot()}</section>`};
+renderDesignerOrdersStandaloneV69=function(){return `<section class="designer-standalone-v69 designer-standalone-v613"><div class="page-title-row-v613">${uiBackV69("route='profile';profileTab='';designerTabV4='projects';render()") }<h1>Заказы</h1></div>${renderDesignerOrdersV69()}</section>`};
+
+/* Supplier product cards: analytics and edit are standardized stacked actions. */
+renderSupplierCardsV4=function(){
+  const own=PRODUCTS.filter(p=>p.brand==='Forma Dom');
+  return `<div class="supplier-section"><div class="supplier-headline"><b>Карточки товаров</b><span>${own.length} товаров</span></div><div class="supplier-card-grid supplier-card-grid-v69">${own.map(p=>`<article class="supplier-product-card supplier-product-card-v69"><div class="supplier-product-img" onclick="openProduct('${p.id}')"><img src="${p.image}"><div class="product-card-actions-v613"><button onclick="event.stopPropagation();openProductAnalyticsV4('${p.id}')" aria-label="Аналитика"><img src="assets/icons/analytics-v69.png" alt=""></button><button onclick="event.stopPropagation();currentProduct=PRODUCTS.find(x=>x.id==='${p.id}');openProductEditorV4()" aria-label="Редактировать"><img src="assets/icons/edit-product-v613.png" alt=""></button></div></div><div class="supplier-product-copy"><div><b>${p.name}</b><span>${p.priceLabel}</span></div><small>${p.type}</small></div></article>`).join('')}</div></div>`;
 };
 
-/* Standard title row: back icon and page title are always on the same baseline. */
-renderDesignerSpecsStandaloneV69 = function(){
-  return `<section class="designer-standalone-v69 designer-standalone-v612">
-    <div class="page-title-row-v612">${uiBackV69("route='profile';profileTab='';designerTabV4='projects';render()")}<h1>Спецификации</h1></div>
-    ${renderSpecsRoot()}
-  </section>`;
-};
-renderDesignerOrdersStandaloneV69 = function(){
-  return `<section class="designer-standalone-v69 designer-standalone-v612">
-    <div class="page-title-row-v612">${uiBackV69("route='profile';profileTab='';designerTabV4='projects';render()")}<h1>Заказы</h1></div>
-    ${renderDesignerOrdersV69()}
-  </section>`;
+/* Pinterest-like publication viewer, responsive and contained inside viewport. */
+desktopVisualCardV5=function(v){return `<article class="desktop-card visual-card-v69 visual-card-v613" onclick="openPublicationV69('${v.id}')"><div><img src="${v.image}" alt="${v.title}"><button onclick="event.stopPropagation();toggleFav('${v.id}',event)">${favorites.has(v.id)?'♥':'♡'}</button></div><h3>${v.title}</h3><span>${v.subtitle||''}</span></article>`};
+openPublicationV69=function(id){
+  const v=VISUALS.find(x=>x.id===id)||VISUALS[0];publicationV69=v;
+  const recs=VISUALS.filter(x=>x.id!==v.id).concat(PRODUCTS).slice(0,5);
+  const m=document.getElementById('modal');m.className='modal publication-modal-v69 publication-modal-v613';
+  m.innerHTML=`<div class="publication-view-v69 publication-view-v613" role="dialog" aria-modal="true"><button class="publication-close-v69" onclick="closeModal()" aria-label="Закрыть">×</button><div class="publication-main-v69 publication-main-v613"><div class="publication-image-v69"><img src="${v.image}" alt="${v.title}"><div class="publication-image-actions-v69"><button onclick="toggleFav('${v.id}',event)">♡</button><button onclick="shareProfileV5()">${shareIconV66()}</button><button>•••</button></div></div><aside class="publication-side-v69 publication-side-v613"><div class="publication-author-v69"><div class="comment-avatar-v64">АС</div><div><b>Анна Смирнова</b><small>Дизайнер интерьеров</small></div></div><h2>${v.title}</h2><p>${v.subtitle||'Интерьерный проект'}</p><div class="publication-comments-v69"><div><b>Мария</b><p>Очень цельное решение, особенно сочетание фактур.</p></div><div><b>Ирина</b><p>Подскажите, какой здесь оттенок стен?</p></div></div><div class="publication-comment-box-v69 publication-comment-box-v613"><input placeholder="Комментарий..."><button class="publication-send-v613">Отправить</button></div></aside></div><section class="publication-recs-v69 publication-recs-v613"><h3>Похожие проекты и товары</h3><div>${recs.map(x=>`<article onclick="${x.kind==='visual'?`openPublicationV69('${x.id}')`:`openProduct('${x.id}');closeModal()`}"><img src="${x.image}" alt=""><b>${x.title||x.name}</b><small>${x.subtitle||x.type||''}</small></article>`).join('')}</div></section></div>`;
 };
 
-/* Supplier cards: analytics + edit buttons are a single standardized vertical action stack. */
-function editSupplierProductV612(id){
-  currentProduct = PRODUCTS.find(p=>p.id===id) || currentProduct;
-  openProductEditorV4();
-}
-renderSupplierCardsV4 = function(){
- const own=PRODUCTS.filter(p=>p.brand==='Forma Dom');
- return `<div class="supplier-section">
-  <div class="supplier-headline"><b>Карточки товаров</b><span>${own.length} товаров</span></div>
-  <div class="supplier-card-grid supplier-card-grid-v69">
-   ${own.map(p=>`<article class="supplier-product-card supplier-product-card-v69">
-    <div class="supplier-product-img" onclick="openProduct('${p.id}')">
-      <img src="${p.image}">
-      <div class="product-card-actions-v612">
-        <button class="product-analytics-icon-v69" onclick="event.stopPropagation();openProductAnalyticsV4('${p.id}')" aria-label="Аналитика"><img src="assets/icons/analytics-v69.png" alt=""></button>
-        <button class="product-edit-icon-v612" onclick="event.stopPropagation();editSupplierProductV612('${p.id}')" aria-label="Редактировать"><img src="assets/icons/edit-product-v612.png" alt=""></button>
-      </div>
-    </div>
-    <div class="supplier-product-copy"><div><b>${p.name}</b><span>${p.priceLabel}</span></div><small>${p.type}</small></div>
-   </article>`).join('')}
-  </div>
- </div>`;
-};
-
-/* Black filled controls always get white copy/icons, based on their actual computed background. */
-function enforceBlackButtonContrastV612(){
+/* Safe global black-control contrast: transparent backgrounds are never mistaken for black. */
+function enforceBlackContrastV613(){
   document.querySelectorAll('button,[role="button"]').forEach(el=>{
     const c=getComputedStyle(el).backgroundColor;
-    const m=c.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
-    if(!m) return;
-    const [r,g,b]=m.slice(1).map(Number);
-    const lum=(0.2126*r+0.7152*g+0.0722*b);
-    const isDark=lum<55;
-    el.classList.toggle('black-control-v612',isDark);
+    const m=c.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?/);
+    if(!m) return; const a=m[4]===undefined?1:Number(m[4]);
+    const r=+m[1],g=+m[2],b=+m[3]; const lum=.2126*r+.7152*g+.0722*b;
+    el.classList.toggle('dark-filled-v613',a>.75&&lum<55);
   });
 }
 
-/* Stronger viewport lock for desktop messenger. Only its two inner panes scroll. */
-function fitDesktopWorkspacesV612(){
-  const chatWorkspace=isDesktopV5()&&['chat','chats'].includes(route);
-  document.documentElement.classList.toggle('chat-root-v612',chatWorkspace);
-  document.body.classList.toggle('chat-workspace-v612',chatWorkspace);
-  if(!chatWorkspace || !isDesktopV5()) return;
-
-  const header=document.querySelector('.desktop-header');
-  const top=header?Math.max(0,header.getBoundingClientRect().bottom):0;
-  document.querySelectorAll('.desktop-messenger,.desktop-messenger-v66').forEach(el=>{
-    el.style.top=`${top}px`;
-    el.style.height=`${Math.max(280,window.innerHeight-top)}px`;
-    el.style.maxHeight=el.style.height;
-  });
+/* Desktop chat is a viewport workspace: only inner panes scroll. */
+function fitChatViewportV613(){
+  const on=isDesktopV5()&&['chat','chats'].includes(route);
+  document.documentElement.classList.toggle('chat-root-v613',on);
+  document.body.classList.toggle('chat-root-v613',on);
+  if(!on)return;
+  const h=document.querySelector('.desktop-header');
+  const top=h?Math.max(0,h.getBoundingClientRect().bottom):0;
+  document.querySelectorAll('.desktop-messenger,.desktop-messenger-v66').forEach(el=>{el.style.top=top+'px';el.style.height=Math.max(280,window.innerHeight-top)+'px';el.style.maxHeight=el.style.height});
+}
+function raiseSupportBubbleV613(){
+ const b=document.getElementById('supportBubbleV5');if(!b)return;
+ const unsafe=isDesktopV5()&&(['chat','chats'].includes(route)||(profileRole==='moderator'&&moderationSectionV5==='support'&&route==='profile'));
+ b.classList.toggle('support-safe-v613',unsafe);
 }
 
-/* Raise the floating support helper above any fixed composer. */
-function syncSupportBubbleV612(){
-  const b=document.getElementById('supportBubbleV5');
-  if(!b) return;
-  const hasBottomComposer=isDesktopV5()&&(
-    ['chat','chats'].includes(route) ||
-    (profileRole==='moderator'&&moderationSectionV5==='support'&&route==='profile')
-  );
-  b.classList.toggle('support-safe-v612',hasBottomComposer);
-}
-
-const renderV612Base=render;
+/* Render extension without touching the established v6.11 navigation components. */
+const renderV613Base=render;
 render=function(){
-  renderV612Base();
-  setTimeout(()=>{
-    fitDesktopWorkspacesV612();
-    enforceBlackButtonContrastV612();
-    syncSupportBubbleV612();
-  },0);
+  renderV613Base();
+  setTimeout(()=>{fitChatViewportV613();enforceBlackContrastV613();raiseSupportBubbleV613();},0);
 };
-window.addEventListener('resize',()=>setTimeout(()=>{
-  fitDesktopWorkspacesV612();
-  syncSupportBubbleV612();
-},0));
+window.addEventListener('resize',()=>setTimeout(()=>{fitChatViewportV613();raiseSupportBubbleV613();},0));
