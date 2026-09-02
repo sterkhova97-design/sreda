@@ -168,3 +168,31 @@ Desktop consolidation: responsive-height workspaces, centered modals, account ro
 
 ## v6.13
 Rebuilt from v6.11. Restores Pinterest masonry, rewrites desktop specification rows, fixes desktop chat viewport locking, publication modal responsiveness/comments/recommendations, compact orders, favorite controls, supplier analytics/edit actions, moderator avatar sizing, muted product descriptions, and safe black-button contrast.
+
+
+## v6.14
+CSS audit: removed stacked v6.8-v6.13 desktop overrides and replaced them with one canonical desktop component layer. JS duplicate v6.13 overrides removed; v6.9 components updated in place.
+
+
+## v6.15 — audited desktop checklist
+- Header: category divider removed; global search shorter/gray; notification/message glyphs visually matched.
+- Home/category: stories + ad only on “Все”; story captions ellipsis; masonry restored as true column flow.
+- Messenger: page locked to viewport; only chat list/message history scroll; aligned search/folder/list gutters; chip spacing and centered +.
+- Designer profile: public-only share by name; compact stats; consistent tabs; narrow-desktop centering.
+- Projects: normal top spacing; public project has no owner dots.
+- Specifications: compact 1120px work area; correct 5-column row; larger image/text; stable selection column; aligned price/qty; centered +/-; fixed printer size; standard disclosure icon.
+- Orders: compact typography and specification-style status badges/filters.
+- Favorites: + aligned with title; larger folder chips; masonry preserved.
+- Supplier: analytics + edit image actions; black filled button contrast.
+- Moderator: active main tab stays black; standardized action buttons/statuses; avatar sizing; KPI cards; compact support status.
+- Modals/publications: centered; backdrop/Esc close; responsive two-column layout; comment input; 5 recommendations.
+- Settings/support: content-sized, no artificial bottom tail; desktop back/title row; help bubble clears composer.
+- Product: description body text gray.
+
+
+## v6.16
+Deep CSS/behavior consolidation pass from v6.15. Fixed missing favorites pills, support viewport lock, moderator request details, normalized desktop header icons, adaptive supplier request/order lists, shared dark-button contrast, and retained all previously consolidated desktop fixes. See QA_v6.16.txt.
+
+
+## v6.16 final QA
+Финальная проверка после консолидации CSS/JS: desktop wide/narrow, viewport-height workspaces, masonry, specifications, publication modal, profiles, favorites, supplier/moderator sections. Chat filters are locked to one row and the left chat column has a safe minimum width.

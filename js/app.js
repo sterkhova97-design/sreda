@@ -737,10 +737,10 @@ function renderProjectSpec(name){
  Object.values(rooms).flat().forEach(x=>{let p=PRODUCTS.find(y=>y.id===x.id);total+=p.price*x.qty});
  return `<div class="project-toolbar"><button onclick="currentProject=null;selectMode=false;render()">‹ Проекты</button><b style="font-size:13px">${name}</b><span><button onclick="selectMode=!selectMode;render()">${selectMode?'Готово':'Выбрать'}</button><button onclick="window.print()" title="Сформировать спецификацию" style="font-size:18px">⇩</button></span></div><div class="${selectMode?'select-mode':''}">${Object.entries(rooms).map(([room,items])=>renderRoom(room,items)).join('')}</div><div class="total"><span>ИТОГО</span><span>${money(total)}</span></div>`;
 }
-function renderRoom(room,items){return `<div class="room"><button class="room-head" onclick="this.nextElementSibling.hidden=!this.nextElementSibling.hidden"><span>${room}</span><span>⌄</span></button><div class="room-items">${items.map((x,i)=>specRow(room,x,i)).join('')}</div></div>`}
+function renderRoom(room,items){return `<div class="room"><button class="room-head" onclick="const b=this.nextElementSibling;b.hidden=!b.hidden;this.classList.toggle('is-collapsed',b.hidden)"><span>${room}</span><img class="room-arrow-v69" src="assets/icons/dropdown-v613.png" alt=""></button><div class="room-items">${items.map((x,i)=>specRow(room,x,i)).join('')}</div></div>`}
 function specRow(room,x,i){
  let p=PRODUCTS.find(y=>y.id===x.id);
- return `<div class="spec-row" data-key="${room}:${i}" onclick="specClick(event,'${room}',${i},'${x.id}')" ontouchstart="holdStart(event,'${room}',${i})" ontouchend="holdEnd()"><div class="select-box"></div><img src="${p.image}"><div class="spec-info"><div class="spec-name">${p.name}</div><div class="spec-conf">${x.conf}</div><span class="spec-status">${x.status}</span></div><div class="spec-right"><div class="spec-price">${money(p.price*x.qty)}</div><div class="qty"><button onclick="changeQty(event,'${room}',${i},-1)">−</button><span>${x.qty}</span><button onclick="changeQty(event,'${room}',${i},1)">+</button></div></div></div>`;
+ return `<div class="spec-row" data-key="${room}:${i}" onclick="specClick(event,'${room}',${i},'${x.id}')" ontouchstart="holdStart(event,'${room}',${i})" ontouchend="holdEnd()"><div class="select-box"></div><img src="${p.image}"><div class="spec-info"><div class="spec-name">${p.name}</div><div class="spec-conf">${x.conf}</div><span class="spec-status status-badge-v69 ${statusClassV69(x.status)}">${x.status}</span></div><div class="spec-price">${money(p.price*x.qty)}</div><div class="qty"><button onclick="changeQty(event,'${room}',${i},-1)">−</button><span>${x.qty}</span><button onclick="changeQty(event,'${room}',${i},1)">+</button></div></div>`;
 }
 let holdTimer=null;
 function holdStart(e,r,i){holdTimer=setTimeout(()=>{selectMode=true;e.currentTarget.classList.add('selected');render()},650)}
@@ -1009,7 +1009,8 @@ function renderDesignerPublicV4(){
 function renderDesignerProjectsV4(){
  return `<div class="project-pinterest">${DESIGNER_PROJECTS_V4.map(p=>`<article onclick="openDesignerProjectV4('${p.id}')"><img src="${p.cover}"><b>${p.title}</b><small>${p.city}</small></article>`).join('')}</div>`;
 }
-function openDesignerProjectV4(id){currentProject=id;route='designerProject';render();scrollTo(0,0)}
+let projectOwnerModeV614=false;
+function openDesignerProjectV4(id){projectOwnerModeV614=(route==='profile');currentProject=id;route='designerProject';render();scrollTo(0,0)}
 function renderDesignerProjectV4(){
  const p=DESIGNER_PROJECTS_V4.find(x=>x.id===currentProject)||DESIGNER_PROJECTS_V4[0];
  const supplierAccess=(profileRole==='supplier'); const canDownloadProject=(profileRole==='supplier'||profileRole==='designer'); 
@@ -2129,41 +2130,11 @@ function desktopProjectCategoriesV61(){
 renderDesignerProjectV4 = function(){
  const p=DESIGNER_PROJECTS_V4.find(x=>x.id===currentProject)||DESIGNER_PROJECTS_V4[0];
  const supplierAccess=(profileRole==='supplier'), canDownload=(profileRole==='supplier'||profileRole==='designer');
-
- const allRoomCards = p.rooms.map((r,ri)=>`
-   <section class="project-room-section-v61">
-     <div class="project-room-title-v61"><h2>${r.name}</h2></div>
-     <div class="project-pinterest-grid-v61">
-       ${r.images.map((img,i)=>`
-         <button class="project-pin-v61 ${((i+ri)%3===1)?'tall':''} ${((i+ri)%4===2)?'wide':''}" onclick="openProjectPostV6('${img}','${r.name}')">
-           <img src="${img}" alt="${r.name}">
-         </button>`).join('')}
-     </div>
-     ${supplierAccess?'<button class="room-spec-link">Открыть спецификацию комнаты →</button>':''}
-   </section>`).join('');
-
+ const allRoomCards=p.rooms.map((r,ri)=>`<section class="project-room-section-v61"><div class="project-room-title-v61"><h2>${r.name}</h2></div><div class="project-pinterest-grid-v61">${r.images.map((img,i)=>`<button class="project-pin-v61 ${((i+ri)%3===1)?'tall':''} ${((i+ri)%4===2)?'wide':''}" onclick="openProjectPostV6('${img}','${r.name}')"><img src="${img}" alt="${r.name}"></button>`).join('')}</div>${supplierAccess?'<button class="room-spec-link">Открыть спецификацию комнаты →</button>':''}</section>`).join('');
  if(isDesktopV5()){
-  return `${desktopProjectCategoriesV61()}
-  <div class="desktop-project-page-v61">
-    <div class="project-topline-v61">
-      <button class="project-back-v61" onclick="route='designerPublic';render()">${iconV6('back','Назад')}</button>
-      <div class="project-title-block-v61">
-        <h1>${p.title}</h1>
-        ${canDownload?`<button class="project-download-v61" onclick="downloadProjectV5('${p.title}')">↓ Скачать проект</button>`:''}
-      </div>
-      <button class="project-more-v61" onclick="projectMenuOpenV6=!projectMenuOpenV6;render()">${iconV6('more','Ещё')}</button>
-      ${projectMenuOpenV6?`<div class="project-popover-v6 project-popover-desktop-v61"><button onclick="toastV5('Редактирование проекта')">Редактировать проект</button><button onclick="toastV5('Настройки видимости проекта')">Видимость проекта</button></div>`:''}
-    </div>
-    ${allRoomCards}
-  </div>`;
+  return `${desktopProjectCategoriesV61()}<div class="desktop-project-page-v61"><div class="project-topline-v61"><button class="project-back-v61" onclick="route='designerPublic';render()">${iconV6('back','Назад')}</button><div class="project-title-block-v61"><h1>${p.title}</h1>${canDownload?`<button class="project-download-v61" onclick="downloadProjectV5('${p.title}')">↓ Скачать проект</button>`:''}</div>${projectOwnerModeV614?`<button class="project-more-v61" onclick="projectMenuOpenV6=!projectMenuOpenV6;render()">${iconV6('more','Ещё')}</button>${projectMenuOpenV6?`<div class="project-popover-v6 project-popover-desktop-v61"><button onclick="toastV5('Редактирование проекта')">Редактировать проект</button><button onclick="toastV5('Настройки видимости проекта')">Видимость проекта</button></div>`:''}`:'<span></span>'}</div>${allRoomCards}</div>`;
  }
-
- return `<div class="designer-project-page mobile-gutter">
-  <div class="mobile-project-toolbar v6-project-toolbar"><button class="mobile-back-v5" onclick="route='designerPublic';render()">${iconV6('back','Назад')}</button><b>${p.title}</b><button class="project-more-v6" onclick="projectMenuOpenV6=!projectMenuOpenV6;render()">${iconV6('more','Ещё')}</button></div>
-  ${projectMenuOpenV6?`<div class="project-popover-v6"><button onclick="toastV5('Редактирование проекта')">Редактировать проект</button><button onclick="toastV5('Настройки видимости проекта')">Видимость проекта</button></div>`:''}
-  ${canDownload?`<button class="project-download-row-v6" onclick="downloadProjectV5('${p.title}')">↓ Скачать проект</button>`:''}
-  <div class="room-folders">${p.rooms.map(r=>`<section><h3>${r.name}</h3><div class="project-room-grid">${r.images.map(img=>`<button class="project-image-button-v6" onclick="openProjectPostV6('${img}','${r.name}')"><img src="${img}"></button>`).join('')}</div>${supplierAccess?'<button class="room-spec-link">Открыть спецификацию комнаты →</button>':''}</section>`).join('')}</div>
- </div>`;
+ return `<div class="designer-project-page mobile-gutter"><div class="mobile-project-toolbar v6-project-toolbar"><button class="mobile-back-v5" onclick="route='designerPublic';render()">${iconV6('back','Назад')}</button><b>${p.title}</b><button class="project-more-v6" onclick="projectMenuOpenV6=!projectMenuOpenV6;render()">${iconV6('more','Ещё')}</button></div>${projectMenuOpenV6?`<div class="project-popover-v6"><button onclick="toastV5('Редактирование проекта')">Редактировать проект</button><button onclick="toastV5('Настройки видимости проекта')">Видимость проекта</button></div>`:''}${canDownload?`<button class="project-download-row-v6" onclick="downloadProjectV5('${p.title}')">↓ Скачать проект</button>`:''}<div class="room-folders">${p.rooms.map(r=>`<section><h3>${r.name}</h3><div class="project-room-grid">${r.images.map(img=>`<button class="project-image-button-v6" onclick="openProjectPostV6('${img}','${r.name}')"><img src="${img}"></button>`).join('')}</div>${supplierAccess?'<button class="room-spec-link">Открыть спецификацию комнаты →</button>':''}</section>`).join('')}</div></div>`;
 };
 
 
@@ -2919,7 +2890,7 @@ renderProductV4 = function(){
 };
 
 
-/* ==================== SREDA v6.8 — accumulated desktop fixes ==================== */
+/* ==================== SREDA v6.16 — canonical desktop behavior ==================== */
 function mountDesktopNavV65(){
  const host=document.getElementById('desktopCompactNavV65');
  if(!host || !isDesktopV5()) return;
@@ -2950,25 +2921,7 @@ renderSearch = function(){
  return html;
 };
 
-const designerProfileBaseV68 = renderDesignerProfileUnifiedV5;
-renderDesignerProfileUnifiedV5 = function(own){
- if(!isDesktopV5()) return designerProfileBaseV68(own);
- const key='designer:'+currentDesignerV4;
- const verified=`<img class="verified-icon-v6" src="assets/icons/verified-v6.png" alt="Верифицирован">`;
- return `<div class="desktop-designer-profile desktop-designer-profile-v67 desktop-designer-profile-v68">
-   <header class="desktop-designer-head"><div class="designer-avatar">АС</div><div><h1>Анна Смирнова ${verified}</h1><p>Дизайнер интерьеров · Москва</p></div>
-     <div class="desktop-designer-actions">${own?`<button onclick="openDesignerV4('Анна Смирнова')">Публичный профиль</button><button onclick="openSettingsV4()">Редактировать профиль</button>`:`${followButtonV4(key)}<button onclick="currentChat='Анна Смирнова';route='chat';render()">Сообщение</button>`}</div>
-   </header>
-   <div class="desktop-designer-stats desktop-designer-stats-v68"><div><b>24</b><span>Проекты</span></div><div><b>1 245</b><span>Подписчики</span></div><div class="stat-with-share-v68"><div><b>320</b><span>Подписки</span></div>${own?`<button class="desktop-designer-share-v68" onclick="shareProfileV5()" aria-label="Поделиться профилем">${shareIconV66()}</button>`:''}</div></div>
-   ${own?`<div class="desktop-profile-quick desktop-profile-quick-v67"><button onclick="profileTab='analytics';render()">Аналитика</button><button onclick="openSettingsV4()">Редактировать</button></div>`:''}
-   <p class="desktop-bio">Жилые и общественные интерьеры. Москва / Европа.</p>
-   <div class="desktop-designer-tabs desktop-designer-tabs-v68"><button class="${designerTabV4==='projects'?'active':''}" onclick="designerTabV4='projects';currentProject=null;render()">Проекты</button><button class="${designerTabV4==='saved'?'active':''}" onclick="designerTabV4='saved';currentProject=null;render()">Публикации</button>${own?`<button class="${designerTabV4==='specs'?'active':''}" onclick="designerTabV4='specs';currentProject=null;render()">Спецификация</button>`:''}</div>
-   <div class="designer-tab-content-v68 ${designerTabV4==='saved'?'is-publications':''}">${designerTabV4==='projects'?renderDesignerProjectsV5():designerTabV4==='specs'?renderSpecsRoot():`<div class="desktop-brand-masonry">${VISUALS.map(desktopVisualCardV5).join('')}</div>`}</div>
- </div>`;
-};
 
-
-/* ==================== SREDA v6.9 — desktop consolidation ==================== */
 let publicationV69=null;
 let designerOrdersProjectV69='Все проекты';
 let designerOrdersStatusV69='Все статусы';
@@ -3006,15 +2959,10 @@ renderDesignerProfileUnifiedV5 = function(own){
 desktopVisualCardV5 = function(v){return `<article class="desktop-card visual-card-v69" onclick="openPublicationV69('${v.id}')"><div><img src="${v.image}" alt="${v.title}"><button onclick="event.stopPropagation();toggleFav('${v.id}',event)">${favorites.has(v.id)?'♥':'♡'}</button></div><h3>${v.title}</h3><span>${v.subtitle||''}</span></article>`};
 function openPublicationV69(id){
  const v=VISUALS.find(x=>x.id===id)||VISUALS[0]; publicationV69=v;
- const recs=VISUALS.filter(x=>x.id!==v.id).concat(PRODUCTS.slice(0,4));
+ const recs=VISUALS.filter(x=>x.id!==v.id).concat(PRODUCTS).slice(0,5);
  const m=document.getElementById('modal'); m.className='modal publication-modal-v69';
- m.innerHTML=`<div class="publication-view-v69" role="dialog" aria-modal="true">
-  <button class="publication-close-v69" onclick="closeModal()" aria-label="Закрыть">×</button>
-  <div class="publication-main-v69"><div class="publication-image-v69"><img src="${v.image}" alt="${v.title}"><div class="publication-image-actions-v69"><button onclick="toggleFav('${v.id}',event)">♡</button><button onclick="shareProfileV5()">${shareIconV66()}</button><button>•••</button></div></div>
-   <aside class="publication-side-v69"><div class="publication-author-v69"><div class="comment-avatar-v64">АС</div><div><b>Анна Смирнова</b><small>Дизайнер интерьеров</small></div></div><h2>${v.title}</h2><p>${v.subtitle||'Интерьерный проект'}</p><div class="publication-comments-v69"><div><b>Мария</b><p>Очень цельное решение, особенно сочетание фактур.</p></div><div><b>Ирина</b><p>Подскажите, какой здесь оттенок стен?</p></div></div><div class="publication-comment-box-v69"><input placeholder="Добавить комментарий"><button>Отправить</button></div></aside>
-  </div>
-  <section class="publication-recs-v69"><h3>Похожие проекты и товары</h3><div>${recs.slice(0,6).map(x=>`<article onclick="${x.kind==='visual'?`openPublicationV69('${x.id}')`:`openProduct('${x.id}');closeModal()`}"><img src="${x.image}" alt=""><b>${x.title||x.name}</b><small>${x.subtitle||x.type||''}</small></article>`).join('')}</div></section>
- </div>`;
+ m.innerHTML=`<div class="publication-view-v69" role="dialog" aria-modal="true" onclick="event.stopPropagation()"><button class="publication-close-v69" onclick="closeModal()" aria-label="Закрыть">×</button><div class="publication-main-v69"><div class="publication-image-v69"><img src="${v.image}" alt="${v.title}"><div class="publication-image-actions-v69"><button onclick="toggleFav('${v.id}',event)">♡</button><button onclick="shareProfileV5()">${shareIconV66()}</button><button>•••</button></div></div><aside class="publication-side-v69"><div class="publication-author-v69"><div class="comment-avatar-v64">АС</div><div><b>Анна Смирнова</b><small>Дизайнер интерьеров</small></div></div><h2>${v.title}</h2><p>${v.subtitle||'Интерьерный проект'}</p><div class="publication-comments-v69"><div><b>Мария</b><p>Очень цельное решение, особенно сочетание фактур.</p></div><div><b>Ирина</b><p>Подскажите, какой здесь оттенок стен?</p></div></div><div class="publication-comment-box-v69"><input placeholder="Комментарий..."><button class="primary">Отправить</button></div></aside></div><section class="publication-recs-v69"><h3>Похожие проекты и товары</h3><div>${recs.map(x=>`<article onclick="${x.kind==='visual'?`openPublicationV69('${x.id}')`:`openProduct('${x.id}');closeModal()`}"><img src="${x.image}" alt=""><b>${x.title||x.name}</b><small>${x.subtitle||x.type||''}</small></article>`).join('')}</div></section></div>`;
+ m.onclick=e=>{if(e.target===m)closeModal()};
 }
 
 /* Dedicated designer account destinations. */
@@ -3029,8 +2977,8 @@ function renderDesignerOrdersV69(){
  return `<section class="designer-orders-page-v69"><div class="orders-head-v69"><h2>Заказы</h2><div><select onchange="designerOrdersProjectV69=this.value;render()">${projects.map(x=>`<option ${x===designerOrdersProjectV69?'selected':''}>${x}</option>`).join('')}</select><select onchange="designerOrdersStatusV69=this.value;render()">${statuses.map(x=>`<option ${x===designerOrdersStatusV69?'selected':''}>${x}</option>`).join('')}</select></div></div><div class="designer-orders-list-v69">${shown.map(x=>`<button onclick="openOrderDetailV69('${x.no}')"><b>${x.no}</b><span>${x.item}</span><small>${x.project} · ${x.date}</small><strong>${x.sum}</strong><em class="status-badge-v69 ${statusClassV69(x.status)}">${x.status}</em></button>`).join('')}</div></section>`;
 }
 function openOrderDetailV69(no){customDialogV5({title:`Заказ ${no}`,subtitle:'Позиции, история статусов и данные заказа доступны в этом разделе.',primary:'Готово'});}
-function renderDesignerSpecsStandaloneV69(){return `<section class="designer-standalone-v69">${uiBackV69("route='profile';profileTab='';designerTabV4='projects';render()")}<h1>Спецификации</h1>${renderSpecsRoot()}</section>`}
-function renderDesignerOrdersStandaloneV69(){return `<section class="designer-standalone-v69">${uiBackV69("route='profile';profileTab='';designerTabV4='projects';render()")}${renderDesignerOrdersV69()}</section>`}
+function renderDesignerSpecsStandaloneV69(){return `<section class="designer-standalone-v69"><div class="page-title-row-v69">${uiBackV69("route='profile';profileTab='';designerTabV4='projects';render()")}<h1>Спецификации</h1></div>${renderSpecsRoot()}</section>`}
+function renderDesignerOrdersStandaloneV69(){return `<section class="designer-standalone-v69"><div class="page-title-row-v69">${uiBackV69("route='profile';profileTab='';designerTabV4='projects';render()")}<h1>Заказы</h1></div>${renderDesignerOrdersV69()}</section>`}
 const accountNavigateV69Base=accountNavigateV5;
 accountNavigateV5=function(k){
  if(profileRole==='designer'){
@@ -3057,7 +3005,7 @@ renderHistory = function(){
 /* Supplier product cards: analytics is an icon on the image. */
 renderSupplierCardsV4 = function(){
  const own=PRODUCTS.filter(p=>p.brand==='Forma Dom');
- return `<div class="supplier-section"><div class="supplier-headline"><b>Карточки товаров</b><span>${own.length} товаров</span></div><div class="supplier-card-grid supplier-card-grid-v69">${own.map(p=>`<article class="supplier-product-card supplier-product-card-v69"><div class="supplier-product-img" onclick="openProduct('${p.id}')"><img src="${p.image}"><button class="product-analytics-icon-v69" onclick="event.stopPropagation();openProductAnalyticsV4('${p.id}')" aria-label="Аналитика"><img src="assets/icons/analytics-v69.png" alt=""></button></div><div class="supplier-product-copy"><div><b>${p.name}</b><span>${p.priceLabel}</span></div><small>${p.type}</small></div></article>`).join('')}</div></div>`;
+ return `<div class="supplier-section"><div class="supplier-headline"><b>Карточки товаров</b><span>${own.length} товаров</span></div><div class="supplier-card-grid supplier-card-grid-v69">${own.map(p=>`<article class="supplier-product-card supplier-product-card-v69"><div class="supplier-product-img" onclick="openProduct('${p.id}')"><img src="${p.image}"><div class="product-card-actions-v69"><button onclick="event.stopPropagation();openProductAnalyticsV4('${p.id}')" aria-label="Аналитика"><img src="assets/icons/analytics-v69.png" alt=""></button><button onclick="event.stopPropagation();currentProduct=PRODUCTS.find(x=>x.id==='${p.id}');openProductEditorV4()" aria-label="Редактировать"><img src="assets/icons/edit-product-v613.png" alt=""></button></div></div><div class="supplier-product-copy"><div><b>${p.name}</b><span>${p.priceLabel}</span></div><small>${p.type}</small></div></article>`).join('')}</div></div>`;
 };
 
 /* Moderator archive rows are wider, statuses are badges, every row opens details. */
@@ -3072,7 +3020,7 @@ moderatorVerificationV5 = function(){
   {name:'Елена Крылова',type:'Дизайнер',brand:'Портфолио · сайт · соцсети',img:''},
   {name:'Travertino Light',type:'Товар',brand:'Laminam · материал · декор',img:'assets/products/travertino-classico.jpg',productId:'travertino'}
  ].filter(x=>moderationTypeV5==='all'||x.type===moderationTypeV5);
- return `<div class="moderation-toolbar"><div>${['all','Товар','Бренд','Дизайнер','Поставщик'].map(x=>`<button class="${moderationTypeV5===x?'active':''}" onclick="moderationTypeV5='${x}';render()">${x==='all'?'Все':x==='Товар'?'Товары':x==='Бренд'?'Бренды':x==='Дизайнер'?'Дизайнеры':'Поставщики'}</button>`).join('')}</div><div><button class="${moderationStatusV5==='pending'?'active':''}" onclick="moderationStatusV5='pending';render()">На рассмотрении</button><button class="${moderationStatusV5==='archive'?'active':''}" onclick="moderationStatusV5='archive';render()">Архив</button></div></div>${moderationStatusV5==='archive'?`<div class="verification-table verification-archive-v69">${verificationArchiveV5.map(x=>`<article onclick="openVerificationInfoV69('${x.name}','${x.type}','${x.date}','${x.decision}','${String(x.comment||'').replace(/'/g,"\\'")}')"><div><b>${x.name}</b><small>${x.type} · ${x.date}</small></div><strong class="status-badge-v69 ${statusClassV69(x.decision)}">${x.decision}</strong><p>${x.comment}</p></article>`).join('')}</div>`:`<div class="verification-table">${pending.map(x=>`<article class="verification-request" ${x.productId?`onclick="openProduct('${x.productId}')"`:''}>${x.img?`<img src="${x.img}">`:`<div class="request-avatar">${x.name[0]}</div>`}<div><b>${x.name}</b><small>${x.type}</small><p>${x.brand}</p></div><div class="verify-actions"><button onclick="event.stopPropagation();moderationDecisionV5('${x.name}','Отклонено')">Отклонить</button><button class="primary" onclick="event.stopPropagation();moderationDecisionV5('${x.name}','Принято')">Принять</button></div></article>`).join('')}</div>`}`;
+ return `<div class="moderation-toolbar"><div>${['all','Товар','Бренд','Дизайнер','Поставщик'].map(x=>`<button class="${moderationTypeV5===x?'active':''}" onclick="moderationTypeV5='${x}';render()">${x==='all'?'Все':x==='Товар'?'Товары':x==='Бренд'?'Бренды':x==='Дизайнер'?'Дизайнеры':'Поставщики'}</button>`).join('')}</div><div><button class="${moderationStatusV5==='pending'?'active':''}" onclick="moderationStatusV5='pending';render()">На рассмотрении</button><button class="${moderationStatusV5==='archive'?'active':''}" onclick="moderationStatusV5='archive';render()">Архив</button></div></div>${moderationStatusV5==='archive'?`<div class="verification-table verification-archive-v69">${verificationArchiveV5.map(x=>`<article onclick="openVerificationInfoV69('${x.name}','${x.type}','${x.date}','${x.decision}','${String(x.comment||'').replace(/'/g,"\\'")}')"><div><b>${x.name}</b><small>${x.type} · ${x.date}</small></div><strong class="status-badge-v69 ${statusClassV69(x.decision)}">${x.decision}</strong><p>${x.comment}</p></article>`).join('')}</div>`:`<div class="verification-table">${pending.map(x=>`<article class="verification-request" onclick="openVerificationInfoV69('${x.name}','${x.type}','сегодня','На рассмотрении','${String(x.brand||'').replace(/'/g,"\\'")}')">${x.img?`<img src="${x.img}">`:`<div class="request-avatar">${x.name[0]}</div>`}<div><b>${x.name}</b><small>${x.type}</small><p>${x.brand}</p></div><div class="verify-actions"><button onclick="event.stopPropagation();moderationDecisionV5('${x.name}','Отклонено')">Отклонить</button><button class="primary" onclick="event.stopPropagation();moderationDecisionV5('${x.name}','Принято')">Принять</button></div></article>`).join('')}</div>`}`;
 };
 
 /* Moderator analytics reuses the supplier KPI component visually. */
@@ -3082,16 +3030,29 @@ moderatorAnalyticsV5 = function(){
 };
 
 /* Support messenger: custom compact status control and adaptive workspace. */
-function supportStatusPickerV69(t){return `<details class="support-status-picker-v69"><summary>${t.status}<span>⌄</span></summary><div>${['Новый','В работе','Ожидаем пользователя','Решён','Закрыт'].map(x=>`<button onclick="event.preventDefault();this.closest('details').removeAttribute('open');toastV5('Статус: ${x}')">${x}</button>`).join('')}</div></details>`}
+function supportStatusPickerV69(t){return `<details class="support-status-picker-v69"><summary>${t.status}<img class="room-arrow-v69" src="assets/icons/dropdown-v613.png" alt=""></summary><div>${['Новый','В работе','Ожидаем пользователя','Решён','Закрыт'].map(x=>`<button onclick="event.preventDefault();this.closest('details').removeAttribute('open');toastV5('Статус: ${x}')">${x}</button>`).join('')}</div></details>`}
 supportConversationV6 = function(t){return `<section class="support-conversation-v6"><header><div><b>${t.id} · ${t.subject}</b><small>${t.user} · ${t.role}</small></div>${supportStatusPickerV69(t)}</header><div class="support-messages-v6"><div class="support-bubble incoming">Здравствуйте! Подскажите, пожалуйста, как решить этот вопрос в сервисе?<small>12:40</small></div><div class="support-bubble outgoing">Здравствуйте! Проверяем обращение.<small>12:44 ✓✓</small></div></div><div class="support-composer-v6"><label>＋<input type="file" accept="image/*,.pdf" hidden onchange="toastV5('Файл прикреплён')"></label><input placeholder="Сообщение..."><button>↑</button></div></section>`};
 
 /* Support page is content-sized on desktop. */
-renderSupportV5 = function(){return `<div class="support-page support-page-v69 mobile-gutter">${mobileBackV5("go('profile')")}<div class="support-content-v69"><h1>Поддержка Среды</h1><p>Задайте вопрос о работе сервиса.</p><div class="support-quick">${['Работа с сервисом','Товары и спецификации','Проекты','Сообщения','Аккаунт и верификация'].map(x=>`<button>${x}<span>›</span></button>`).join('')}</div><div class="support-actions-v69"><button class="primary">Задать вопрос поддержке</button><button>Мои обращения</button></div></div></div>`};
+renderSupportV5 = function(){return `<div class="support-page support-page-v69 mobile-gutter"><div class="support-content-v69"><div class="page-title-row-v69">${mobileBackV5("go('profile')")}<h1>Поддержка Среды</h1></div><p>Задайте вопрос о работе сервиса.</p><div class="support-quick">${['Работа с сервисом','Товары и спецификации','Проекты','Сообщения','Аккаунт и верификация'].map(x=>`<button>${x}<span>›</span></button>`).join('')}</div><div class="support-actions-v69"><button class="primary">Задать вопрос поддержке</button><button>Мои обращения</button></div></div></div>`};
 
 /* Attachments/info screen gets a Telegram-inspired structured layout. */
 renderAttachmentsV66 = function(){
  const tabs=['Фото','Видео','Файлы','Ссылки']; const media=messages.filter(m=>m.chat===currentChat&&m.attachment);
  return `<section class="attachments-page-v69 page-gutter-v66"><header class="attachments-profile-v69">${uiBackV69("route='chat';render()")}<div class="attachments-avatar-v69">${currentChat.slice(0,1).toUpperCase()}</div><div><h1>${currentChat}</h1><p>${currentChat.includes('Проект')?'4 участника':'в сети'}</p></div><button class="attachments-edit-v69">Изм.</button></header><div class="attachments-actions-v69"><button>Добавить</button><button>Звук</button><button>Жалоба</button><button>Выйти</button></div><nav class="attachments-tabs-v66 attachments-tabs-v69">${tabs.map(t=>`<button class="${attachmentsTabV66===t?'active':''}" onclick="attachmentsTabV66='${t}';render()">${t}</button>`).join('')}</nav><div class="attachments-content-v66 attachments-content-v69">${attachmentsTabV66==='Фото'?`<div class="attachments-photo-grid-v66">${media.filter(m=>m.attachment?.type==='image').map(m=>`<img src="${m.attachment.url}" alt="">`).join('')||'<div class="attachments-empty-v69"><b>Фотографий пока нет</b><span>Отправленные изображения появятся здесь.</span></div>'}</div>`:attachmentsTabV66==='Видео'?'<div class="attachments-empty-v69"><b>Видео пока нет</b></div>':attachmentsTabV66==='Файлы'?'<div class="attachments-empty-v69"><b>Файлов пока нет</b></div>':'<div class="attachments-empty-v69"><b>Ссылок пока нет</b></div>'}</div></section>`;
+};
+
+
+const renderSettingsMobileV615=renderSettingsV4;
+renderSettingsV4=function(){
+ if(!isDesktopV5()) return renderSettingsMobileV615();
+ const groups=[
+  ['Ваш аккаунт',[['profile','Изменить данные','Имя, фото, описание, контакты','settings-edit-v64.png'],['security','Безопасность','Пароль и активные сессии','settings-security-v64.png']]],
+  ['Как вы используете Среду',[['history','Вы смотрели','История просмотренных товаров','settings-history-v64.png'],['notifications','Уведомления','Настроить события и push','notification-plain-v64.png']]],
+  ['Приватность',[['privacy','Видимость проектов','Публичные проекты и доступ поставщиков','settings-visibility-v64.png'],['blacklist','Чёрный список','Заблокированные пользователи и бренды','settings-blacklist-v64.png']]],
+  ['Помощь',[['support','Поддержка','Связаться с командой Среды','settings-support-v64.png']]]
+ ];
+ return `<div class="settings-page-v64 settings-desktop-v615"><div class="page-title-row-v69">${uiBackV69("go('profile')")}<h1>Настройки</h1></div>${groups.map(([name,items])=>`<section class="settings-group-v64"><h2>${name}</h2>${items.map(([k,n,d,ic])=>`<button class="settings-row-v64" onclick="${k==='support'?'openSupportV5()':`settingsSectionV4='${k}';openSettingsDetailV4('${n}','${d}')`}">${settingsIconV64(ic,n)}<span><b>${n}</b><small>${d}</small></span><em>›</em></button>`).join('')}</section>`).join('')}<section class="settings-group-v64 settings-logout-group-v64"><button class="settings-row-v64 settings-logout-v64">${settingsIconV64('settings-logout-v64.png','Выйти')}<span><b>Выйти</b></span></button></section></div>`;
 };
 
 /* Global desktop modal behavior: centered, backdrop/ESC closes. */
@@ -3100,30 +3061,39 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!document.getElemen
 
 /* Workspaces fit the actual remaining viewport height, not a guessed device. */
 function fitDesktopWorkspacesV69(){
- const activeWorkspace=(profileRole==='moderator'&&moderationSectionV5==='support'&&route==='profile');
+ const supportWorkspace=isDesktopV5()&&(profileRole==='moderator'&&moderationSectionV5==='support'&&route==='profile');
  const chatWorkspace=isDesktopV5()&&['chat','chats'].includes(route);
- document.body.classList.toggle('workspace-route-v69',isDesktopV5()&&(chatWorkspace||activeWorkspace));
- document.body.classList.toggle('chat-workspace-v610',chatWorkspace);
+ document.documentElement.classList.toggle('chat-workspace-v69',chatWorkspace);
+ document.documentElement.classList.toggle('workspace-route-v69',chatWorkspace||supportWorkspace);
+ document.body.classList.toggle('chat-workspace-v69',chatWorkspace);
+ document.body.classList.toggle('workspace-route-v69',chatWorkspace||supportWorkspace);
  document.body.classList.toggle('settings-route-v69',isDesktopV5()&&route==='settings');
+ const bubble=document.getElementById('supportBubbleV5'); if(bubble)bubble.classList.toggle('support-safe-v69',chatWorkspace||supportWorkspace);
  if(!isDesktopV5())return;
-
- const desktopHeader=document.querySelector('.desktop-header');
- const headerBottom=desktopHeader ? Math.max(0,desktopHeader.getBoundingClientRect().bottom) : 0;
-
+ const header=document.querySelector('.desktop-header');
+ const headerBottom=header?Math.ceil(header.getBoundingClientRect().bottom):0;
  document.querySelectorAll('.desktop-messenger,.desktop-messenger-v66').forEach(el=>{
-   if(chatWorkspace){
-     const h=Math.max(320,window.innerHeight-headerBottom);
-     el.style.top=`${headerBottom}px`;
-     el.style.height=`${h}px`;
-     el.style.maxHeight=`${h}px`;
-   }
+  if(!chatWorkspace)return;
+  const h=Math.max(280,window.innerHeight-headerBottom);
+  el.style.top=headerBottom+'px'; el.style.bottom='0px'; el.style.height=h+'px'; el.style.maxHeight=h+'px';
  });
-
  document.querySelectorAll('.support-messenger-v6').forEach(el=>{
-   const top=Math.max(0,el.getBoundingClientRect().top);
-   const h=Math.max(320,window.innerHeight-top);
-   el.style.height=`${h}px`;
-   el.style.maxHeight=`${h}px`;
+  if(!supportWorkspace)return;
+  const top=Math.max(headerBottom,Math.ceil(el.getBoundingClientRect().top));
+  const h=Math.max(240,window.innerHeight-top);
+  el.style.height=h+'px'; el.style.maxHeight=h+'px';
+ });
+}
+
+
+function syncDarkControlsV615(){
+ document.querySelectorAll('button,[role="button"]').forEach(b=>{
+  b.classList.remove('dark-control-v616');
+  const c=getComputedStyle(b).backgroundColor;
+  const m=c&&c.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?/);
+  if(!m)return;
+  const r=+m[1],g=+m[2],bl=+m[3],a=m[4]===undefined?1:+m[4];
+  if(a>.55&&(.2126*r+.7152*g+.0722*bl)<62)b.classList.add('dark-control-v616');
  });
 }
 
@@ -3135,96 +3105,9 @@ render=function(){
  else if(route==='designerOrdersV69') v.innerHTML=renderDesignerOrdersStandaloneV69();
  else renderV69Base();
  mountDesktopNavV65();
- setTimeout(fitDesktopWorkspacesV69,0);
+ setTimeout(()=>{fitDesktopWorkspacesV69();syncDarkControlsV615()},0);
 };
 window.addEventListener('resize',()=>setTimeout(fitDesktopWorkspacesV69,0));
 
 /* Apply the latest component definitions on initial load as well. */
 setTimeout(()=>render(),0);
-
-
-/* ==================== SREDA v6.13 — rebuilt from v6.11 ==================== */
-let projectOwnerModeV613=false;
-
-/* Public/own project mode is remembered at the moment a project is opened. */
-const openDesignerProjectV613Base=openDesignerProjectV4;
-openDesignerProjectV4=function(id){
-  projectOwnerModeV613=(route==='profile');
-  return openDesignerProjectV613Base(id);
-};
-
-/* Project desktop: owner menu only from own cabinet. */
-const renderDesignerProjectV613Mobile=renderDesignerProjectV4;
-renderDesignerProjectV4=function(){
-  if(!isDesktopV5()) return renderDesignerProjectV613Mobile();
-  const p=DESIGNER_PROJECTS_V4.find(x=>x.id===currentProject)||DESIGNER_PROJECTS_V4[0];
-  const supplierAccess=(profileRole==='supplier');
-  const canDownload=(profileRole==='supplier'||profileRole==='designer');
-  const rooms=p.rooms.map((r,ri)=>`<section class="project-room-section-v61"><div class="project-room-title-v61"><h2>${r.name}</h2></div><div class="project-pinterest-grid-v61">${r.images.map((img,i)=>`<button class="project-pin-v61 ${((i+ri)%3===1)?'tall':''} ${((i+ri)%4===2)?'wide':''}" onclick="openProjectPostV6('${img}','${r.name}')"><img src="${img}" alt="${r.name}"></button>`).join('')}</div>${supplierAccess?'<button class="room-spec-link">Открыть спецификацию комнаты →</button>':''}</section>`).join('');
-  return `${desktopProjectCategoriesV61()}<div class="desktop-project-page-v61 desktop-project-page-v613"><div class="project-topline-v61"><button class="project-back-v61" onclick="route='designerPublic';render()">${iconV6('back','Назад')}</button><div class="project-title-block-v61"><h1>${p.title}</h1>${canDownload?`<button class="project-download-v61" onclick="downloadProjectV5('${p.title}')">↓ Скачать проект</button>`:''}</div>${projectOwnerModeV613?`<button class="project-more-v61" onclick="projectMenuOpenV6=!projectMenuOpenV6;render()">${iconV6('more','Ещё')}</button>${projectMenuOpenV6?`<div class="project-popover-v6 project-popover-desktop-v61"><button onclick="toastV5('Редактирование проекта')">Редактировать проект</button><button onclick="toastV5('Настройки видимости проекта')">Видимость проекта</button></div>`:''}`:'<span></span>'}</div>${rooms}</div>`;
-};
-
-/* Specification: real stable columns; selection is a reserved column and never shifts content. */
-renderRoom=function(room,items){
-  return `<div class="room room-v613"><button class="room-head room-head-v613" onclick="const b=this.nextElementSibling;b.hidden=!b.hidden;this.classList.toggle('collapsed',b.hidden)"><span>${room}</span><img class="room-arrow-v613" src="assets/icons/dropdown-v613.png" alt=""></button><div class="room-items">${items.map((x,i)=>specRow(room,x,i)).join('')}</div></div>`;
-};
-specRow=function(room,x,i){
-  const p=PRODUCTS.find(y=>y.id===x.id);
-  return `<div class="spec-row spec-row-v613" data-key="${room}:${i}" onclick="specClick(event,'${room}',${i},'${x.id}')" ontouchstart="holdStart(event,'${room}',${i})" ontouchend="holdEnd()"><div class="select-box"></div><img src="${p.image}" alt=""><div class="spec-info spec-info-v613"><div class="spec-name">${p.name}</div><div class="spec-conf">${x.conf}</div></div><span class="spec-status status-badge-v69 ${statusClassV69(x.status)}">${x.status}</span><div class="spec-price">${money(p.price*x.qty)}</div><div class="qty qty-v613"><button onclick="changeQty(event,'${room}',${i},-1)">−</button><span>${x.qty}</span><button onclick="changeQty(event,'${room}',${i},1)">+</button></div></div>`;
-};
-renderProjectSpec=function(name){
-  let rooms=specData[name],total=0;Object.values(rooms).flat().forEach(x=>{const p=PRODUCTS.find(y=>y.id===x.id);total+=p.price*x.qty});
-  return `<div class="project-spec-v69 project-spec-v613"><div class="project-toolbar project-toolbar-v69 project-toolbar-v613">${uiBackV69("currentProject=null;selectMode=false;render()") }<b>${name}</b><span><button onclick="selectMode=!selectMode;render()">${selectMode?'Готово':'Выбрать'}</button><button class="print-button-v69 print-button-v613" onclick="window.print()" title="Печать"><img src="assets/icons/print-v69.png" alt="Печать"></button></span></div><div class="spec-groups-v69 ${selectMode?'select-mode':''}">${Object.entries(rooms).map(([room,items])=>renderRoom(room,items)).join('')}</div><div class="total"><span>ИТОГО</span><span>${money(total)}</span></div></div>`;
-};
-renderDesignerSpecsStandaloneV69=function(){return `<section class="designer-standalone-v69 designer-standalone-v613"><div class="page-title-row-v613">${uiBackV69("route='profile';profileTab='';designerTabV4='projects';render()") }<h1>Спецификации</h1></div>${renderSpecsRoot()}</section>`};
-renderDesignerOrdersStandaloneV69=function(){return `<section class="designer-standalone-v69 designer-standalone-v613"><div class="page-title-row-v613">${uiBackV69("route='profile';profileTab='';designerTabV4='projects';render()") }<h1>Заказы</h1></div>${renderDesignerOrdersV69()}</section>`};
-
-/* Supplier product cards: analytics and edit are standardized stacked actions. */
-renderSupplierCardsV4=function(){
-  const own=PRODUCTS.filter(p=>p.brand==='Forma Dom');
-  return `<div class="supplier-section"><div class="supplier-headline"><b>Карточки товаров</b><span>${own.length} товаров</span></div><div class="supplier-card-grid supplier-card-grid-v69">${own.map(p=>`<article class="supplier-product-card supplier-product-card-v69"><div class="supplier-product-img" onclick="openProduct('${p.id}')"><img src="${p.image}"><div class="product-card-actions-v613"><button onclick="event.stopPropagation();openProductAnalyticsV4('${p.id}')" aria-label="Аналитика"><img src="assets/icons/analytics-v69.png" alt=""></button><button onclick="event.stopPropagation();currentProduct=PRODUCTS.find(x=>x.id==='${p.id}');openProductEditorV4()" aria-label="Редактировать"><img src="assets/icons/edit-product-v613.png" alt=""></button></div></div><div class="supplier-product-copy"><div><b>${p.name}</b><span>${p.priceLabel}</span></div><small>${p.type}</small></div></article>`).join('')}</div></div>`;
-};
-
-/* Pinterest-like publication viewer, responsive and contained inside viewport. */
-desktopVisualCardV5=function(v){return `<article class="desktop-card visual-card-v69 visual-card-v613" onclick="openPublicationV69('${v.id}')"><div><img src="${v.image}" alt="${v.title}"><button onclick="event.stopPropagation();toggleFav('${v.id}',event)">${favorites.has(v.id)?'♥':'♡'}</button></div><h3>${v.title}</h3><span>${v.subtitle||''}</span></article>`};
-openPublicationV69=function(id){
-  const v=VISUALS.find(x=>x.id===id)||VISUALS[0];publicationV69=v;
-  const recs=VISUALS.filter(x=>x.id!==v.id).concat(PRODUCTS).slice(0,5);
-  const m=document.getElementById('modal');m.className='modal publication-modal-v69 publication-modal-v613';
-  m.innerHTML=`<div class="publication-view-v69 publication-view-v613" role="dialog" aria-modal="true"><button class="publication-close-v69" onclick="closeModal()" aria-label="Закрыть">×</button><div class="publication-main-v69 publication-main-v613"><div class="publication-image-v69"><img src="${v.image}" alt="${v.title}"><div class="publication-image-actions-v69"><button onclick="toggleFav('${v.id}',event)">♡</button><button onclick="shareProfileV5()">${shareIconV66()}</button><button>•••</button></div></div><aside class="publication-side-v69 publication-side-v613"><div class="publication-author-v69"><div class="comment-avatar-v64">АС</div><div><b>Анна Смирнова</b><small>Дизайнер интерьеров</small></div></div><h2>${v.title}</h2><p>${v.subtitle||'Интерьерный проект'}</p><div class="publication-comments-v69"><div><b>Мария</b><p>Очень цельное решение, особенно сочетание фактур.</p></div><div><b>Ирина</b><p>Подскажите, какой здесь оттенок стен?</p></div></div><div class="publication-comment-box-v69 publication-comment-box-v613"><input placeholder="Комментарий..."><button class="publication-send-v613">Отправить</button></div></aside></div><section class="publication-recs-v69 publication-recs-v613"><h3>Похожие проекты и товары</h3><div>${recs.map(x=>`<article onclick="${x.kind==='visual'?`openPublicationV69('${x.id}')`:`openProduct('${x.id}');closeModal()`}"><img src="${x.image}" alt=""><b>${x.title||x.name}</b><small>${x.subtitle||x.type||''}</small></article>`).join('')}</div></section></div>`;
-};
-
-/* Safe global black-control contrast: transparent backgrounds are never mistaken for black. */
-function enforceBlackContrastV613(){
-  document.querySelectorAll('button,[role="button"]').forEach(el=>{
-    const c=getComputedStyle(el).backgroundColor;
-    const m=c.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?/);
-    if(!m) return; const a=m[4]===undefined?1:Number(m[4]);
-    const r=+m[1],g=+m[2],b=+m[3]; const lum=.2126*r+.7152*g+.0722*b;
-    el.classList.toggle('dark-filled-v613',a>.75&&lum<55);
-  });
-}
-
-/* Desktop chat is a viewport workspace: only inner panes scroll. */
-function fitChatViewportV613(){
-  const on=isDesktopV5()&&['chat','chats'].includes(route);
-  document.documentElement.classList.toggle('chat-root-v613',on);
-  document.body.classList.toggle('chat-root-v613',on);
-  if(!on)return;
-  const h=document.querySelector('.desktop-header');
-  const top=h?Math.max(0,h.getBoundingClientRect().bottom):0;
-  document.querySelectorAll('.desktop-messenger,.desktop-messenger-v66').forEach(el=>{el.style.top=top+'px';el.style.height=Math.max(280,window.innerHeight-top)+'px';el.style.maxHeight=el.style.height});
-}
-function raiseSupportBubbleV613(){
- const b=document.getElementById('supportBubbleV5');if(!b)return;
- const unsafe=isDesktopV5()&&(['chat','chats'].includes(route)||(profileRole==='moderator'&&moderationSectionV5==='support'&&route==='profile'));
- b.classList.toggle('support-safe-v613',unsafe);
-}
-
-/* Render extension without touching the established v6.11 navigation components. */
-const renderV613Base=render;
-render=function(){
-  renderV613Base();
-  setTimeout(()=>{fitChatViewportV613();enforceBlackContrastV613();raiseSupportBubbleV613();},0);
-};
-window.addEventListener('resize',()=>setTimeout(()=>{fitChatViewportV613();raiseSupportBubbleV613();},0));
