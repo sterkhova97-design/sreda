@@ -3101,10 +3101,30 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!document.getElemen
 /* Workspaces fit the actual remaining viewport height, not a guessed device. */
 function fitDesktopWorkspacesV69(){
  const activeWorkspace=(profileRole==='moderator'&&moderationSectionV5==='support'&&route==='profile');
- document.body.classList.toggle('workspace-route-v69',isDesktopV5()&&(['chat','chats'].includes(route)||activeWorkspace));
+ const chatWorkspace=isDesktopV5()&&['chat','chats'].includes(route);
+ document.body.classList.toggle('workspace-route-v69',isDesktopV5()&&(chatWorkspace||activeWorkspace));
+ document.body.classList.toggle('chat-workspace-v610',chatWorkspace);
  document.body.classList.toggle('settings-route-v69',isDesktopV5()&&route==='settings');
  if(!isDesktopV5())return;
- document.querySelectorAll('.desktop-messenger,.support-messenger-v6').forEach(el=>{const top=el.getBoundingClientRect().top; el.style.height=`${Math.max(320,window.innerHeight-top)}px`; el.style.maxHeight=el.style.height;});
+
+ const desktopHeader=document.querySelector('.desktop-header');
+ const headerBottom=desktopHeader ? Math.max(0,desktopHeader.getBoundingClientRect().bottom) : 0;
+
+ document.querySelectorAll('.desktop-messenger,.desktop-messenger-v66').forEach(el=>{
+   if(chatWorkspace){
+     const h=Math.max(320,window.innerHeight-headerBottom);
+     el.style.top=`${headerBottom}px`;
+     el.style.height=`${h}px`;
+     el.style.maxHeight=`${h}px`;
+   }
+ });
+
+ document.querySelectorAll('.support-messenger-v6').forEach(el=>{
+   const top=Math.max(0,el.getBoundingClientRect().top);
+   const h=Math.max(320,window.innerHeight-top);
+   el.style.height=`${h}px`;
+   el.style.maxHeight=`${h}px`;
+ });
 }
 
 /* Main render extension for dedicated destinations + post-layout fit. */

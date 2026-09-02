@@ -158,3 +158,9 @@ Accumulated adaptive desktop/UI consistency fixes based on v6.7. Mobile changes 
 
 ## v6.9
 Desktop consolidation: responsive-height workspaces, centered modals, account routing fixes, compact specifications/history/support, publication viewer, unified buttons/icons/statuses, category-home promo behavior and profile/moderator/supplier polish. Mobile changes remain limited to shared logical components.
+
+
+## v6.10 desktop messenger fix
+- Desktop chats are now a fixed workspace from the exact bottom of the desktop header to the viewport bottom.
+- Chat header/search/folders can no longer slide underneath the sticky site header.
+- The message pane and composer use the remaining device height with no artificial bottom gap.
