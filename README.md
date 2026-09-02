@@ -164,3 +164,7 @@ Desktop consolidation: responsive-height workspaces, centered modals, account ro
 - Desktop chats are now a fixed workspace from the exact bottom of the desktop header to the viewport bottom.
 - Chat header/search/folders can no longer slide underneath the sticky site header.
 - The message pane and composer use the remaining device height with no artificial bottom gap.
+
+
+## v6.12
+Ordered desktop corrections from v6.11: chat viewport lock, nav/search spacing, specification layout, standardized back/title rows and disclosure arrows, orders styling, favorites header/chips, supplier edit action, moderator avatar sizing, global black-button contrast, product description color, and support bubble clearance.

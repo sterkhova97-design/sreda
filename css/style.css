@@ -1742,3 +1742,454 @@ button.primary *, .primary *{color:inherit!important;-webkit-text-fill-color:inh
     margin:0!important;
   }
 }
+
+
+/* v6.11 — equal desktop notification/message icon geometry */
+@media (min-width:900px){
+  .desktop-actions .desktop-icon{
+    width:40px!important;
+    height:40px!important;
+    min-width:40px!important;
+    min-height:40px!important;
+    padding:7px!important;
+    display:inline-flex!important;
+    align-items:center!important;
+    justify-content:center!important;
+    box-sizing:border-box!important;
+  }
+  .desktop-actions .desktop-icon > img,
+  .desktop-actions .desktop-chat-icon > img{
+    display:block!important;
+    width:auto!important;
+    height:26px!important;
+    max-width:26px!important;
+    max-height:26px!important;
+    object-fit:contain!important;
+    margin:0!important;
+  }
+}
+
+
+/* ==================== SREDA v6.12 — ordered desktop fixes ==================== */
+
+.black-control-v612{color:#fff!important;-webkit-text-fill-color:#fff!important}
+.black-control-v612 svg{color:#fff!important;fill:currentColor!important;stroke:currentColor!important}
+.black-control-v612>img{filter:brightness(0) invert(1)}
+
+/* Desktop navigation: no global divider under categories, only active underline. */
+@media(min-width:900px){
+  .desktop-header,
+  .desktop-nav-shell-v68,
+  .desktop-compact-nav-host-v65,
+  .desktop-compact-nav-v65,
+  .desktop-compact-nav-v68{
+    border-bottom:0!important;
+  }
+
+  /* Search strip is slightly lower in height. */
+  .desktop-global-search-v68{
+    min-height:48px!important;
+    height:48px!important;
+    border-radius:15px!important;
+  }
+
+  /* Chats: standard chip spacing and perfectly centered +. */
+  .desktop-chat-folders-v66{
+    display:flex!important;
+    align-items:center!important;
+    gap:12px!important;
+    padding-top:12px!important;
+    padding-bottom:12px!important;
+  }
+  .desktop-chat-folders-v66 .ui-chip-v66{flex:0 0 auto}
+  .folder-plus-v66{
+    flex:0 0 34px!important;
+    width:34px!important;
+    height:34px!important;
+    min-width:34px!important;
+    min-height:34px!important;
+    padding:0!important;
+    margin:0!important;
+    display:grid!important;
+    place-items:center!important;
+    line-height:1!important;
+    font-size:22px!important;
+    border:0!important;
+    border-radius:8px!important;
+    background:#eee!important;
+  }
+
+  /* Telegram-like viewport lock: no page scroll, only list/messages. */
+  html.chat-root-v612,
+  html.chat-root-v612 body{
+    width:100%!important;
+    height:100dvh!important;
+    min-height:100dvh!important;
+    max-height:100dvh!important;
+    overflow:hidden!important;
+    overscroll-behavior:none!important;
+  }
+  body.chat-workspace-v612 #view{
+    height:100dvh!important;
+    max-height:100dvh!important;
+    overflow:hidden!important;
+    padding-bottom:0!important;
+  }
+  body.chat-workspace-v612 .desktop-messenger,
+  body.chat-workspace-v612 .desktop-messenger-v66{
+    position:fixed!important;
+    left:0!important;
+    right:0!important;
+    bottom:0!important;
+    margin:0!important;
+    width:100vw!important;
+    overflow:hidden!important;
+  }
+  body.chat-workspace-v612 .desktop-chat-list{
+    overflow-y:auto!important;
+    overflow-x:hidden!important;
+    overscroll-behavior:contain!important;
+  }
+  body.chat-workspace-v612 .desktop-chat-pane{
+    display:flex!important;
+    flex-direction:column!important;
+    overflow:hidden!important;
+  }
+  body.chat-workspace-v612 .desktop-message-scroll{
+    flex:1 1 auto!important;
+    min-height:0!important;
+    overflow-y:auto!important;
+    overscroll-behavior:contain!important;
+  }
+  body.chat-workspace-v612 .desktop-composer{
+    flex:0 0 64px!important;
+    position:relative!important;
+    bottom:auto!important;
+  }
+
+  /* Project page starts after a normal section gap, not a large blank area. */
+  .desktop-project-page-v61{
+    padding-top:24px!important;
+  }
+  .project-topline-v61{
+    margin-top:0!important;
+  }
+
+  /* Public project has no owner menu. */
+  .desktop-project-page-v61 .project-topline-v61:has(.project-more-v61){
+    /* own-mode keeps its normal grid */
+  }
+
+  /* Page title back arrow + title: same row and optical center. */
+  .page-title-row-v612{
+    display:flex!important;
+    align-items:center!important;
+    gap:14px!important;
+    margin:0 0 22px!important;
+  }
+  .page-title-row-v612>h1{
+    margin:0!important;
+    line-height:1!important;
+    font-size:32px!important;
+  }
+  .page-title-row-v612>.back-only-v66,
+  .page-title-row-v612>.mobile-back-v5{
+    flex:0 0 40px!important;
+    align-self:center!important;
+  }
+
+  /* Standalone specifications/orders use the page width, not a narrow fixed container. */
+  .designer-standalone-v612{
+    width:100%!important;
+    max-width:none!important;
+    margin:28px 0 0!important;
+  }
+  .designer-standalone-v612>.project-list,
+  .designer-standalone-v612>.project-spec-v69,
+  .designer-standalone-v612>.designer-orders-page-v69{
+    width:100%!important;
+    max-width:none!important;
+  }
+
+  /* Specification is a stable 5-column work row. */
+  .project-spec-v69{
+    width:100%!important;
+    max-width:none!important;
+    margin:0!important;
+  }
+  .project-toolbar-v69{
+    width:100%!important;
+    grid-template-columns:44px minmax(0,1fr) auto!important;
+  }
+  .print-button-v69{
+    width:40px!important;
+    height:40px!important;
+    min-width:40px!important;
+    min-height:40px!important;
+    padding:8px!important;
+    flex:0 0 40px!important;
+    display:grid!important;
+    place-items:center!important;
+  }
+  .print-button-v69 img{
+    width:22px!important;
+    height:22px!important;
+    min-width:22px!important;
+    min-height:22px!important;
+    max-width:22px!important;
+    max-height:22px!important;
+    object-fit:contain!important;
+  }
+  .room-head{
+    display:flex!important;
+    align-items:center!important;
+    justify-content:space-between!important;
+  }
+  .room-arrow-v612{
+    width:16px!important;
+    height:16px!important;
+    flex:0 0 16px!important;
+    object-fit:contain!important;
+    transition:transform .15s ease;
+  }
+  .room-head.is-collapsed .room-arrow-v612{transform:rotate(180deg)}
+
+  .spec-row-v612{
+    display:grid!important;
+    grid-template-columns:28px 82px minmax(300px,1fr) minmax(210px,260px)!important;
+    gap:16px!important;
+    align-items:center!important;
+    min-height:104px!important;
+    padding:13px 4px!important;
+  }
+  .spec-row-v612>img{
+    width:74px!important;
+    height:74px!important;
+    object-fit:contain!important;
+    justify-self:start!important;
+  }
+  .spec-row-v612 .select-box{
+    position:static!important;
+    inset:auto!important;
+    width:20px!important;
+    height:20px!important;
+    margin:0!important;
+    justify-self:center!important;
+    align-self:center!important;
+    border:1.5px solid #111!important;
+    border-radius:50%!important;
+    box-sizing:border-box!important;
+    visibility:hidden!important;
+  }
+  .select-mode .spec-row-v612 .select-box{visibility:visible!important}
+  .spec-row-v612 .spec-info{
+    min-width:0!important;
+    width:100%!important;
+    grid-template-columns:minmax(0,1fr) max-content!important;
+    column-gap:24px!important;
+  }
+  .spec-row-v612 .spec-name{font-size:15px!important}
+  .spec-row-v612 .spec-conf{font-size:13px!important;color:#888!important}
+  .spec-row-v612 .spec-right{
+    width:100%!important;
+    display:grid!important;
+    grid-template-columns:minmax(90px,1fr) auto!important;
+    justify-self:stretch!important;
+    align-items:center!important;
+    gap:16px!important;
+  }
+  .spec-row-v612 .spec-price{
+    text-align:right!important;
+    white-space:nowrap!important;
+  }
+  .spec-row-v612 .qty{
+    display:grid!important;
+    grid-template-columns:34px 26px 34px!important;
+    align-items:center!important;
+    justify-items:center!important;
+    gap:4px!important;
+  }
+  .spec-row-v612 .qty button{
+    width:34px!important;
+    height:34px!important;
+    min-width:34px!important;
+    min-height:34px!important;
+    padding:0!important;
+    display:grid!important;
+    place-items:center!important;
+    line-height:1!important;
+    font-size:20px!important;
+    border:0!important;
+    border-radius:8px!important;
+  }
+  .spec-row-v612 .qty span{
+    width:26px!important;
+    text-align:center!important;
+  }
+
+  /* Designer orders are compact and visually match specification rows. */
+  .designer-standalone-v612 .orders-head-v69 h2{display:none!important}
+  .orders-head-v69{
+    margin:0 0 14px!important;
+    justify-content:flex-end!important;
+  }
+  .orders-head-v69 select{
+    min-height:34px!important;
+    padding:6px 10px!important;
+    font-size:13px!important;
+    border-radius:9px!important;
+  }
+  .designer-orders-list-v69 button{
+    grid-template-columns:88px 150px minmax(220px,1fr) 118px 142px!important;
+    gap:14px!important;
+    padding:13px 6px!important;
+    font-size:14px!important;
+  }
+  .designer-orders-list-v69 button b,
+  .designer-orders-list-v69 button strong{font-size:14px!important}
+  .designer-orders-list-v69 button small{font-size:13px!important}
+
+  /* Favorites header and folder chips. */
+  .favorites-head-v66{
+    justify-content:flex-start!important;
+    gap:14px!important;
+    align-items:center!important;
+  }
+  .favorites-head-v66 h2{
+    line-height:1!important;
+  }
+  .favorite-plus-v66{
+    width:42px!important;
+    height:42px!important;
+    min-width:42px!important;
+    min-height:42px!important;
+    padding:0!important;
+    margin:0!important;
+    display:grid!important;
+    place-items:center!important;
+    align-self:center!important;
+    border-radius:9px!important;
+  }
+  .favorite-plus-v66 img{
+    width:24px!important;
+    height:24px!important;
+    object-fit:contain!important;
+  }
+  .favorite-folder-chips-v66{
+    gap:10px!important;
+  }
+  .favorite-folder-chips-v66 .ui-chip-v66{
+    min-height:38px!important;
+    height:38px!important;
+    padding:0 16px!important;
+    font-size:15px!important;
+  }
+  .favorite-folder-chips-v66 .ui-chip-v66 small{font-size:13px!important}
+
+  /* Supplier card action stack. */
+  .product-card-actions-v612{
+    position:absolute!important;
+    right:12px!important;
+    top:12px!important;
+    display:flex!important;
+    flex-direction:column!important;
+    gap:8px!important;
+    z-index:3!important;
+  }
+  .product-card-actions-v612 .product-analytics-icon-v69,
+  .product-edit-icon-v612{
+    position:static!important;
+    width:44px!important;
+    height:44px!important;
+    min-width:44px!important;
+    min-height:44px!important;
+    border:0!important;
+    border-radius:50%!important;
+    background:#fff!important;
+    display:grid!important;
+    place-items:center!important;
+    padding:9px!important;
+    box-shadow:0 1px 5px rgba(0,0,0,.05)!important;
+  }
+  .product-card-actions-v612 img{
+    width:22px!important;
+    height:22px!important;
+    object-fit:contain!important;
+  }
+
+  /* Moderator verification: avatar occupies the same image box as product/brand previews. */
+  .verification-request>.request-avatar{
+    width:82px!important;
+    height:82px!important;
+    min-width:82px!important;
+    min-height:82px!important;
+    border-radius:50%!important;
+    font-size:16px!important;
+  }
+
+  /* Product description text is secondary gray. */
+  .desktop-description-v6 p,
+  .desktop-product-v67 .desktop-description-v6 p{
+    color:#777!important;
+  }
+
+  /* Floating support never overlays the composer. */
+  .support-bubble-v5.support-safe-v612{
+    bottom:88px!important;
+  }
+
+  /* Narrow desktop: side paddings shrink and profile remains truly centered in viewport. */
+  @media(max-width:1180px){
+    :root{--page-pad-desktop-v67:clamp(10px,1.4vw,18px)}
+    .mobile-role-tabs{display:none!important}
+    .desktop-designer-profile-v69{
+      display:flex!important;
+      flex-direction:column!important;
+      align-items:center!important;
+      width:100%!important;
+    }
+    .desktop-designer-profile-v69 .desktop-designer-head{
+      width:100%!important;
+      flex-direction:column!important;
+      justify-content:center!important;
+      align-items:center!important;
+      text-align:center!important;
+      gap:10px!important;
+    }
+    .desktop-designer-profile-v69 .designer-name-row-v69{
+      justify-content:center!important;
+    }
+    .desktop-designer-profile-v69 .desktop-designer-actions{
+      margin-left:0!important;
+      justify-content:center!important;
+    }
+    .desktop-designer-profile-v69 .designer-stats-v69{
+      width:auto!important;
+      justify-content:center!important;
+      gap:clamp(48px,9vw,100px)!important;
+      margin-left:auto!important;
+      margin-right:auto!important;
+    }
+    .desktop-designer-profile-v69 .desktop-profile-quick{
+      justify-content:center!important;
+      padding-right:0!important;
+    }
+    .desktop-designer-profile-v69 .desktop-bio{
+      text-align:center!important;
+    }
+    .desktop-designer-profile-v69 .desktop-designer-tabs-v69{
+      width:100%!important;
+      justify-content:center!important;
+    }
+    .desktop-designer-profile-v69 .designer-tab-content-v69{
+      width:100%!important;
+      align-self:stretch!important;
+    }
+
+    .spec-row-v612{
+      grid-template-columns:26px 72px minmax(220px,1fr) minmax(185px,220px)!important;
+      gap:12px!important;
+    }
+    .spec-row-v612>img{width:66px!important;height:66px!important}
+  }
+}

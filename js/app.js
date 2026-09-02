@@ -3141,3 +3141,144 @@ window.addEventListener('resize',()=>setTimeout(fitDesktopWorkspacesV69,0));
 
 /* Apply the latest component definitions on initial load as well. */
 setTimeout(()=>render(),0);
+
+
+/* ==================== SREDA v6.12 — ordered desktop fixes ==================== */
+
+let projectOpenSourceV612 = 'public';
+
+const openDesignerProjectV612Base = openDesignerProjectV4;
+openDesignerProjectV4 = function(id){
+  projectOpenSourceV612 = (route === 'profile') ? 'own' : 'public';
+  return openDesignerProjectV612Base(id);
+};
+
+const renderDesignerProjectV612Base = renderDesignerProjectV4;
+renderDesignerProjectV4 = function(){
+  let html = renderDesignerProjectV612Base();
+  if(isDesktopV5() && projectOpenSourceV612 !== 'own'){
+    html = html.replace(/<button class="project-more-v61"[\s\S]*?<\/button>/,'');
+    html = html.replace(/<div class="project-popover-v6 project-popover-desktop-v61">[\s\S]*?<\/div>/,'');
+  }
+  return html;
+};
+
+/* One shared disclosure icon for specification room accordions. */
+renderRoom = function(room,items){
+  return `<div class="room">
+    <button class="room-head" onclick="const body=this.nextElementSibling;body.hidden=!body.hidden;this.classList.toggle('is-collapsed',body.hidden)">
+      <span>${room}</span><img class="room-arrow-v612" src="assets/icons/dropdown-v612.png" alt="">
+    </button>
+    <div class="room-items">${items.map((x,i)=>specRow(room,x,i)).join('')}</div>
+  </div>`;
+};
+
+/* Specification row keeps a permanent selection column, so selection never shifts content. */
+specRow = function(room,x,i){
+  const p=PRODUCTS.find(y=>y.id===x.id);
+  return `<div class="spec-row spec-row-v612" data-key="${room}:${i}" onclick="specClick(event,'${room}',${i},'${x.id}')" ontouchstart="holdStart(event,'${room}',${i})" ontouchend="holdEnd()">
+    <div class="select-box"></div>
+    <img src="${p.image}" alt="">
+    <div class="spec-info">
+      <div class="spec-name">${p.name}</div>
+      <div class="spec-conf">${x.conf}</div>
+      <span class="spec-status status-badge-v69 ${statusClassV69(x.status)}">${x.status}</span>
+    </div>
+    <div class="spec-right">
+      <div class="spec-price">${money(p.price*x.qty)}</div>
+      <div class="qty"><button onclick="changeQty(event,'${room}',${i},-1)">−</button><span>${x.qty}</span><button onclick="changeQty(event,'${room}',${i},1)">+</button></div>
+    </div>
+  </div>`;
+};
+
+/* Standard title row: back icon and page title are always on the same baseline. */
+renderDesignerSpecsStandaloneV69 = function(){
+  return `<section class="designer-standalone-v69 designer-standalone-v612">
+    <div class="page-title-row-v612">${uiBackV69("route='profile';profileTab='';designerTabV4='projects';render()")}<h1>Спецификации</h1></div>
+    ${renderSpecsRoot()}
+  </section>`;
+};
+renderDesignerOrdersStandaloneV69 = function(){
+  return `<section class="designer-standalone-v69 designer-standalone-v612">
+    <div class="page-title-row-v612">${uiBackV69("route='profile';profileTab='';designerTabV4='projects';render()")}<h1>Заказы</h1></div>
+    ${renderDesignerOrdersV69()}
+  </section>`;
+};
+
+/* Supplier cards: analytics + edit buttons are a single standardized vertical action stack. */
+function editSupplierProductV612(id){
+  currentProduct = PRODUCTS.find(p=>p.id===id) || currentProduct;
+  openProductEditorV4();
+}
+renderSupplierCardsV4 = function(){
+ const own=PRODUCTS.filter(p=>p.brand==='Forma Dom');
+ return `<div class="supplier-section">
+  <div class="supplier-headline"><b>Карточки товаров</b><span>${own.length} товаров</span></div>
+  <div class="supplier-card-grid supplier-card-grid-v69">
+   ${own.map(p=>`<article class="supplier-product-card supplier-product-card-v69">
+    <div class="supplier-product-img" onclick="openProduct('${p.id}')">
+      <img src="${p.image}">
+      <div class="product-card-actions-v612">
+        <button class="product-analytics-icon-v69" onclick="event.stopPropagation();openProductAnalyticsV4('${p.id}')" aria-label="Аналитика"><img src="assets/icons/analytics-v69.png" alt=""></button>
+        <button class="product-edit-icon-v612" onclick="event.stopPropagation();editSupplierProductV612('${p.id}')" aria-label="Редактировать"><img src="assets/icons/edit-product-v612.png" alt=""></button>
+      </div>
+    </div>
+    <div class="supplier-product-copy"><div><b>${p.name}</b><span>${p.priceLabel}</span></div><small>${p.type}</small></div>
+   </article>`).join('')}
+  </div>
+ </div>`;
+};
+
+/* Black filled controls always get white copy/icons, based on their actual computed background. */
+function enforceBlackButtonContrastV612(){
+  document.querySelectorAll('button,[role="button"]').forEach(el=>{
+    const c=getComputedStyle(el).backgroundColor;
+    const m=c.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+    if(!m) return;
+    const [r,g,b]=m.slice(1).map(Number);
+    const lum=(0.2126*r+0.7152*g+0.0722*b);
+    const isDark=lum<55;
+    el.classList.toggle('black-control-v612',isDark);
+  });
+}
+
+/* Stronger viewport lock for desktop messenger. Only its two inner panes scroll. */
+function fitDesktopWorkspacesV612(){
+  const chatWorkspace=isDesktopV5()&&['chat','chats'].includes(route);
+  document.documentElement.classList.toggle('chat-root-v612',chatWorkspace);
+  document.body.classList.toggle('chat-workspace-v612',chatWorkspace);
+  if(!chatWorkspace || !isDesktopV5()) return;
+
+  const header=document.querySelector('.desktop-header');
+  const top=header?Math.max(0,header.getBoundingClientRect().bottom):0;
+  document.querySelectorAll('.desktop-messenger,.desktop-messenger-v66').forEach(el=>{
+    el.style.top=`${top}px`;
+    el.style.height=`${Math.max(280,window.innerHeight-top)}px`;
+    el.style.maxHeight=el.style.height;
+  });
+}
+
+/* Raise the floating support helper above any fixed composer. */
+function syncSupportBubbleV612(){
+  const b=document.getElementById('supportBubbleV5');
+  if(!b) return;
+  const hasBottomComposer=isDesktopV5()&&(
+    ['chat','chats'].includes(route) ||
+    (profileRole==='moderator'&&moderationSectionV5==='support'&&route==='profile')
+  );
+  b.classList.toggle('support-safe-v612',hasBottomComposer);
+}
+
+const renderV612Base=render;
+render=function(){
+  renderV612Base();
+  setTimeout(()=>{
+    fitDesktopWorkspacesV612();
+    enforceBlackButtonContrastV612();
+    syncSupportBubbleV612();
+  },0);
+};
+window.addEventListener('resize',()=>setTimeout(()=>{
+  fitDesktopWorkspacesV612();
+  syncSupportBubbleV612();
+},0));
