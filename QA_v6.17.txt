@@ -1,0 +1,31 @@
+SREDA v6.17 — consolidated responsive QA
+
+Implemented in canonical responsive components (not a trailing emergency patch):
+- Desktop navigation: persistent search bar removed; search icon opens full-width inline search in the same header row.
+- Desktop header/nav separators removed and shared spacing retained.
+- Product desktop right information column aligned to the top edge of product image.
+- Desktop chat/support workspaces remain viewport-height based; internal scroll only.
+- Publication viewer: backdrop/X close, compact typography, comment composer, 5-column desktop recommendations, mobile post sheet with recommendation masonry.
+- Visual cards now open publication viewer instead of navigating away.
+- Mobile bottom sheets unified to full available device height with dock/safe-area content clearance.
+- Mobile filters/notifications/support ticket use the same sheet geometry.
+- Mobile page side gutters unified.
+- Mobile favorites folders enlarged and aligned to page gutter.
+- Mobile feed/profile publication grids use 2-column masonry.
+- Feed/profile/project image radius unified via --card-radius.
+- Advertising banner outer radius removed.
+- Mobile chat list rebuilt as avatar / text / meta columns.
+- Mobile chat composer uses full available width and stays inside viewport.
+- Mobile chat info screen centered; obsolete action row hidden.
+- Mobile specification rows rebuilt and action icons constrained.
+- Supplier product analytics/edit icons constrained; pencil glyph smaller than its container.
+- Supplier profile: redundant large analytics/edit controls removed in new mobile profile composition; share/edit icon group used.
+- Orders status visual treatment normalized to request-style neutral chips.
+- Mobile moderator verification rows compacted; hamburger restored; support bubble hidden in moderator profile.
+- Share profile opens bottom sheet with Send to chat / Copy link / More (native share when supported).
+- Support bubble standardized near lower edge and kept above bottom dock.
+
+Static checks:
+- node --check js/app.js: PASS
+- CSS brace balance: PASS
+- ZIP integrity: run after packaging

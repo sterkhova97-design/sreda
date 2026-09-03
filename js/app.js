@@ -1159,7 +1159,7 @@ function renderProductEditorPreviewV4(){
 
 function moderatorProfileV4(){
  return `<div class="moderator">
-  <div class="moderator-head"><div><small>Личный кабинет</small><h2>Модератор</h2></div><span class="moderation-badge">7 новых</span></div>
+  <div class="moderator-mobile-menu-v617"><button class="hamburger-v5" onclick="openSettingsV4()">☰</button></div><div class="moderator-head"><div><small>Личный кабинет</small><h2>Модератор</h2></div><span class="moderation-badge">7 новых</span></div>
   <div class="public-tabs"><button class="${moderatorTabV4==='products'?'active':''}" onclick="moderatorTabV4='products';render()">Товары</button><button class="${moderatorTabV4==='brands'?'active':''}" onclick="moderatorTabV4='brands';render()">Бренды</button><button class="${moderatorTabV4==='designers'?'active':''}" onclick="moderatorTabV4='designers';render()">Верификация</button></div>
   ${moderatorTabV4==='products'?renderModerationProductsV4():moderatorTabV4==='brands'?renderModerationBrandsV4():renderModerationDesignersV4()}
  </div>`;
@@ -1590,11 +1590,7 @@ function supplierMobileV5(){
 }
 function supplierDesktopV5(){
  const tabs=[['cards','Товары'],['requests','Запросы'],['orders','Заказы'],['analytics','Аналитика']];
- return `<div class="desktop-cabinet">
-   <header class="desktop-cabinet-title"><div><small>Личный кабинет поставщика</small><h1>Forma Dom</h1></div><div><button onclick="openProductEditorV4()">＋ Добавить товар</button><button onclick="openSettingsV4()">Редактировать профиль</button></div></header>
-   <nav class="desktop-cabinet-tabs">${tabs.map(([k,n])=>`<button class="${profileTab===k?'active':''}" onclick="profileTab='${k}';render()">${n}</button>`).join('')}</nav>
-   ${profileTab==='cards'?renderSupplierCardsV4():profileTab==='analytics'?renderSupplierAnalyticsV4():profileTab==='requests'?renderSupplierRequests():renderOrdersV5()}
- </div>`;
+ return `<div class="desktop-cabinet desktop-cabinet-v66"><header class="desktop-profile-head-v66 supplier-head-v617"><div class="desktop-profile-avatar-v66">FD</div><div><small>Личный кабинет поставщика</small><h1>Forma Dom</h1><p>Поставщик мебели · Москва</p></div><div class="supplier-corner-actions-v617"><button onclick="shareProfileV5()">${shareIconV66()}</button><button onclick="openSettingsV4()"><img src="assets/icons/edit-product-v613.png" alt="Редактировать"></button></div></header><nav class="desktop-cabinet-tabs">${tabs.map(([k,n])=>`<button class="${profileTab===k?'active':''}" onclick="profileTab='${k}';render()">${n}</button>`).join('')}</nav>${profileTab==='cards'?renderSupplierCardsV4():profileTab==='analytics'?renderSupplierAnalyticsV4():profileTab==='requests'?renderSupplierRequests():renderOrdersV5()}</div>`;
 }
 function renderOrdersV5(){return `<div class="desktop-list-card"><h2>Заказы</h2>${[['№ 1284','Nube · Квартира на Патриках','В производстве'],['№ 1279','Shad · Спальня','Отгружено · Оставить отзыв']].map(x=>`<div><span><b>${x[0]}</b><small>${x[1]}</small></span><strong>${x[2]}</strong></div>`).join('')}</div>`}
 
@@ -1755,9 +1751,8 @@ function initSplashV5(){
 /* Floating support only desktop */
 function ensureSupportBubbleV5(){
  let b=document.getElementById('supportBubbleV5');
- if(isDesktopV5()){
-  if(!b){b=document.createElement('button');b.id='supportBubbleV5';b.className='support-bubble-v5';b.textContent='?';b.onclick=openSupportV5;document.body.appendChild(b)}
- } else b?.remove();
+ const hide=profileRole==='moderator'&&route==='profile';
+ if(!hide){if(!b){b=document.createElement('button');b.id='supportBubbleV5';b.className='support-bubble-v5';b.textContent='?';b.onclick=openSupportV5;document.body.appendChild(b)}} else b?.remove();
 }
 
 /* Shared mobile gutters and shell are updated after every render */
@@ -1979,14 +1974,7 @@ function renderProjectPostV6(){
 /* Supplier profile mobile icons, desktop consistency */
 supplierMobileV5 = function(){
  const tabs=[['cards','products','Товары'],['requests','requests','Запросы'],['analytics','analytics','Аналитика'],['marks','projects-tab','Отметки']];
- return `<div class="mobile-supplier-profile mobile-gutter">
-  <div class="mobile-role-tabs v6-role-tabs"><button onclick="profileRole='designer';render()">Дизайнер</button><button class="active">Поставщик</button><button onclick="profileRole='moderator';render()">Модератор</button></div>
-  <div class="mobile-profile-top-actions"><span></span><button class="hamburger-v5" onclick="openSettingsV4()">☰</button></div>
-  <div class="mobile-profile-avatar brand-avatar-mobile">FD</div><h1>Forma Dom</h1><p class="mobile-profile-sub">Поставщик мебели · Москва</p>
-  <div class="mobile-profile-quick"><button onclick="profileTab='analytics';render()">Аналитика</button><button onclick="openSettingsV4()">Редактировать</button><button onclick="shareProfileV5()">Поделиться профилем</button></div>
-  <div class="profile-tabs supplier-tabs v6-icon-tabs">${tabs.map(([t,ic,n])=>`<button title="${n}" class="profile-tab ${profileTab===t?'active':''}" onclick="profileTab='${t}';render()">${iconV6(ic,n)}</button>`).join('')}</div>
-  ${profileTab==='cards'?renderSupplierCardsV4():profileTab==='analytics'?renderSupplierAnalyticsV4():profileTab==='requests'?renderSupplierRequests():renderSupplierMarks()}
- </div>`;
+ return `<div class="mobile-supplier-profile mobile-gutter"><div class="mobile-role-tabs v6-role-tabs"><button onclick="profileRole='designer';render()">Дизайнер</button><button class="active">Поставщик</button><button onclick="profileRole='moderator';render()">Модератор</button></div><div class="mobile-profile-top-actions"><span></span><button class="hamburger-v5" onclick="openSettingsV4()">☰</button><button class="profile-share-icon-v66" onclick="shareProfileV5()">${shareIconV66()}</button><button class="profile-edit-icon-v617" onclick="openSettingsV4()"><img src="assets/icons/edit-product-v613.png" alt="Редактировать"></button></div><div class="mobile-profile-avatar brand-avatar-mobile">FD</div><h1>Forma Dom</h1><p class="mobile-profile-sub">Поставщик мебели · Москва</p><div class="profile-tabs supplier-tabs v6-icon-tabs">${tabs.map(([t,ic,n])=>`<button title="${n}" class="profile-tab ${profileTab===t?'active':''}" onclick="profileTab='${t}';render()">${iconV6(ic,n)}</button>`).join('')}</div>${profileTab==='cards'?renderSupplierCardsV4():profileTab==='analytics'?renderSupplierAnalyticsV4():profileTab==='requests'?renderSupplierRequests():renderSupplierMarks()}</div>`;
 };
 
 /* Orders: compact, 16px title/order/status + image + designer */
@@ -2075,7 +2063,7 @@ openSupportTicketV5 = function(id){
  const m=document.getElementById('modal');m.className='modal';
  m.innerHTML=`<div class="sheet support-ticket-sheet-v6"><div class="sheet-title"><div><h3>${t.id} · ${t.subject}</h3><small>${t.user} · ${t.role}</small></div><button class="close" onclick="closeModal()">×</button></div>
  <div class="support-messages-v6"><div class="support-bubble incoming">Здравствуйте! Подскажите, пожалуйста, как решить этот вопрос в сервисе?<small>12:40</small></div></div>
- <select class="support-status-select-v6"><option>${t.status}</option><option>В работе</option><option>Ожидаем пользователя</option><option>Решён</option><option>Закрыт</option></select>
+ ${supportStatusPickerV69(t)}
  <div class="support-composer-v6"><label>＋<input type="file" accept="image/*,.pdf" hidden onchange="toastV5('Файл прикреплён')"></label><input placeholder="Сообщение..."><button onclick="toastV5('Ответ отправлен')">↑</button></div></div>`;
 };
 
@@ -2478,438 +2466,15 @@ const DESKTOP_NAV_V65 = [
 ];
 
 function mountDesktopNavV65(){
-  const host=document.getElementById('desktopCompactNavV65');
-  if(!host || !isDesktopV5()) return;
-  host.innerHTML=`<div class="desktop-compact-nav-v65">
-    <button class="desktop-nav-top-v65 active" onclick="selectedCategory='Все';go('home')">Все</button>
-    ${DESKTOP_NAV_V65.map(([name,items])=>`
-      <details class="desktop-nav-group-v65">
-        <summary>${name}<span>⌄</span></summary>
-        <div class="desktop-nav-menu-v65">
-          ${items.map(item=>`<button onclick="selectedCategory='${item}';go('home');this.closest('details').removeAttribute('open')">${item}</button>`).join('')}
-        </div>
-      </details>`).join('')}
-    <form class="desktop-inline-search-v65" onsubmit="event.preventDefault();q=this.querySelector('input').value;go('search')">
-      <input placeholder="Поиск">
-      <button aria-label="Найти"><img src="assets/icons/search-v6.png" alt=""></button>
-    </form>
-  </div>`;
-}
-
-/* Never inject a second category row into page content. */
-desktopProjectCategoriesV61 = function(){ return ''; };
-desktopHomeCategoryBarV63 = function(){ return ''; };
-
-/* Stable desktop brand/product grids instead of CSS multi-columns. */
-const renderBrandV65Base = renderBrandV4;
-renderBrandV4 = function(){
-  const out = renderBrandV65Base();
-  return out;
-};
-
-const renderV65Base = render;
-render = function(){
-  renderV65Base();
-  mountDesktopNavV65();
-  document.querySelectorAll('#view > .desktop-catbar-v63, #view > .desktop-project-categories-v61').forEach(el=>el.remove());
-};
-
-/* Mount once on initial load too. */
-setTimeout(mountDesktopNavV65,0);
-
-
-/* ==================== SREDA v6.6 — consolidated responsive review ==================== */
-const V66_BACK_ICON='assets/icons/back-v66.png';
-const V66_PRINT_ICON='assets/icons/print-v66.png';
-const V66_SHARE_ICON='assets/icons/share-v66.png';
-const V66_DROP_ICON='assets/icons/dropdown-v66.png';
-let attachmentsTabV66='Фото';
-
-function backIconV66(label='Назад'){
-  return `<img src="${V66_BACK_ICON}" alt="${label}" class="back-icon-v66">`;
-}
-function shareIconV66(){ return `<img src="${V66_SHARE_ICON}" alt="Поделиться" class="share-icon-v66">`; }
-function dropdownIconV66(){ return `<img src="${V66_DROP_ICON}" alt="" class="dropdown-icon-v66">`; }
-
-/* All old back button renderers become the same icon-only control. */
-mobileBackV5 = function(action){
- return `<button class="mobile-back-v5 back-only-v66" onclick="${action||"history.back()"}" aria-label="Назад">${backIconV66()}</button>`;
-};
-
-/* Desktop nav: only one row. Hover submenus, search at row end. */
-function mountDesktopNavV65(){
  const host=document.getElementById('desktopCompactNavV65');
  if(!host || !isDesktopV5()) return;
- host.innerHTML=`<div class="desktop-compact-nav-v65 desktop-compact-nav-v66">
-   <button class="desktop-nav-top-v65 active" onclick="selectedCategory='Все';go('home')">Все</button>
-   ${DESKTOP_NAV_V65.map(([name,items])=>`
-     <div class="desktop-nav-group-v66">
-       <button class="desktop-nav-group-button-v66">${name}${dropdownIconV66()}</button>
-       <div class="desktop-nav-menu-v65 desktop-nav-menu-v66">
-         ${items.map(item=>`<button onclick="selectedCategory='${item}';go('home')">${item}</button>`).join('')}
-       </div>
-     </div>`).join('')}
-   <form class="desktop-inline-search-v65 desktop-inline-search-v66" onsubmit="event.preventDefault();q=this.querySelector('input').value;go('search')">
-     <input placeholder="Поиск">
-     <button aria-label="Найти"><img src="assets/icons/search-v6.png" alt=""></button>
-   </form>
- </div>`;
-}
-
-/* Home: desktop no longer renders the obsolete second category row. */
-const renderHomeV66Base = renderHomeV4;
-renderHomeV4 = function(){
- let html=renderHomeV66Base();
- if(isDesktopV5()) html=html.replace(/<div class="feed-tabs">[\s\S]*?<\/div>\s*(?=<div class="stories">)/,'');
- return html;
-};
-
-/* Shared chip component used by favorites, request filters, moderator filters. */
-function chipV66(text,active,onclick,count=''){
- return `<button class="ui-chip-v66 ${active?'active':''}" onclick="${onclick}">${text}${count!==''?` <small>${count}</small>`:''}</button>`;
-}
-
-/* Favorites: no subtitle; folders styled like popular queries; + centered on heading. */
-renderFavoritesV4 = function(){
- const items=PRODUCTS.filter(p=>favorites.has(p.id)&&favCategoryMatchV5(p));
- const countAll=PRODUCTS.filter(p=>favorites.has(p.id)).length;
- return `<div class="favorites-v4 mobile-gutter page-gutter-v66">
-   <div class="favorites-head-v66"><h2>Избранное</h2>
-     <button class="favorite-plus-v66" onclick="createFavoriteFolderV4()" aria-label="Новая папка"><img src="assets/icons/plus-v66.png" alt=""></button>
-   </div>
-   <div class="favorite-folders favorite-folder-chips-v66">
-    ${chipV66('Все товары',true,'void(0)',countAll)}
-    ${favoriteFoldersV5.map((f,i)=>chipV66(f,false,'void(0)',[8,12,5,3][i]||0)).join('')}
-   </div>
-   ${favoriteCategoryTabsV5()}
-   <div class="masonry">${items.length?items.map(feedCardV4).join(''):`<div class="favorite-empty">Нажмите ♡ у товара,<br>чтобы сохранить его.</div>`}</div>
- </div>`;
-};
-
-/* Product picker arrow uses supplied icon. */
-pickerButtonHTMLV5 = function(label,value,items){
- return `<button class="v4-picker picker-v66" onclick='openPickerV6(this,${JSON.stringify(label)},${JSON.stringify(items)})'>
-   <span><small>${label}</small><b>${value}</b></span>${dropdownIconV66()}</button>`;
-};
-
-/* Product desktop: icon-only favorite on image, no share in details, clean brand row. */
-const renderProductV66Before = renderProductV4;
-renderProductV4 = function(){
- const p=currentProduct, sizes=p.bedSizes||p.sizes||['Стандарт'];
- if(!isDesktopV5()) return renderProductV66Before();
- return `<div class="desktop-product-page desktop-product-v66">
-   <div class="desktop-product-gallery">
-     <button class="desktop-back back-only-v66" onclick="productBackV6()">${backIconV66()}</button>
-     <div class="desktop-product-main-v66"><img class="desktop-main-product-img" src="${p.image}" alt="${p.name}">
-       <button class="desktop-image-fav-v66 ${favorites.has(p.id)?'is-favorite':''}" onclick="toggleFav('${p.id}',event)">${favorites.has(p.id)?'♥':'♡'}</button>
-     </div>
-     <div class="desktop-thumb-row"><img src="${p.image}"><img src="${findVisualForProductV5(p)}"><img src="${p.image}"></div>
-   </div>
-   <aside class="desktop-product-info">
-     <button class="desktop-brand-link brand-clean-v66" onclick="openBrandV4('${p.brand}')">${p.brand}</button>
-     <small>${p.type}</small>
-     <div class="desktop-product-title"><h1>${p.name}</h1><strong>${p.priceLabel}</strong></div>
-     ${pickerButtonHTMLV5('Отделка',(p.finishes||['Стандарт'])[0],p.finishes||['Стандарт'])}
-     ${pickerButtonHTMLV5(p.bedSizes?'Спальное место':'Размер / формат',sizes[0],sizes)}
-     <div class="desktop-product-cta"><button class="primary" onclick="specModal()">Добавить в спецификацию</button><button onclick="requestCalc()">Запросить расчёт</button></div>
-     <div class="desktop-meta"><span>Срок производства</span><b>${p.production}</b></div>
-     <section class="desktop-description-v6"><h3>Описание</h3><p>${p.description}</p></section>
-     <div class="v4-accordions desktop-product-accordions v6-clean-accordions">
-       ${accordionV4('Характеристики',`<p>Материал: ${p.material||'—'}<br>Наличие: ${p.availability||'—'}<br>Цвет: ${p.color||'—'}</p>`)}
-       ${accordionV4('Схема с размерами',`<div class="doc-preview"><div class="dimension-demo">↔ ${sizes[0]}</div></div>`)}
-       ${accordionV4('Инструкция',`<div class="doc-row">PDF · Инструкция <button>Открыть</button></div>`)}
-       ${accordionV4('Рекомендации по уходу',`<p>Использовать мягкую сухую ткань.</p>`)}
-       ${accordionV4('Отзывы',`<div class="review-mini"><b>4,9 ★</b><span>12 отзывов</span></div>`)}
-     </div>
-   </aside>
- </div>`;
-};
-
-/* Filters: unified dropdown arrow; compact ranges. */
-openFilters = function(){
- const m=document.getElementById('modal');m.className='modal';
- const details=(title,body,open='')=>`<details class="filter-detail-v66" ${open}><summary>${title}${dropdownIconV66()}</summary><div>${body}</div></details>`;
- m.innerHTML=`<div class="sheet filters filter-sheet-v66">
-   <div class="sheet-title"><h3>Фильтры</h3><button class="close" onclick="closeModal()">×</button></div>
-   <div class="filter-scroll-v66">
-    ${details('Категория',filterSectionBodyV6('category',CATEGORIES))}
-    ${details('Материал',filterSectionBodyV6('material',['Все',...MATERIAL_FILTERS_V5]))}
-    ${details('Цвет',filterSectionBodyV6('color',['Все','Светлый','Чёрный','Коричневый','Зелёный','Терракотовый','Белый']))}
-    ${details('Размер',`<div class="range-list-v66">
-      <label><span>Ширина</span><input placeholder="от"><em>—</em><input placeholder="до"></label>
-      <label><span>Глубина</span><input placeholder="от"><em>—</em><input placeholder="до"></label>
-      <label><span>Высота</span><input placeholder="от"><em>—</em><input placeholder="до"></label>
-    </div>`)}
-    ${details('Декор',`<div class="filter-options">${['Все','Однотонный','Геометрия','Флора','Абстракция'].map(x=>`<button class="filter-option">${x}</button>`).join('')}</div>`)}
-    ${details('Цена',`<div class="price-range-v66"><input id="minP" type="number" value="${filters.minPrice}" placeholder="от"><span>—</span><input id="maxP" type="number" value="${filters.maxPrice}" placeholder="до"></div>`)}
-   </div>
-   <div class="filter-actions-v66"><button class="btn primary" onclick="applyFilters()">Показать</button><button class="btn" onclick="resetFilters()">Сбросить</button></div>
- </div>`;
-};
-
-/* Profile share becomes icon and both role profiles use same mobile header geometry. */
-function profileShareButtonV66(){
- return `<button class="profile-share-icon-v66" onclick="shareProfileV5()" aria-label="Поделиться профилем">${shareIconV66()}</button>`;
-}
-const designerProfileBaseV66 = renderDesignerProfileUnifiedV5;
-renderDesignerProfileUnifiedV5 = function(own){
- if(isDesktopV5()) return designerProfileBaseV66(own);
- const key='designer:'+currentDesignerV4;
- const verified=`<img class="verified-icon-v6" src="assets/icons/verified-v6.png" alt="Верифицирован">`;
- return `<div class="mobile-profile-unified mobile-gutter page-gutter-v66">
-   ${own?`<div class="mobile-role-tabs role-tabs-single-v66"><button class="active" onclick="profileRole='designer';render()">Дизайнер</button><button onclick="profileRole='supplier';render()">Поставщик</button><button onclick="profileRole='moderator';render()">Модератор</button></div>`:''}
-   <div class="mobile-profile-corner-v66">${own?`<button class="hamburger-v5" onclick="openSettingsV4()">☰</button>${profileShareButtonV66()}`:''}</div>
-   <div class="mobile-profile-avatar">АС</div>
-   <h1 class="v6-name-line">Анна Смирнова ${verified}</h1><p class="mobile-profile-sub">Дизайнер интерьеров · Москва</p>
-   <div class="stats mobile-stats"><div><b>24</b><small>Проекты</small></div><div><b>1 245</b><small>Подписчики</small></div><div><b>320</b><small>Подписки</small></div></div>
-   ${own?`<div class="mobile-profile-quick profile-quick-v66"><button onclick="profileTab='analytics';render()">Аналитика</button><button onclick="openSettingsV4()">Редактировать</button></div>`:`<div class="public-actions">${followButtonV4(key)}<button class="v4-message" onclick="currentChat='Анна Смирнова';route='chat';render()">Сообщение</button></div>`}
-   <p class="mobile-profile-bio">Жилые и общественные интерьеры. Москва / Европа.</p>
-   <div class="public-tabs mobile-profile-tabs full-width-tabs-v66">
-     <button title="Проекты" class="${designerTabV4==='projects'?'active':''}" onclick="designerTabV4='projects';render()">${iconV6('projects-tab','Проекты')}</button>
-     ${own?`<button title="Спецификация" class="${designerTabV4==='specs'?'active':''}" onclick="designerTabV4='specs';currentProject=null;render()">${iconV6('spec','Спецификация')}</button>`:''}
-     <button class="${designerTabV4==='saved'?'active':''}" onclick="designerTabV4='saved';render()">Публикации</button>
-   </div>
-   ${profileTab==='orders'?renderDesignerOrdersV66():designerTabV4==='projects'?renderDesignerProjectsV4():designerTabV4==='specs'?renderSpecsRoot():`<div class="masonry mobile-profile-grid">${VISUALS.map(feedCardV4).join('')}</div>`}
- </div>`;
-};
-
-supplierMobileV5 = function(){
- const tabs=[['cards','products','Товары'],['requests','requests','Запросы'],['analytics','analytics','Аналитика'],['marks','projects-tab','Отметки']];
- return `<div class="mobile-supplier-profile mobile-gutter page-gutter-v66">
-  <div class="mobile-role-tabs role-tabs-single-v66"><button onclick="profileRole='designer';render()">Дизайнер</button><button class="active">Поставщик</button><button onclick="profileRole='moderator';render()">Модератор</button></div>
-  <div class="mobile-profile-corner-v66"><button class="hamburger-v5" onclick="openSettingsV4()">☰</button>${profileShareButtonV66()}</div>
-  <div class="mobile-profile-avatar brand-avatar-mobile">FD</div><h1>Forma Dom</h1><p class="mobile-profile-sub">Поставщик мебели · Москва</p>
-  <div class="mobile-profile-quick profile-quick-v66"><button onclick="profileTab='analytics';render()">Аналитика</button><button onclick="openSettingsV4()">Редактировать</button></div>
-  <div class="profile-tabs supplier-tabs full-width-tabs-v66">${tabs.map(([t,ic,n])=>`<button title="${n}" class="profile-tab ${profileTab===t?'active':''}" onclick="profileTab='${t}';render()">${iconV6(ic,n)}</button>`).join('')}</div>
-  ${profileTab==='cards'?renderSupplierCardsV4():profileTab==='analytics'?renderSupplierAnalyticsV4():profileTab==='requests'?renderSupplierRequests():renderSupplierMarks()}
- </div>`;
-};
-
-/* Designer orders are an actual page/list. */
-function renderDesignerOrdersV66(){
- const rows=[
-  {no:'№ 1284',project:'Квартира на Патриках',supplier:'Forma Dom',item:'Nube',sum:'523 000 ₽',date:'28.08.2026',status:'В производстве'},
-  {no:'№ 1279',project:'Спальня',supplier:'Forma Dom',item:'Shad',sum:'230 000 ₽',date:'20.08.2026',status:'Отгружено'},
-  {no:'№ 1268',project:'Дом в Подмосковье',supplier:'METALNO',item:'MODEL A H',sum:'52 000 ₽',date:'11.08.2026',status:'Ожидает оплаты'}
- ];
- return `<section class="designer-orders-v66"><h2>Заказы</h2>${rows.map(x=>`<article>
-  <div><b>${x.no}</b><strong>${x.item}</strong><small>${x.project} · ${x.supplier}<br>${x.date} · ${x.sum}</small></div>
-  <span class="order-status-v66 status-${x.status==='Отгружено'?'shipped':x.status==='Ожидает оплаты'?'pay':'production'}">${x.status}</span>
-  ${x.status==='Отгружено'?'<button class="review-order-v66">Оставить отзыв</button>':''}
- </article>`).join('')}</section>`;
-}
-const accountNavigateV66Base=accountNavigateV5;
-accountNavigateV5 = function(k){
- if(profileRole==='designer' && k==='orders'){
-  closeDesktopOverlaysV5(); route='profile'; profileTab='orders'; render(); return;
- }
- accountNavigateV66Base(k);
-};
-
-/* Supplier requests match messenger row scale and open chat. */
-renderSupplierRequests = function(){
- const requests=[
-  {name:'Nube',project:'Квартира на Патриках',date:'12:40',day:'сегодня',status:'Новые',chat:'Forma Dom'},
-  {name:'Shad',project:'Дом в Подмосковье',date:'11:15',day:'вчера',status:'В работе',chat:'Shad'},
-  {name:'Core × 4',project:'Офисное пространство',date:'18:05',day:'08.08',status:'Расчёт отправлен',chat:'Core'}
- ];
- const statuses=['Все','Новые','В работе','Расчёт отправлен','Завершённые'];
- const shown=supplierRequestFilter==='Все'?requests:requests.filter(r=>r.status===supplierRequestFilter);
- return `<div class="supplier-requests-v66">
-   <div class="supplier-headline-v66"><b>Запросы на расчёт</b><span>${requests.length}</span></div>
-   <div class="request-folders-v66">${statuses.map(st=>chipV66(st,supplierRequestFilter===st,`supplierRequestFilter='${st}';render()`,st==='Все'?requests.length:requests.filter(r=>r.status===st).length)).join('')}</div>
-   <div class="request-list-v66">${shown.map(r=>`<button class="request-row-v66" onclick="currentChat='${r.chat}';route='chat';render()">
-     <div class="request-avatar-v66">${r.name.slice(0,2).toUpperCase()}</div>
-     <div class="request-main-v66"><b>${r.name}</b><small>${r.project}</small></div>
-     <div class="request-meta-v66"><time>${r.day} · ${r.date}</time><span>${r.status}</span></div>
-   </button>`).join('')}</div>
- </div>`;
-};
-
-/* Desktop supplier gets designer-like wide profile layout. */
-supplierDesktopV5 = function(){
- const tabs=[['cards','Товары'],['requests','Запросы'],['orders','Заказы'],['analytics','Аналитика']];
- return `<div class="desktop-cabinet desktop-cabinet-v66">
-   <header class="desktop-profile-head-v66">
-    <div class="desktop-profile-avatar-v66">FD</div>
-    <div><small>Личный кабинет поставщика</small><h1>Forma Dom</h1><p>Поставщик мебели · Москва</p></div>
-    <div class="desktop-profile-actions-v66"><button onclick="openProductEditorV4()">＋ Добавить товар</button><button onclick="openSettingsV4()">Редактировать профиль</button><button class="desktop-share-icon-v66" onclick="shareProfileV5()">${shareIconV66()}</button></div>
-   </header>
-   <nav class="desktop-cabinet-tabs">${tabs.map(([k,n])=>`<button class="${profileTab===k?'active':''}" onclick="profileTab='${k}';render()">${n}</button>`).join('')}</nav>
-   ${profileTab==='cards'?renderSupplierCardsV4():profileTab==='analytics'?renderSupplierAnalyticsV4():profileTab==='requests'?renderSupplierRequests():renderOrdersV5()}
- </div>`;
-};
-
-/* Orders: colored status badges. */
-renderOrdersV5 = function(){
- const rows=[
-  {no:'№ 1284',name:'Nube',project:'Квартира на Патриках',designer:'Анна Смирнова',status:'В производстве',img:'assets/products/nube.webp'},
-  {no:'№ 1279',name:'Shad',project:'Спальня',designer:'Анна Смирнова',status:'Отгружено',img:'assets/products/shad.webp'}
- ];
- return `<div class="orders-v66"><h2>Заказы</h2>${rows.map(x=>`<article><img src="${x.img}"><div><b>${x.no}</b><strong>${x.name}</strong><small>${x.project} · ${x.designer}</small></div><span class="order-status-v66 ${x.status==='Отгружено'?'status-shipped':'status-production'}">${x.status}</span>${x.status==='Отгружено'?'<button class="review-order-v66">Оставить отзыв</button>':''}</article>`).join('')}</div>`;
-};
-
-/* Desktop and mobile chat list: readable avatars, unread numeric bubble only. */
-renderChats = function(){
- const chats=[
-  ['Forma Dom','Расчёт по Nube готов','14:48','2'],['Nube','Отправлена карточка товара','14:36',''],['METALNO','Срок производства 4 недели','13:42','1'],['Анна Смирнова','Спасибо!','12:18',''],['Проект Патрики','Групповой чат · 4 участника','вчера','3']
- ];
- if(!isDesktopV5()){
-  return `<div class="mobile-chat-list-v66">${chats.map(x=>`<button class="mobile-chat-row-v66" onclick="openChat('${x[0]}')"><span class="chat-avatar-v66">${x[0].slice(0,2)}</span><span><b>${x[0]}</b><small>${x[1]}</small></span><time>${x[2]}${x[3]?`<i>${x[3]}</i>`:''}</time></button>`).join('')}</div>`;
- }
- return `<div class="desktop-messenger desktop-messenger-v66">
-  <aside class="desktop-chat-list"><div class="desktop-chat-list-head"><h2>Чаты</h2><button class="plain-plus-v66" onclick="toastV5('Создание группы')">＋</button></div>
-   <div class="desktop-chat-search-v66"><input placeholder="Поиск"></div>
-   <div class="desktop-chat-folders-v66">${['Все чаты','Проекты','Поставщики'].map((x,i)=>chipV66(x,i===0,'void(0)')).join('')}<button class="folder-plus-v66">＋</button></div>
-   ${chats.map((x,i)=>`<button class="desktop-chat-row ${i===0?'active':''}" onclick="currentChat='${x[0]}';route='chat';render()"><span class="chat-avatar-v66">${x[0].slice(0,2)}</span><span><b>${x[0]}</b><small>${x[1]}</small></span><time>${x[2]}${x[3]?`<i>${x[3]}</i>`:''}</time></button>`).join('')}
-  </aside><section class="desktop-chat-empty"><span>Выберите чат</span></section></div>`;
-};
-
-/* Attachments are a separate screen like Telegram. */
-openSharedMedia = function(){
- attachmentsTabV66='Фото';
- route='attachmentsV66';
- render();
-};
-function renderAttachmentsV66(){
- const tabs=['Фото','Видео','Файлы','Ссылки'];
- const media=messages.filter(m=>m.chat===currentChat&&m.attachment);
- return `<section class="attachments-page-v66 page-gutter-v66">
-   <header class="attachments-head-v66"><button class="back-only-v66" onclick="route='chat';render()">${backIconV66()}</button><div><b>${currentChat}</b><small>Вложения</small></div><span></span></header>
-   <nav class="attachments-tabs-v66">${tabs.map(t=>`<button class="${attachmentsTabV66===t?'active':''}" onclick="attachmentsTabV66='${t}';render()">${t}</button>`).join('')}</nav>
-   <div class="attachments-content-v66">${attachmentsTabV66==='Фото'
-    ? `<div class="attachments-photo-grid-v66">${media.filter(m=>m.attachment?.type==='image').map(m=>`<img src="${m.attachment.url}" alt="">`).join('')||'<p>Фотографий пока нет</p>'}</div>`
-    : attachmentsTabV66==='Видео'
-    ? `<div>${media.filter(m=>m.attachment?.type==='video').map(m=>`<video controls src="${m.attachment.url}"></video>`).join('')||'<p>Видео пока нет</p>'}</div>`
-    : attachmentsTabV66==='Файлы'
-    ? `<div>${media.filter(m=>m.attachment&&!['image','video'].includes(m.attachment.type)).map(m=>`<div class="attachment-file-row-v66"><b>${m.attachment.name||'Файл'}</b><small>${m.attachment.meta||''}</small></div>`).join('')||'<p>Файлов пока нет</p>'}</div>`
-    : '<p>Ссылок пока нет</p>'}
-   </div>
- </section>`;
-}
-
-/* Responsive clean chat. */
-function renderChatV66(){
- const rel=messages.filter(m=>!m.chat||m.chat===currentChat);
- if(isDesktopV5()){
-  const listHTML=renderChats().match(/<aside class="desktop-chat-list">([\s\S]*?)<\/aside>/)?.[1]||'';
-  return `<div class="desktop-messenger desktop-messenger-open desktop-messenger-v66">
-   <aside class="desktop-chat-list">${listHTML}</aside>
-   <section class="desktop-chat-pane">
-    <header><div class="chat-avatar-v66">${currentChat.slice(0,2).toUpperCase()}</div><div><b>${currentChat}</b><small>в сети</small></div><button onclick="openSharedMedia()">•••</button></header>
-    <div class="desktop-message-scroll">${rel.length?rel.map(chatMessageHTML).join(''):'<div class="desktop-chat-date">Начало переписки</div>'}</div>
-    <div class="desktop-composer"><button>＋</button><input id="msg" placeholder="Сообщение" onkeydown="if(event.key==='Enter')sendMsg()"><button onclick="sendMsg()">↑</button></div>
-   </section></div>`;
- }
- return `<section class="telegram-chat chat-fullscreen-v66">
-   <header class="chat-head-v66">
-     <button class="back-only-v66" onclick="go('chats')">${backIconV66()}</button>
-     <div class="chat-avatar-v66">${currentChat.slice(0,2).toUpperCase()}</div>
-     <div class="chat-head-main"><b>${currentChat}</b><small>в сети</small></div>
-     <button class="chat-more-v66" onclick="openSharedMedia()">•••</button>
-   </header>
-   <div class="messages messages-v66">${rel.length?rel.map(chatMessageHTML).join(''):`<div class="bubble"><div class="bubble-text">Здравствуйте! Напишите, что вас интересует.</div><small class="msg-time">сейчас</small></div>`}</div>
-   <div class="composer composer-v66"><button class="composer-icon" onclick="toggleAttachPanel()">＋</button><input id="msg" placeholder="Сообщение" onkeydown="if(event.key==='Enter')sendMsg()"><button class="mic-btn">◉</button><button class="send-btn" onclick="sendMsg()">↑</button></div>
- </section>`;
-}
-renderChat = renderChatV66;
-
-/* Project desktop cards: half-height; proper responsive grid. */
-renderDesignerProjectsV5 = function(){
- return `<div class="desktop-project-grid-v66">${DESIGNER_PROJECTS_V4.map(p=>`<article onclick="openDesignerProjectV4('${p.id}')"><img src="${p.cover}"><h3>${p.title}</h3><span>${p.city}</span></article>`).join('')}</div>`;
-};
-
-/* Story title can use 2 complete lines. */
-const openStoryV66Base=openStoryV4;
-
-/* Settings separators and global back icons. */
-const renderSettingsV66Base=renderSettingsV4;
-
-/* Main render route extension and nav hiding. */
-const renderV66Base=render;
-render = function(){
- const v=document.getElementById('view');
- if(route==='attachmentsV66') v.innerHTML=renderAttachmentsV66();
- else renderV66Base();
- mountDesktopNavV65();
- document.querySelectorAll('#view > .feed-tabs').forEach(el=>{if(isDesktopV5())el.remove()});
- const nav=document.querySelector('.bottom-nav');
- if(!isDesktopV5() && ['chat','story','attachmentsV66'].includes(route)) nav?.classList.add('route-hidden-v66');
- else nav?.classList.remove('route-hidden-v66');
-};
-
-/* Re-render on viewport resize so both mobile and desktop remain responsive. */
-let resizeTimerV66=null;
-window.addEventListener('resize',()=>{
- clearTimeout(resizeTimerV66);
- resizeTimerV66=setTimeout(()=>{shellSyncV5();render();},120);
-});
-
-/* ==================== SREDA v6.7 — verified cleanup ==================== */
-const designerProfileBaseV67 = renderDesignerProfileUnifiedV5;
-renderDesignerProfileUnifiedV5 = function(own){
-  if(!isDesktopV5()) return designerProfileBaseV67(own);
-  const key='designer:'+currentDesignerV4;
-  const verified=`<img class="verified-icon-v6" src="assets/icons/verified-v6.png" alt="Верифицирован">`;
-  return `<div class="desktop-designer-profile desktop-designer-profile-v67">
-    <header class="desktop-designer-head"><div class="designer-avatar">АС</div><div><h1>Анна Смирнова ${verified}</h1><p>Дизайнер интерьеров · Москва</p></div>
-      <div class="desktop-designer-actions">${own?`<button onclick="openDesignerV4('Анна Смирнова')">Публичный профиль</button><button onclick="openSettingsV4()">Редактировать профиль</button>`:`${followButtonV4(key)}<button onclick="currentChat='Анна Смирнова';route='chat';render()">Сообщение</button>`}</div>
-    </header>
-    ${own?`<button class="desktop-designer-share-v67" onclick="shareProfileV5()" aria-label="Поделиться профилем">${shareIconV66()}</button>`:''}
-    <div class="desktop-designer-stats"><div><b>24</b><span>Проекты</span></div><div><b>1 245</b><span>Подписчики</span></div><div><b>320</b><span>Подписки</span></div></div>
-    ${own?`<div class="desktop-profile-quick desktop-profile-quick-v67"><button onclick="profileTab='analytics';render()">Аналитика</button><button onclick="openSettingsV4()">Редактировать</button></div>`:''}
-    <p class="desktop-bio">Жилые и общественные интерьеры. Москва / Европа.</p>
-    <div class="desktop-designer-tabs"><button class="${designerTabV4==='projects'?'active':''}" onclick="designerTabV4='projects';render()">Проекты</button><button class="${designerTabV4==='saved'?'active':''}" onclick="designerTabV4='saved';render()">Публикации</button>${own?`<button class="${designerTabV4==='specs'?'active':''}" onclick="designerTabV4='specs';render()">Спецификация</button>`:''}</div>
-    ${designerTabV4==='projects'?renderDesignerProjectsV5():designerTabV4==='specs'?renderSpecsRoot():`<div class="desktop-brand-masonry">${VISUALS.map(desktopVisualCardV5).join('')}</div>`}
-  </div>`;
-};
-
-const renderProductBaseV67 = renderProductV4;
-renderProductV4 = function(){
-  if(!isDesktopV5()) return renderProductBaseV67();
-  const p=currentProduct, sizes=p.bedSizes||p.sizes||['Стандарт'];
-  const similar=PRODUCTS.filter(x=>x.id!==p.id&&(x.category===p.category||x.type===p.type)).slice(0,4);
-  return `<div class="desktop-product-page desktop-product-v66 desktop-product-v67">
-    <div class="desktop-product-gallery desktop-product-gallery-v67">
-      <button class="desktop-back back-only-v66" onclick="productBackV6()">${backIconV66()}</button>
-      <div class="desktop-product-main-v66"><img class="desktop-main-product-img" src="${p.image}" alt="${p.name}"><button class="desktop-image-fav-v66 ${favorites.has(p.id)?'is-favorite':''}" onclick="toggleFav('${p.id}',event)">${favorites.has(p.id)?'♥':'♡'}</button></div>
-      <div class="desktop-thumb-row"><img src="${p.image}"><img src="${findVisualForProductV5(p)}"><img src="${p.image}"></div>
-    </div>
-    <aside class="desktop-product-info desktop-product-info-v67">
-      <button class="desktop-brand-link brand-clean-v66" onclick="openBrandV4('${p.brand}')">${p.brand}</button><small>${p.type}</small>
-      <div class="desktop-product-title"><h1>${p.name}</h1><strong>${p.priceLabel}</strong></div>
-      ${pickerButtonHTMLV5('Отделка',(p.finishes||['Стандарт'])[0],p.finishes||['Стандарт'])}
-      ${pickerButtonHTMLV5(p.bedSizes?'Спальное место':'Размер / формат',sizes[0],sizes)}
-      <div class="desktop-product-cta"><button class="primary" onclick="specModal()">Добавить в спецификацию</button><button onclick="requestCalc()">Запросить расчёт</button></div>
-      <div class="desktop-meta"><span>Срок производства</span><b>${p.production}</b></div>
-      <section class="desktop-description-v6"><h3>Описание</h3><p>${p.description}</p></section>
-      <div class="v4-accordions desktop-product-accordions v6-clean-accordions">${accordionV4('Характеристики',`<p>Материал: ${p.material||'—'}<br>Наличие: ${p.availability||'—'}<br>Цвет: ${p.color||'—'}</p>`)}${accordionV4('Схема с размерами',`<div class="doc-preview"><div class="dimension-demo">↔ ${sizes[0]}</div></div>`)}${accordionV4('Инструкция',`<div class="doc-row">PDF · Инструкция <button>Открыть</button></div>`)}${accordionV4('Рекомендации по уходу',`<p>Использовать мягкую сухую ткань.</p>`)}${accordionV4('Отзывы',`<div class="review-mini"><b>4,9 ★</b><span>12 отзывов</span></div>`)}</div>
-    </aside>
-    <section class="desktop-similar desktop-similar-v67"><h2>Похожие товары</h2><div class="desktop-product-grid">${similar.map(desktopProductCardV5).join('')}</div></section>
-  </div>`;
-};
-
-
-/* ==================== SREDA v6.16 — canonical desktop behavior ==================== */
-function mountDesktopNavV65(){
- const host=document.getElementById('desktopCompactNavV65');
- if(!host || !isDesktopV5()) return;
- host.innerHTML=`<div class="desktop-nav-shell-v68">
-   <div class="desktop-compact-nav-v65 desktop-compact-nav-v66 desktop-compact-nav-v68">
+ const nav=`<div class="desktop-compact-nav-v65 desktop-compact-nav-v66 desktop-compact-nav-v68">
      <button class="desktop-nav-top-v65 ${selectedCategory==='Все'?'active':''}" onclick="selectedCategory='Все';go('home')">Все</button>
-     ${DESKTOP_NAV_V65.map(([name,items])=>`
-       <div class="desktop-nav-group-v66 desktop-nav-group-v68">
-         <button class="desktop-nav-group-button-v66 ${selectedCategory===name||items.includes(selectedCategory)?'active':''}">${name}</button>
-         <div class="desktop-nav-menu-v65 desktop-nav-menu-v66">
-           ${items.map(item=>`<button onclick="selectedCategory='${item}';go('home')">${item}</button>`).join('')}
-         </div>
-       </div>`).join('')}
-   </div>
-   <form class="desktop-global-search-v68" onsubmit="event.preventDefault();q=this.querySelector('input').value;go('search')">
-     <input id="desktopGlobalSearchV68" placeholder="Товар, модель или визуализация" value="${route==='search'?(q||''):''}">
-     <button aria-label="Найти"><img src="assets/icons/search-v6.png" alt=""></button>
-   </form>
- </div>`;
+     ${DESKTOP_NAV_V65.map(([name,items])=>`<div class="desktop-nav-group-v66 desktop-nav-group-v68"><button class="desktop-nav-group-button-v66 ${selectedCategory===name||items.includes(selectedCategory)?'active':''}">${name}</button><div class="desktop-nav-menu-v65 desktop-nav-menu-v66">${items.map(item=>`<button onclick="selectedCategory='${item}';go('home')">${item}</button>`).join('')}</div></div>`).join('')}
+     <button class="desktop-nav-search-v617" onclick="toggleDesktopSearchV617(true)" aria-label="Поиск"><img src="assets/icons/search-v6.png" alt=""></button>
+   </div>`;
+ const search=`<form class="desktop-search-expanded-v617" onsubmit="event.preventDefault();q=this.querySelector('input').value;go('search')"><input id="desktopGlobalSearchV617" placeholder="Товар, модель или визуализация" value="${route==='search'?(q||''):''}"><button aria-label="Найти"><img src="assets/icons/search-v6.png" alt=""></button><button type="button" onclick="toggleDesktopSearchV617(false)" aria-label="Закрыть поиск">×</button></form>`;
+ host.innerHTML=`<div class="desktop-nav-shell-v68">${desktopSearchOpenV617?search:nav}</div>`;
 }
 
 const renderSearchBaseV68 = renderSearch;
@@ -2937,6 +2502,13 @@ renderHomeV4 = function(){
  return `<div class="feed-tabs">${CATEGORIES.map(c=>`<button class="feed-tab ${c===selectedCategory?'active':''}" onclick="selectedCategory='${c}';render()">${c}</button>`).join('')}</div>${promo}<div class="masonry ${selectedCategory==='Все'?'':'category-feed-v69'}">${mix.map(feedCardV4).join('')}</div>`;
 };
 
+feedCardV4 = function(item){
+ if(item.kind==='visual'){
+   return `<article class="feed-card"><div class="feed-media" onclick="openPublicationV69('${item.id}')"><img src="${item.image}" alt="${item.title}"><button class="feed-heart" onclick="toggleFav('${item.id}',event)">${favorites.has(item.id)?'♥':'♡'}</button></div><div class="feed-caption"><div class="caption-main"><span class="caption-name">${item.title}</span></div><div class="caption-sub">${item.subtitle} · Анна Смирнова</div></div></article>`;
+ }
+ return `<article class="feed-card" onclick="openProduct('${item.id}')"><div class="feed-media"><img src="${item.image}" alt="${item.name}"><button class="feed-heart" onclick="toggleFav('${item.id}',event)">${favorites.has(item.id)?'♥':'♡'}</button></div><div class="feed-caption"><div class="caption-main"><span class="caption-name">${item.name}</span><span class="caption-price">${item.priceLabel}</span></div><div class="caption-sub" onclick="event.stopPropagation();openBrandV4('${item.brand}')">${item.type} · ${item.brand}</div></div></article>`;
+};
+
 /* Desktop profile share is public-only and sits by the name; statistics stay compact. */
 const designerProfileMobileV69=renderDesignerProfileUnifiedV5;
 renderDesignerProfileUnifiedV5 = function(own){
@@ -2959,11 +2531,18 @@ renderDesignerProfileUnifiedV5 = function(own){
 desktopVisualCardV5 = function(v){return `<article class="desktop-card visual-card-v69" onclick="openPublicationV69('${v.id}')"><div><img src="${v.image}" alt="${v.title}"><button onclick="event.stopPropagation();toggleFav('${v.id}',event)">${favorites.has(v.id)?'♥':'♡'}</button></div><h3>${v.title}</h3><span>${v.subtitle||''}</span></article>`};
 function openPublicationV69(id){
  const v=VISUALS.find(x=>x.id===id)||VISUALS[0]; publicationV69=v;
- const recs=VISUALS.filter(x=>x.id!==v.id).concat(PRODUCTS).slice(0,5);
+ const recs=VISUALS.filter(x=>x.id!==v.id).concat(PRODUCTS).filter((x,i,a)=>a.findIndex(y=>y.id===x.id)===i);
  const m=document.getElementById('modal'); m.className='modal publication-modal-v69';
- m.innerHTML=`<div class="publication-view-v69" role="dialog" aria-modal="true" onclick="event.stopPropagation()"><button class="publication-close-v69" onclick="closeModal()" aria-label="Закрыть">×</button><div class="publication-main-v69"><div class="publication-image-v69"><img src="${v.image}" alt="${v.title}"><div class="publication-image-actions-v69"><button onclick="toggleFav('${v.id}',event)">♡</button><button onclick="shareProfileV5()">${shareIconV66()}</button><button>•••</button></div></div><aside class="publication-side-v69"><div class="publication-author-v69"><div class="comment-avatar-v64">АС</div><div><b>Анна Смирнова</b><small>Дизайнер интерьеров</small></div></div><h2>${v.title}</h2><p>${v.subtitle||'Интерьерный проект'}</p><div class="publication-comments-v69"><div><b>Мария</b><p>Очень цельное решение, особенно сочетание фактур.</p></div><div><b>Ирина</b><p>Подскажите, какой здесь оттенок стен?</p></div></div><div class="publication-comment-box-v69"><input placeholder="Комментарий..."><button class="primary">Отправить</button></div></aside></div><section class="publication-recs-v69"><h3>Похожие проекты и товары</h3><div>${recs.map(x=>`<article onclick="${x.kind==='visual'?`openPublicationV69('${x.id}')`:`openProduct('${x.id}');closeModal()`}"><img src="${x.image}" alt=""><b>${x.title||x.name}</b><small>${x.subtitle||x.type||''}</small></article>`).join('')}</div></section></div>`;
+ m.innerHTML=`<div class="publication-view-v69" role="dialog" aria-modal="true" onclick="event.stopPropagation()"><button class="publication-close-v69" onclick="closeModal()" aria-label="Закрыть">×</button><div class="publication-main-v69"><div class="publication-image-v69"><img src="${v.image}" alt="${v.title}"><div class="publication-image-actions-v69"><button onclick="toggleFav('${v.id}',event)">${favorites.has(v.id)?'♥':'♡'}</button><button onclick="shareProfileV5()">${shareIconV66()}</button><button>•••</button></div></div><aside class="publication-side-v69"><div class="publication-author-v69"><div class="comment-avatar-v64">АС</div><div><b>Анна Смирнова</b><small>Дизайнер интерьеров</small></div></div><h2>${v.title}</h2><p>${v.subtitle||'Интерьерный проект'}</p><div class="publication-comments-v69"><div><b>Мария</b><p>Очень цельное решение, особенно сочетание фактур.</p></div><div><b>Ирина</b><p>Подскажите, какой здесь оттенок стен?</p></div></div><div class="publication-comment-box-v69"><input placeholder="Комментарий..."><button class="primary">Отправить</button></div></aside></div><section class="publication-recs-v69"><h3>Похожие проекты и товары</h3><div>${recs.map(x=>`<article onclick="${x.kind==='visual'?`openPublicationV69('${x.id}')`:`closeModal();openProduct('${x.id}')`}"><img src="${x.image}" alt=""><b>${x.title||x.name}</b><small>${x.subtitle||x.type||''}</small></article>`).join('')}</div></section></div>`;
  m.onclick=e=>{if(e.target===m)closeModal()};
 }
+
+function shareProfileV5(){
+ const m=document.getElementById('modal');m.className='modal';
+ m.innerHTML=`<div class="sheet share-sheet-v617"><div class="sheet-title"><h3>Поделиться</h3><button class="close" onclick="closeModal()">×</button></div><button class="share-row-v617" onclick="closeModal();route='chats';render()">Отправить в чат</button><button class="share-row-v617" onclick="navigator.clipboard?.writeText(location.href);toastV5('Ссылка скопирована');closeModal()">Скопировать ссылку</button><button class="share-row-v617" onclick="nativeShareV617()">Ещё</button></div>`;
+ m.onclick=e=>{if(e.target===m)closeModal()};
+}
+async function nativeShareV617(){try{if(navigator.share)await navigator.share({title:'Среда',url:location.href});else toastV5('Системное меню недоступно в этом браузере')}catch(e){}finally{closeModal()}}
 
 /* Dedicated designer account destinations. */
 function renderDesignerOrdersV69(){
@@ -3039,9 +2618,9 @@ renderSupportV5 = function(){return `<div class="support-page support-page-v69 m
 /* Attachments/info screen gets a Telegram-inspired structured layout. */
 renderAttachmentsV66 = function(){
  const tabs=['Фото','Видео','Файлы','Ссылки']; const media=messages.filter(m=>m.chat===currentChat&&m.attachment);
- return `<section class="attachments-page-v69 page-gutter-v66"><header class="attachments-profile-v69">${uiBackV69("route='chat';render()")}<div class="attachments-avatar-v69">${currentChat.slice(0,1).toUpperCase()}</div><div><h1>${currentChat}</h1><p>${currentChat.includes('Проект')?'4 участника':'в сети'}</p></div><button class="attachments-edit-v69">Изм.</button></header><div class="attachments-actions-v69"><button>Добавить</button><button>Звук</button><button>Жалоба</button><button>Выйти</button></div><nav class="attachments-tabs-v66 attachments-tabs-v69">${tabs.map(t=>`<button class="${attachmentsTabV66===t?'active':''}" onclick="attachmentsTabV66='${t}';render()">${t}</button>`).join('')}</nav><div class="attachments-content-v66 attachments-content-v69">${attachmentsTabV66==='Фото'?`<div class="attachments-photo-grid-v66">${media.filter(m=>m.attachment?.type==='image').map(m=>`<img src="${m.attachment.url}" alt="">`).join('')||'<div class="attachments-empty-v69"><b>Фотографий пока нет</b><span>Отправленные изображения появятся здесь.</span></div>'}</div>`:attachmentsTabV66==='Видео'?'<div class="attachments-empty-v69"><b>Видео пока нет</b></div>':attachmentsTabV66==='Файлы'?'<div class="attachments-empty-v69"><b>Файлов пока нет</b></div>':'<div class="attachments-empty-v69"><b>Ссылок пока нет</b></div>'}</div></section>`;
+ if(!isDesktopV5()) return `<section class="attachments-page-v66 attachments-page-v69 page-gutter-v66"><header class="attachments-profile-v69">${uiBackV69("route='chat';render()")}<div class="attachments-avatar-v69">${currentChat.slice(0,1).toUpperCase()}</div><div><h1>${currentChat}</h1><p>${currentChat.includes('Проект')?'4 участника':'в сети'}</p></div><span></span></header><nav class="attachments-tabs-v66 attachments-tabs-v69">${tabs.map(t=>`<button class="${attachmentsTabV66===t?'active':''}" onclick="attachmentsTabV66='${t}';render()">${t}</button>`).join('')}</nav><div class="attachments-content-v66 attachments-content-v69">${attachmentsTabV66==='Фото'?`<div class="attachments-photo-grid-v66">${media.filter(m=>m.attachment?.type==='image').map(m=>`<img src="${m.attachment.url}" alt="">`).join('')||'<div class="attachments-empty-v69"><b>Фотографий пока нет</b><span>Отправленные изображения появятся здесь.</span></div>'}</div>`:`<div class="attachments-empty-v69"><b>${attachmentsTabV66} пока нет</b></div>`}</div></section>`;
+ return `<section class="attachments-page-v69 page-gutter-v66"><header class="attachments-profile-v69">${uiBackV69("route='chat';render()")}<div class="attachments-avatar-v69">${currentChat.slice(0,1).toUpperCase()}</div><div><h1>${currentChat}</h1><p>${currentChat.includes('Проект')?'4 участника':'в сети'}</p></div><button class="attachments-edit-v69">Изм.</button></header><div class="attachments-actions-v69"><button>Добавить</button><button>Звук</button><button>Жалоба</button><button>Выйти</button></div><nav class="attachments-tabs-v66 attachments-tabs-v69">${tabs.map(t=>`<button class="${attachmentsTabV66===t?'active':''}" onclick="attachmentsTabV66='${t}';render()">${t}</button>`).join('')}</nav><div class="attachments-content-v66 attachments-content-v69">${attachmentsTabV66==='Фото'?`<div class="attachments-photo-grid-v66">${media.filter(m=>m.attachment?.type==='image').map(m=>`<img src="${m.attachment.url}" alt="">`).join('')||'<div class="attachments-empty-v69"><b>Фотографий пока нет</b><span>Отправленные изображения появятся здесь.</span></div>'}</div>`:'<div class="attachments-empty-v69"><b>Пока пусто</b></div>'}</div></section>`;
 };
-
 
 const renderSettingsMobileV615=renderSettingsV4;
 renderSettingsV4=function(){
@@ -3111,3 +2690,6 @@ window.addEventListener('resize',()=>setTimeout(fitDesktopWorkspacesV69,0));
 
 /* Apply the latest component definitions on initial load as well. */
 setTimeout(()=>render(),0);
+
+/* universal modal backdrop close */
+document.addEventListener('click',e=>{if(e.target?.id==='modal'&&!e.target.classList.contains('hidden'))closeModal()});
