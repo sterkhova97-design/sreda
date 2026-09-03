@@ -1798,6 +1798,8 @@ let supportStatusFilterV6 = 'Все';
 let customAnalyticsOpenV6 = false;
 
 function iconV6(name, alt=''){ return `<img class="v6-icon" src="assets/icons/${name}-v6.png" alt="${alt}">`; }
+function backIconV66(){ return `<img class="back-icon-v66" src="assets/icons/back-v66.png" alt="">`; }
+function shareIconV66(){ return `<img class="share-icon-v66" src="assets/icons/share-v66.png" alt="">`; }
 function v6Escape(s){ return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m])); }
 
 const openProductBaseV6 = openProduct;
