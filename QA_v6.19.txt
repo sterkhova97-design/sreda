@@ -1,0 +1,54 @@
+SREDA v6.19 — design-token cleanup pass (verstka audit)
+
+Scope of this pass: css/style.css only. No HTML/JS changed except cache-busting
+version bump (?v=618 -> ?v=619) and title. Behavior/markup untouched — this is
+a value-preserving refactor, not a visual redesign.
+
+What was done (safe, mechanical, verified value-for-value):
+- Added a proper design-token layer in :root: 39 color tokens, 30 z-index
+  tokens (--z-2 ... --z-9999), 13 border-radius tokens (--r-8 ... --r-24).
+- Replaced 891 hardcoded hex colors, 51 raw z-index numbers and 155 raw
+  border-radius px values across the file with var() references to those
+  tokens. Every substitution preserves the exact original value — rendered
+  output is unchanged.
+- Fixed a self-reference bug introduced by the first pass of the script
+  (--bg:var(--bg) etc. in :root) before it ever shipped.
+
+Verification performed:
+- Brace balance before/after: 1997/1997 (unchanged).
+- node --check js/app.js: PASS (untouched file).
+- Every var(--x) used in the stylesheet resolves to a definition somewhere
+  in one of the file's :root blocks (checked programmatically) — no dangling
+  custom properties.
+- No automated way to pixel-diff this in a real browser from this
+  environment — recommended before merging: open the app on a couple of
+  breakpoints (mobile ~390px, desktop ~1440px) and spot-check that nothing
+  shifted. It shouldn't, since every replacement is value-identical, but a
+  human visual pass is the real gate for a client-facing prototype.
+
+Found but intentionally NOT auto-changed (needs a design/product decision,
+each documented with evidence in chat):
+1. Near-duplicate near-white grays — 9 backgrounds within ~3% of each other
+   (#f0f0f0/#f1f1f1/#f2f2f2/#f3f3f1/#f3f3f3/#f4f4f4/#f5f5f7/#f6f6f4/#f6f6f6/
+   #f7f7f7) are now separate tokens rather than merged, because merging
+   would change actual pixels and is a design call, not a syntax fix.
+2. Two different "near-black" values used interchangeably for ink/text:
+   --text (#121212) vs the far more common --ink (#111), never unified.
+3. 353 uses of !important — a sign later patches couldn't otherwise beat
+   earlier rules. Removing these safely requires reading each collision and
+   visually confirming nothing breaks; not attempted in this pass.
+4. 46 media queries across breakpoints 360/380/700/767/769/899/900/1020/
+   1050/1120/1180/1250/1280/1450/1700 — not consolidated. Some pairs (e.g.
+   899/900) are intentional complementary min/max pairs, not bugs; others
+   look like accidental drift between component-specific tuning passes.
+   Needs per-component visual check before merging any of them.
+5. 272 versioned "patch" class names in CSS (-v6, -v64, -v66, -v69, -v613,
+   -v616 suffixes) — legacy from iterative single-session patches layered
+   on top of base classes instead of editing them. Renaming/merging these
+   touches js/app.js template strings too and needs full click-through QA;
+   out of scope for a CSS-only pass.
+
+Static checks
+- node --check js/app.js: PASS
+- CSS brace balance: PASS
+- index cache keys: 619
