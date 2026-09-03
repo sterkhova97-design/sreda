@@ -463,7 +463,7 @@ function chatMessageHTML(m){
 
 function renderChat(){
  const rel=messages.filter(m=>!m.chat||m.chat===currentChat);
- return `<section class="telegram-chat">
+ return `<section class="telegram-chat mobile-chat-v618">
    <header class="chat-head">
      <button class="chat-back" onclick="go('chats')">‹</button>
      <div class="chat-avatar">${currentChat.slice(0,2).toUpperCase()}</div>
@@ -477,7 +477,7 @@ function renderChat(){
 
    ${attachmentPanelOpen?renderAttachPanel():''}
 
-   <div class="composer">
+   <div class="composer composer-v618">
      <button class="composer-icon" onclick="toggleAttachPanel()" aria-label="Вложения">＋</button>
      <input id="msg" placeholder="${voiceRecording?'Идёт запись…':'Сообщение'}" onkeydown="if(event.key==='Enter')sendMsg()">
      <button class="mic-btn ${voiceRecording?'recording':''}" onclick="toggleVoice()" aria-label="Голосовое">${voiceRecording?'■':'◉'}</button>
@@ -1206,7 +1206,7 @@ function openSettingsDetailV4(title,desc){
 }
 
 function openNotifications(){
- const m=document.getElementById('modal');m.className='modal';
+ const m=document.getElementById('modal');m.className='modal mobile-sheet-modal-v618';
  m.innerHTML=`<div class="sheet notifications-sheet"><div class="sheet-title"><h3>Уведомления</h3><button class="close" onclick="closeModal()">×</button></div>
  ${[
   ['Forma Dom обновил стоимость Nube','497 000 ₽ → 523 000 ₽','2 мин'],
@@ -1580,7 +1580,7 @@ function supplierProfileV4(){
 function supplierMobileV5(){
  let tabs=['cards','requests','analytics','marks']; let names={cards:'Товары',requests:'Запросы',analytics:'Аналитика',marks:'Отметки'};
  return `<div class="mobile-supplier-profile mobile-gutter">
-   <div class="mobile-role-tabs"><button onclick="profileRole='designer';render()">Дизайнер</button><button class="active">Поставщик</button><button onclick="profileRole='moderator';render()">Модератор</button></div>
+   <div class="mobile-role-tabs"><button onclick="profileRole='designer';profileTab='';designerTabV4='projects';render()">Дизайнер</button><button class="active">Поставщик</button><button onclick="profileRole='moderator';profileTab='moderation';moderationSectionV5='verification';render()">Модератор</button></div>
    <div class="mobile-profile-top-actions"><span></span><button class="hamburger-v5" onclick="openSettingsV4()">☰</button></div>
    <div class="mobile-profile-avatar brand-avatar-mobile">FD</div><h1>Forma Dom</h1><p class="mobile-profile-sub">Поставщик мебели · Москва</p>
    <div class="mobile-profile-quick"><button onclick="profileTab='analytics';render()">Аналитика</button><button onclick="openSettingsV4()">Редактировать</button><button onclick="shareProfileV5()">Поделиться профилем</button></div>
@@ -1616,7 +1616,7 @@ function moderatorProfileV4(){
  return moderatorMobileV5();
 }
 function moderatorMobileV5(){
- return `<div class="moderator mobile-gutter"><div class="mobile-role-tabs"><button onclick="profileRole='designer';render()">Дизайнер</button><button onclick="profileRole='supplier';render()">Поставщик</button><button class="active">Модератор</button></div>
+ return `<div class="moderator mobile-gutter"><div class="mobile-role-tabs"><button onclick="profileRole='designer';profileTab='';designerTabV4='projects';render()">Дизайнер</button><button onclick="profileRole='supplier';profileTab='cards';render()">Поставщик</button><button class="active">Модератор</button></div>
  <div class="moderator-head"><div><small>Личный кабинет</small><h2>Модератор</h2></div><span class="moderation-badge">7 новых</span></div>
  ${moderatorNavV5()}${moderatorSectionContentV5()}</div>`;
 }
@@ -1645,7 +1645,7 @@ function moderatorVerificationV5(){
   <div>${['all','Товар','Бренд','Дизайнер','Поставщик'].map(x=>`<button class="${moderationTypeV5===x?'active':''}" onclick="moderationTypeV5='${x}';render()">${x==='all'?'Все':x==='Товар'?'Товары':x==='Бренд'?'Бренды':x==='Дизайнер'?'Дизайнеры':'Поставщики'}</button>`).join('')}</div>
   <div><button class="${moderationStatusV5==='pending'?'active':''}" onclick="moderationStatusV5='pending';render()">На рассмотрении</button><button class="${moderationStatusV5==='archive'?'active':''}" onclick="moderationStatusV5='archive';render()">Архив</button></div></div>
   ${moderationStatusV5==='archive'?`<div class="verification-table">${verificationArchiveV5.map(x=>`<article><div><b>${x.name}</b><small>${x.type} · ${x.date}</small></div><strong class="${x.decision==='Принято'?'ok':'bad'}">${x.decision}</strong><p>${x.comment}</p></article>`).join('')}</div>`:
-  `<div class="verification-table">${pending.map(x=>`<article class="verification-request" ${x.productId?`onclick="openProduct('${x.productId}')"`:''}>${x.img?`<img src="${x.img}">`:`<div class="request-avatar">${x.name[0]}</div>`}<div><b>${x.name}</b><small>${x.type}</small><p>${x.brand}</p></div><div class="verify-actions"><button onclick="event.stopPropagation();moderationDecisionV5('${x.name}','Отклонено')">Отклонить</button><button onclick="event.stopPropagation();moderationDecisionV5('${x.name}','Принято')">Принять</button></div></article>`).join('')}</div>`}`;
+  `<div class="verification-table">${pending.map(x=>`<article class="verification-request" ${x.productId?`onclick="openProduct('${x.productId}')"`:''}>${x.img?`<img src="${x.img}">`:`<div class="request-avatar">${x.name[0]}</div>`}<div><b>${x.name}</b><small>${x.type}</small><p>${x.brand}</p></div><div class="verify-actions"><button class="secondary" onclick="event.stopPropagation();moderationDecisionV5('${x.name}','Отклонено')">Отклонить</button><button onclick="event.stopPropagation();moderationDecisionV5('${x.name}','Принято')">Принять</button></div></article>`).join('')}</div>`}`;
 }
 function moderationDecisionV5(name,decision){
  customDialogV5({title:decision==='Принято'?'Принять заявку':'Отклонить заявку',subtitle:`${name}. Добавьте комментарий к решению.`,input:true,placeholder:'Комментарий модератора',primary:decision==='Принято'?'Принять':'Отклонить',onPrimary:(comment)=>{
@@ -1693,9 +1693,14 @@ function renderSettingsV4(){
 
 
 const renderChatsLegacyV5 = renderChats;
+function renderMobileChatsV618(){
+ const rows=[['Forma Dom','Расчёт по Nube готов','14:48',true],['Nube','Отправлена карточка товара','14:36',false],['METALNO','Срок производства 4 недели','13:42',true],['Анна Смирнова','Спасибо!','12:18',false],['Проект Патрики','Групповой чат · 4 участника','вчера',true]];
+ return `<section class="mobile-chats-v618"><header class="mobile-chats-head-v618"><h1>Чаты</h1><button aria-label="Новый чат">＋</button></header><input class="mobile-chat-search-v618" placeholder="Поиск"><div class="mobile-chat-filters-v618"><button class="active">Все чаты</button><button>Проекты</button><button>Поставщики</button><button class="plus">＋</button></div><div class="mobile-chat-list-v66">${rows.map(r=>`<button class="mobile-chat-row-v66" onclick="openChat('${r[0]}')"><span class="mobile-chat-avatar-v618">${r[0].split(' ').map(x=>x[0]).join('').slice(0,2)}</span><span><b>${r[0]}</b><small>${r[1]}</small></span><time>${r[2]}${r[3]?'<i></i>':''}</time></button>`).join('')}</div></section>`;
+}
+
 const renderChatLegacyV5 = renderChat;
 renderChats = function(){
- if(!isDesktopV5()) return renderChatsLegacyV5();
+ if(!isDesktopV5()) return renderMobileChatsV618();
  const chats=[
   ['Forma Dom','Расчёт по Nube готов','14:48','2'],['Nube','Отправлена карточка товара','14:36',''],['METALNO','Срок производства 4 недели','13:42','1'],['Анна Смирнова','Спасибо!','12:18',''],['Проект Патрики','Групповой чат · 4 участника','вчера','3']
  ];
@@ -1974,7 +1979,7 @@ function renderProjectPostV6(){
 /* Supplier profile mobile icons, desktop consistency */
 supplierMobileV5 = function(){
  const tabs=[['cards','products','Товары'],['requests','requests','Запросы'],['analytics','analytics','Аналитика'],['marks','projects-tab','Отметки']];
- return `<div class="mobile-supplier-profile mobile-gutter"><div class="mobile-role-tabs v6-role-tabs"><button onclick="profileRole='designer';render()">Дизайнер</button><button class="active">Поставщик</button><button onclick="profileRole='moderator';render()">Модератор</button></div><div class="mobile-profile-top-actions"><span></span><button class="hamburger-v5" onclick="openSettingsV4()">☰</button><button class="profile-share-icon-v66" onclick="shareProfileV5()">${shareIconV66()}</button><button class="profile-edit-icon-v617" onclick="openSettingsV4()"><img src="assets/icons/edit-product-v613.png" alt="Редактировать"></button></div><div class="mobile-profile-avatar brand-avatar-mobile">FD</div><h1>Forma Dom</h1><p class="mobile-profile-sub">Поставщик мебели · Москва</p><div class="profile-tabs supplier-tabs v6-icon-tabs">${tabs.map(([t,ic,n])=>`<button title="${n}" class="profile-tab ${profileTab===t?'active':''}" onclick="profileTab='${t}';render()">${iconV6(ic,n)}</button>`).join('')}</div>${profileTab==='cards'?renderSupplierCardsV4():profileTab==='analytics'?renderSupplierAnalyticsV4():profileTab==='requests'?renderSupplierRequests():renderSupplierMarks()}</div>`;
+ return `<div class="mobile-supplier-profile mobile-gutter"><div class="mobile-role-tabs v6-role-tabs"><button onclick="profileRole='designer';profileTab='';designerTabV4='projects';render()">Дизайнер</button><button class="active">Поставщик</button><button onclick="profileRole='moderator';profileTab='moderation';moderationSectionV5='verification';render()">Модератор</button></div><div class="mobile-profile-top-actions"><span></span><button class="hamburger-v5" onclick="openSettingsV4()">☰</button><button class="profile-share-icon-v66" onclick="shareProfileV5()">${shareIconV66()}</button><button class="profile-edit-icon-v617" onclick="openSettingsV4()"><img src="assets/icons/edit-product-v613.png" alt="Редактировать"></button></div><div class="mobile-profile-avatar brand-avatar-mobile">FD</div><h1>Forma Dom</h1><p class="mobile-profile-sub">Поставщик мебели · Москва</p><div class="profile-tabs supplier-tabs v6-icon-tabs">${tabs.map(([t,ic,n])=>`<button title="${n}" class="profile-tab ${profileTab===t?'active':''}" onclick="profileTab='${t}';render()">${iconV6(ic,n)}</button>`).join('')}</div>${profileTab==='cards'?renderSupplierCardsV4():profileTab==='analytics'?renderSupplierAnalyticsV4():profileTab==='requests'?renderSupplierRequests():renderSupplierMarks()}</div>`;
 };
 
 /* Orders: compact, 16px title/order/status + image + designer */
@@ -1983,7 +1988,7 @@ renderOrdersV5 = function(){
   {no:'№ 1284',name:'Nube',project:'Квартира на Патриках',designer:'Анна Смирнова',status:'В производстве',img:'assets/products/nube.webp'},
   {no:'№ 1279',name:'Shad',project:'Спальня',designer:'Анна Смирнова',status:'Отгружено · Оставить отзыв',img:'assets/products/shad.webp'}
  ];
- return `<div class="orders-v6"><h2>Заказы</h2>${rows.map(x=>`<article><img src="${x.img}"><div><b>${x.no}</b><strong>${x.name}</strong><small>${x.project} · ${x.designer}</small></div><span>${x.status}</span></article>`).join('')}</div>`;
+ return `<div class="orders-v6"><h2>Заказы</h2>${rows.map(x=>`<article><img src="${x.img}"><div><b>${x.no}</b><strong>${x.name}</strong><small>${x.project} · ${x.designer}</small></div><span class="request-status-chip-v618">${x.status.replace(' · Оставить отзыв','')}</span>${x.status.includes('Оставить отзыв')?'<button class="review-order-v66">Оставить отзыв</button>':''}</article>`).join('')}</div>`;
 };
 
 /* Universal analytics period controls */
@@ -2002,7 +2007,7 @@ renderProductAnalyticsV4 = function(){ return `<div class="product-analytics-wra
 /* Moderator mobile as settings-like list, desktop full analytics/history/support */
 moderatorMobileV5 = function(){
  return `<div class="moderator mobile-gutter">
-   <div class="mobile-role-tabs v6-role-tabs"><button onclick="profileRole='designer';render()">Дизайнер</button><button onclick="profileRole='supplier';render()">Поставщик</button><button class="active">Модератор</button></div>
+   <div class="mobile-role-tabs v6-role-tabs"><button onclick="profileRole='designer';profileTab='';designerTabV4='projects';render()">Дизайнер</button><button onclick="profileRole='supplier';profileTab='cards';render()">Поставщик</button><button class="active">Модератор</button></div>
    <div class="moderator-head"><div><small>Личный кабинет</small><h2>Модератор</h2></div><span class="moderation-badge">7 новых</span></div>
    <div class="moderator-list-v6">
     <button onclick="moderationSectionV5='verification';render()"><span><b>Верификация</b><small>Товары, бренды и пользователи</small></span><em>›</em></button>
@@ -2060,16 +2065,16 @@ function supportConversationV6(t){
 }
 openSupportTicketV5 = function(id){
  const t=supportTicketsV5.find(x=>x.id===id); if(!t)return;
- const m=document.getElementById('modal');m.className='modal';
- m.innerHTML=`<div class="sheet support-ticket-sheet-v6"><div class="sheet-title"><div><h3>${t.id} · ${t.subject}</h3><small>${t.user} · ${t.role}</small></div><button class="close" onclick="closeModal()">×</button></div>
- <div class="support-messages-v6"><div class="support-bubble incoming">Здравствуйте! Подскажите, пожалуйста, как решить этот вопрос в сервисе?<small>12:40</small></div></div>
- ${supportStatusPickerV69(t)}
- <div class="support-composer-v6"><label>＋<input type="file" accept="image/*,.pdf" hidden onchange="toastV5('Файл прикреплён')"></label><input placeholder="Сообщение..."><button onclick="toastV5('Ответ отправлен')">↑</button></div></div>`;
+ const m=document.getElementById('modal');m.className='modal mobile-sheet-modal-v618';
+ m.innerHTML=`<div class="sheet support-ticket-sheet-v6 support-ticket-sheet-v618" onclick="event.stopPropagation()"><div class="sheet-title support-ticket-head-v618"><div><h3>${t.id} · ${t.subject}</h3><small>${t.user} · ${t.role}</small></div><button class="close" onclick="closeModal()">×</button></div>
+ <div class="support-ticket-body-v618"><div class="support-messages-v6"><div class="support-bubble incoming">Здравствуйте! Подскажите, пожалуйста, как решить этот вопрос в сервисе?<small>12:40</small></div></div></div>
+ <div class="support-ticket-footer-v618">${supportStatusPickerV69(t)}<div class="support-composer-v6"><label>＋<input type="file" accept="image/*,.pdf" hidden onchange="toastV5('Файл прикреплён')"></label><input placeholder="Сообщение..."><button onclick="toastV5('Ответ отправлен')">↑</button></div></div></div>`;
+ m.onclick=e=>{if(e.target===m)closeModal()};
 };
 
 /* Filters: all sections expandable, compact range rows */
 openFilters = function(){
- const m=document.getElementById('modal');m.className='modal';
+ const m=document.getElementById('modal');m.className='modal mobile-sheet-modal-v618';
  const section=(title,body,open='')=>`<details class="filter-detail-v6" ${open}><summary>${title}<span>⌄</span></summary><div>${body}</div></details>`;
  m.innerHTML=`<div class="sheet filters v6-filter-sheet"><div class="sheet-title"><h3>Фильтры</h3><button class="close" onclick="closeModal()">×</button></div>
  ${section('Категория',filterSectionBodyV6('category',CATEGORIES))}
@@ -2079,6 +2084,7 @@ openFilters = function(){
  ${section('Декор',`<div class="filter-options">${['Все','Однотонный','Геометрия','Флора','Абстракция'].map(x=>`<button class="filter-option">${x}</button>`).join('')}</div>`)}
  ${section('Цена',`<div class="price-range-v6"><input id="minP" type="number" value="${filters.minPrice}" placeholder="от, ₽"><input id="maxP" type="number" value="${filters.maxPrice}" placeholder="до, ₽"></div>`)}
  <div class="filter-actions-v6"><button class="btn primary" onclick="applyFilters()">Показать</button><button class="btn" onclick="resetFilters()">Сбросить</button></div></div>`;
+ m.onclick=e=>{if(e.target===m)closeModal()};
 };
 function filterSectionBodyV6(key,arr){ return `<div class="filter-options">${arr.map(x=>`<button class="filter-option" onclick="setFilter('${key}','${String(x).replace(/'/g,"\\'")}',this)">${x}</button>`).join('')}</div>`; }
 
@@ -2465,6 +2471,9 @@ const DESKTOP_NAV_V65 = [
   ['Услуги',['Строительная бригада','Сантехника','Монтаж дверей','Монтаж мебели']]
 ];
 
+let desktopSearchOpenV617=false;
+function toggleDesktopSearchV617(open){ desktopSearchOpenV617=!!open; mountDesktopNavV65(); if(desktopSearchOpenV617) setTimeout(()=>document.getElementById('desktopGlobalSearchV617')?.focus(),0); }
+
 function mountDesktopNavV65(){
  const host=document.getElementById('desktopCompactNavV65');
  if(!host || !isDesktopV5()) return;
@@ -2511,8 +2520,24 @@ feedCardV4 = function(item){
 
 /* Desktop profile share is public-only and sits by the name; statistics stay compact. */
 const designerProfileMobileV69=renderDesignerProfileUnifiedV5;
+function renderDesignerProfileMobileV618(own){
+ const key='designer:'+currentDesignerV4;
+ const content=designerTabV4==='projects'?renderDesignerProjectsV4():designerTabV4==='specs'?renderSpecsRoot():`<div class="masonry mobile-profile-grid">${VISUALS.map(feedCardV4).join('')}</div>`;
+ return `<div class="mobile-profile-unified mobile-gutter mobile-designer-v618">
+   ${own?`<div class="mobile-role-tabs v6-role-tabs"><button class="active" onclick="profileRole='designer';profileTab='';render()">Дизайнер</button><button onclick="profileRole='supplier';profileTab='cards';render()">Поставщик</button><button onclick="profileRole='moderator';profileTab='moderation';moderationSectionV5='verification';render()">Модератор</button></div>`:''}
+   ${own?`<div class="mobile-profile-top-actions"><button class="hamburger-v5" onclick="openSettingsV4()" aria-label="Меню">☰</button><button class="profile-share-icon-v66" onclick="shareProfileV5()" aria-label="Поделиться">${shareIconV66()}</button><button class="profile-edit-icon-v617" onclick="openSettingsV4()" aria-label="Редактировать"><img src="assets/icons/edit-product-v613.png" alt=""></button></div>`:''}
+   <div class="mobile-profile-avatar">АС</div>
+   <h1>Анна Смирнова <img class="verified-icon-v6" src="assets/icons/verified-v6.png" alt="Верифицирован"></h1><p class="mobile-profile-sub">Дизайнер интерьеров · Москва</p>
+   <div class="stats mobile-stats"><div><b>24</b><small>Проекты</small></div><div><b>1 245</b><small>Подписчики</small></div><div><b>320</b><small>Подписки</small></div></div>
+   ${own?'':`<div class="public-actions">${followButtonV4(key)}<button class="v4-message" onclick="currentChat='Анна Смирнова';route='chat';render()">Сообщение</button></div>`}
+   <p class="mobile-profile-bio">Жилые и общественные интерьеры. Москва / Европа.</p>
+   <div class="public-tabs mobile-profile-tabs"><button class="${designerTabV4==='projects'?'active':''}" onclick="designerTabV4='projects';currentProject=null;render()">Проекты</button><button class="${designerTabV4==='saved'?'active':''}" onclick="designerTabV4='saved';currentProject=null;render()">Публикации</button>${own?`<button class="${designerTabV4==='specs'?'active':''}" onclick="designerTabV4='specs';currentProject=null;render()">Спецификация</button>`:''}</div>
+   <div class="mobile-profile-tab-content-v618">${content}</div>
+ </div>`;
+}
+
 renderDesignerProfileUnifiedV5 = function(own){
- if(!isDesktopV5()) return designerProfileMobileV69(own);
+ if(!isDesktopV5()) return renderDesignerProfileMobileV618(own);
  const key='designer:'+currentDesignerV4;
  const verified=`<img class="verified-icon-v6" src="assets/icons/verified-v6.png" alt="Верифицирован">`;
  const content=profileTab==='orders'?renderDesignerOrdersV69():designerTabV4==='projects'?renderDesignerProjectsV5():designerTabV4==='specs'?renderSpecsRoot():`<div class="desktop-brand-masonry publication-grid-v69">${VISUALS.map(desktopVisualCardV5).join('')}</div>`;
@@ -2599,7 +2624,7 @@ moderatorVerificationV5 = function(){
   {name:'Елена Крылова',type:'Дизайнер',brand:'Портфолио · сайт · соцсети',img:''},
   {name:'Travertino Light',type:'Товар',brand:'Laminam · материал · декор',img:'assets/products/travertino-classico.jpg',productId:'travertino'}
  ].filter(x=>moderationTypeV5==='all'||x.type===moderationTypeV5);
- return `<div class="moderation-toolbar"><div>${['all','Товар','Бренд','Дизайнер','Поставщик'].map(x=>`<button class="${moderationTypeV5===x?'active':''}" onclick="moderationTypeV5='${x}';render()">${x==='all'?'Все':x==='Товар'?'Товары':x==='Бренд'?'Бренды':x==='Дизайнер'?'Дизайнеры':'Поставщики'}</button>`).join('')}</div><div><button class="${moderationStatusV5==='pending'?'active':''}" onclick="moderationStatusV5='pending';render()">На рассмотрении</button><button class="${moderationStatusV5==='archive'?'active':''}" onclick="moderationStatusV5='archive';render()">Архив</button></div></div>${moderationStatusV5==='archive'?`<div class="verification-table verification-archive-v69">${verificationArchiveV5.map(x=>`<article onclick="openVerificationInfoV69('${x.name}','${x.type}','${x.date}','${x.decision}','${String(x.comment||'').replace(/'/g,"\\'")}')"><div><b>${x.name}</b><small>${x.type} · ${x.date}</small></div><strong class="status-badge-v69 ${statusClassV69(x.decision)}">${x.decision}</strong><p>${x.comment}</p></article>`).join('')}</div>`:`<div class="verification-table">${pending.map(x=>`<article class="verification-request" onclick="openVerificationInfoV69('${x.name}','${x.type}','сегодня','На рассмотрении','${String(x.brand||'').replace(/'/g,"\\'")}')">${x.img?`<img src="${x.img}">`:`<div class="request-avatar">${x.name[0]}</div>`}<div><b>${x.name}</b><small>${x.type}</small><p>${x.brand}</p></div><div class="verify-actions"><button onclick="event.stopPropagation();moderationDecisionV5('${x.name}','Отклонено')">Отклонить</button><button class="primary" onclick="event.stopPropagation();moderationDecisionV5('${x.name}','Принято')">Принять</button></div></article>`).join('')}</div>`}`;
+ return `<div class="moderation-toolbar"><div>${['all','Товар','Бренд','Дизайнер','Поставщик'].map(x=>`<button class="${moderationTypeV5===x?'active':''}" onclick="moderationTypeV5='${x}';render()">${x==='all'?'Все':x==='Товар'?'Товары':x==='Бренд'?'Бренды':x==='Дизайнер'?'Дизайнеры':'Поставщики'}</button>`).join('')}</div><div><button class="${moderationStatusV5==='pending'?'active':''}" onclick="moderationStatusV5='pending';render()">На рассмотрении</button><button class="${moderationStatusV5==='archive'?'active':''}" onclick="moderationStatusV5='archive';render()">Архив</button></div></div>${moderationStatusV5==='archive'?`<div class="verification-table verification-archive-v69">${verificationArchiveV5.map(x=>`<article onclick="openVerificationInfoV69('${x.name}','${x.type}','${x.date}','${x.decision}','${String(x.comment||'').replace(/'/g,"\\'")}')"><div><b>${x.name}</b><small>${x.type} · ${x.date}</small></div><strong class="status-badge-v69 ${statusClassV69(x.decision)}">${x.decision}</strong><p>${x.comment}</p></article>`).join('')}</div>`:`<div class="verification-table">${pending.map(x=>`<article class="verification-request" onclick="openVerificationInfoV69('${x.name}','${x.type}','сегодня','На рассмотрении','${String(x.brand||'').replace(/'/g,"\\'")}')">${x.img?`<img src="${x.img}">`:`<div class="request-avatar">${x.name[0]}</div>`}<div><b>${x.name}</b><small>${x.type}</small><p>${x.brand}</p></div><div class="verify-actions"><button class="secondary" onclick="event.stopPropagation();moderationDecisionV5('${x.name}','Отклонено')">Отклонить</button><button class="primary" onclick="event.stopPropagation();moderationDecisionV5('${x.name}','Принято')">Принять</button></div></article>`).join('')}</div>`}`;
 };
 
 /* Moderator analytics reuses the supplier KPI component visually. */

@@ -1,0 +1,23 @@
+SREDA v6.18 — technical revision QA
+
+Architecture pass
+- Replaced the v6.17 mobile canonical CSS block instead of stacking another mobile patch.
+- Added missing desktop search state/toggle logic that previously aborted desktop category navigation rendering.
+- Added dedicated mobile designer profile renderer without legacy Analytics/Edit/Share text buttons.
+- Added dedicated mobile chat-list renderer with a stable 3-column row structure.
+- Rebuilt mobile live-chat viewport as header / scrollable messages / composer rows.
+- Rebuilt mobile attachments as a separate full-screen page.
+- Consolidated mobile bottom sheets to full available viewport height with dock/safe-area reserve.
+- Rebuilt mobile specification row layout and constrained print/dropdown/action icon bitmap sizes.
+- Normalized moderator verification action colors (Reject white, Accept black).
+- Normalized moderator analytics KPI cards and request/order status chips.
+- Role switch handlers now reset the correct tab/section when changing role.
+
+Static checks
+- node --check js/app.js: PASS
+- CSS brace balance: PASS
+- index cache keys: 618
+
+Manual visual checkpoints for browser QA
+Desktop: Home header/categories/search; product card; chats; designer profile; supplier profile; moderator verification/analytics/support; specification.
+Mobile: Home; Favorites; Settings; designer/supplier/moderator role switch; chats list; live chat composer; attachments; filters; notifications; verification; support ticket; specification; publication modal.

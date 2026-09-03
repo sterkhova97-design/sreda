@@ -196,3 +196,15 @@ Deep CSS/behavior consolidation pass from v6.15. Fixed missing favorites pills, 
 
 ## v6.16 final QA
 Финальная проверка после консолидации CSS/JS: desktop wide/narrow, viewport-height workspaces, masonry, specifications, publication modal, profiles, favorites, supplier/moderator sections. Chat filters are locked to one row and the left chat column has a safe minimum width.
+
+
+## v6.18 — technical revision
+- desktop category navigation restored; search lives at the end of the category row and expands in place;
+- mobile profile actions consolidated to icon controls; duplicate text action buttons removed;
+- mobile page gutters standardized;
+- mobile chat list, live chat composer and attachments rebuilt as separate responsive layouts;
+- one full-height mobile bottom-sheet system used for filters, notifications, sharing and moderator support;
+- mobile specification rows rebuilt and action icon sizes constrained independently of source image dimensions;
+- moderator verification, analytics and support components normalized;
+- role switching resets destination state so Designer / Supplier / Moderator transitions work consistently;
+- cache version bumped to 618.
